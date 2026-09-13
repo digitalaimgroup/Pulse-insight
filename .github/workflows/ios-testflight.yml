@@ -1,0 +1,65 @@
+name: iOS TestFlight
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "www/**"
+      - "ios/**"
+      - "fastlane/**"
+      - "package.json"
+      - "capacitor.config.json"
+      - ".github/workflows/ios-testflight.yml"
+
+jobs:
+  testflight:
+    runs-on: macos-14
+    timeout-minutes: 90
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install JS deps
+        run: npm ci
+
+      - name: Sync Capacitor iOS
+        run: npx cap sync ios
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.2"
+          bundler-cache: true
+
+      - name: Install CocoaPods deps
+        run: |
+          gem install cocoapods --no-document
+          cd ios/App && pod install
+
+      - name: Install Fastlane
+        run: |
+          gem install fastlane --no-document
+          bundle install || true
+
+      - name: Build & upload TestFlight
+        env:
+          APPLE_KEY_ID: ${{ secrets.APPLE_KEY_ID }}
+          APPLE_ISSUER_ID: ${{ secrets.APPLE_ISSUER_ID }}
+          APPLE_KEY_CONTENT: ${{ secrets.APPLE_KEY_CONTENT }}
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
+          MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
+          BUILD_NUMBER: ${{ github.run_number }}
+        run: |
+          if [ -f Gemfile ]; then
+            bundle exec fastlane ios beta
+          else
+            fastlane ios beta
+          fi
