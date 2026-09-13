@@ -1,0 +1,1170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#0d1117">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<title>PULSE Insight</title>
+<style>
+:root {
+  --bg:#0d1117; --surface:#161b22; --surface2:#21262d; --border:#30363d;
+  --cyan:#22d3ee; --magenta:#e879f9; --text:#e6edf3; --muted:#8b949e;
+  --danger:#f85149; --cell:#1c2128; --gold:#f0c14b;
+  --radius:12px; --font:"Segoe UI",system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{
+  height:100%;background:var(--bg);color:var(--text);font-family:var(--font);
+  overflow:hidden;overscroll-behavior:none;touch-action:none;
+  position:fixed;inset:0;width:100%;
+}
+body{
+  display:flex;flex-direction:column;align-items:center;padding:10px 10px 16px;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(34,211,238,.12), transparent),
+    radial-gradient(ellipse 60% 40% at 100% 100%, rgba(232,121,249,.08), transparent),
+    var(--bg);
+}
+.header{width:100%;max-width:420px;display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}
+.brand{display:flex;align-items:baseline;gap:8px}
+.brand h1{
+  font-size:1.5rem;font-weight:800;letter-spacing:.16em;
+  background:linear-gradient(135deg,var(--cyan),var(--magenta));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.badge{font-size:.6rem;font-weight:700;letter-spacing:.1em;color:var(--magenta);border:1px solid var(--magenta);border-radius:4px;padding:2px 6px}
+.stats{display:flex;gap:12px;font-variant-numeric:tabular-nums}
+.stat{text-align:right}
+.stat label{display:block;font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.stat span{font-size:1.05rem;font-weight:700;color:var(--cyan)}
+.tip{width:100%;max-width:420px;font-size:.72rem;color:var(--muted);text-align:center;margin-bottom:8px;line-height:1.35;min-height:2.2em}
+.meta{width:100%;max-width:420px;display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;gap:8px}
+.level-pill{
+  font-size:.75rem;font-weight:800;letter-spacing:.1em;color:var(--gold);
+  border:1px solid rgba(240,193,75,.45);border-radius:6px;padding:5px 10px;background:rgba(240,193,75,.08);
+}
+.streak{font-size:.7rem;color:var(--muted)}.streak b{color:var(--magenta)}
+#restartBtn{font:700 .72rem var(--font);border:1px solid var(--border);border-radius:8px;padding:6px 10px;background:var(--surface);color:var(--text);cursor:pointer}
+.pulse-wrap{width:100%;max-width:420px;margin-bottom:8px}
+.pulse-label-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.pulse-label{font-size:.68rem;font-weight:700;letter-spacing:.12em;color:var(--cyan);text-transform:uppercase}
+.pulse-value{font-size:.75rem;color:var(--text);font-variant-numeric:tabular-nums}
+.pulse-track{
+  height:16px;background:var(--surface);border:1px solid var(--border);border-radius:99px;overflow:hidden;
+  position:relative;box-shadow:inset 0 1px 3px rgba(0,0,0,.45);
+}
+.pulse-fill{
+  height:100%;width:55%;border-radius:99px;
+  background:linear-gradient(90deg,var(--cyan),var(--magenta));
+  transform-origin:left center;
+  box-shadow:0 0 12px rgba(34,211,238,.5);
+  transition:width .08s linear, background .3s, box-shadow .3s;
+}
+.pulse-fill.pump{animation:heartbeat 1s ease-in-out infinite}
+.pulse-fill.low{background:linear-gradient(90deg,#f85149,#e879f9);box-shadow:0 0 14px rgba(248,81,73,.55);animation:heartbeat .55s ease-in-out infinite}
+.pulse-fill.critical{animation:heartbeat .35s ease-in-out infinite}
+@keyframes heartbeat{
+  0%,100%{filter:brightness(1);box-shadow:0 0 10px rgba(34,211,238,.4)}
+  30%{filter:brightness(1.25);box-shadow:0 0 22px rgba(232,121,249,.7)}
+  50%{filter:brightness(.95)}
+}
+.powers{width:100%;max-width:420px;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:8px}
+.power{
+  font:700 .68rem var(--font);letter-spacing:.04em;text-transform:uppercase;
+  border:1px solid var(--border);border-radius:8px;padding:8px 4px;background:var(--surface);color:var(--muted);
+  cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;
+}
+.power small{font-size:.58rem;font-weight:600;opacity:.85;text-transform:none;letter-spacing:0}
+.power.ready{color:var(--bg);border-color:transparent;background:linear-gradient(135deg,var(--cyan),var(--magenta))}
+.power.active{color:#fff;background:linear-gradient(135deg,#0891b2,#c026d3);box-shadow:0 0 16px rgba(232,121,249,.45)}
+.power:disabled{opacity:.4;cursor:not-allowed}
+.board-wrap{position:relative;width:min(100%,420px);aspect-ratio:1;margin-bottom:10px}
+#board{
+  width:100%;height:100%;display:grid;grid-template:repeat(8,1fr)/repeat(8,1fr);gap:3px;padding:6px;
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  user-select:none;touch-action:none;box-shadow:0 8px 32px rgba(0,0,0,.4);
+}
+.cell{background:var(--cell);border-radius:4px;transition:background .12s,box-shadow .12s}
+.cell.filled{background:linear-gradient(145deg,#67e8f9,#22d3ee 40%,#0891b2);box-shadow:0 0 8px rgba(34,211,238,.4),inset 0 1px 0 rgba(255,255,255,.35)}
+.cell.preview{background:rgba(34,211,238,.35);box-shadow:inset 0 0 0 2px var(--cyan)}
+.cell.preview-bad{background:rgba(248,81,73,.45);box-shadow:inset 0 0 0 2px var(--danger)}
+.cell.clearing{animation:clearFlash .45s ease-out forwards}
+@keyframes clearFlash{0%{background:#fff;transform:scale(1.05)}40%{background:var(--magenta)}100%{background:var(--cell);opacity:.3}}
+.combo-toast{
+  position:absolute;top:40%;left:50%;transform:translate(-50%,-50%) scale(.8);
+  font-size:1.25rem;font-weight:800;letter-spacing:.08em;color:var(--magenta);
+  text-shadow:0 0 20px rgba(232,121,249,.8);opacity:0;pointer-events:none;z-index:5;
+  transition:opacity .2s,transform .3s;text-align:center;max-width:90%;
+}
+.combo-toast.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
+.overlay{
+  position:absolute;inset:0;background:rgba(13,17,23,.92);backdrop-filter:blur(8px);
+  border-radius:var(--radius);display:none;flex-direction:column;align-items:center;justify-content:center;
+  gap:8px;z-index:10;padding:22px;text-align:center;
+}
+.overlay.show{display:flex}
+.overlay h2{font-size:1.35rem;letter-spacing:.14em;background:linear-gradient(135deg,var(--cyan),var(--magenta));-webkit-background-clip:text;background-clip:text;color:transparent}
+.overlay .reason{color:var(--muted);font-size:.85rem}
+.overlay .final-score{font-size:2.2rem;font-weight:800;color:var(--cyan);font-variant-numeric:tabular-nums}
+.overlay .hi{font-size:.9rem;color:var(--gold);min-height:1.2em}
+.overlay .meta-line{font-size:.8rem;color:var(--muted)}
+.overlay .btn-row{display:flex;flex-direction:column;gap:10px;width:100%;max-width:260px;margin-top:10px}
+.overlay button{
+  margin-top:0;padding:12px 28px;border:none;border-radius:8px;cursor:pointer;
+  font:700 .85rem var(--font);text-transform:uppercase;
+  background:linear-gradient(135deg,var(--cyan),var(--magenta));color:var(--bg);
+}
+.overlay button.secondary{
+  background:transparent;color:var(--cyan);border:1px solid rgba(34,211,238,.45);
+}
+.overlay button:disabled{opacity:.45;cursor:default}
+
+.tray-section{width:100%;max-width:420px}
+.tray-label{font-size:.65rem;font-weight:700;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;text-align:center;margin-bottom:6px}
+#tray{display:flex;justify-content:space-evenly;align-items:center;gap:8px;padding:10px 8px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);min-height:96px}
+.piece-slot{flex:1;display:flex;justify-content:center;align-items:center;min-height:84px;border-radius:8px;border:1px dashed transparent;padding:6px;cursor:pointer;touch-action:none;user-select:none}
+.piece-slot.selected{background:rgba(34,211,238,.2);border-color:var(--cyan);box-shadow:0 0 0 1px var(--cyan)}
+.piece-slot.empty{opacity:.35;cursor:default}
+.piece-slot.dragging{opacity:.35}
+.piece-grid{display:grid;gap:2px;pointer-events:none}
+.piece-cell{width:16px;height:16px;border-radius:3px;background:linear-gradient(145deg,#e879f9,#c026d3);box-shadow:0 0 6px rgba(232,121,249,.4)}
+.piece-slot.selected .piece-cell{background:linear-gradient(145deg,#67e8f9,#22d3ee)}
+#dragGhost{position:fixed;pointer-events:none;z-index:1000;display:none;opacity:.9;filter:drop-shadow(0 8px 16px rgba(0,0,0,.5))}
+.insight-hint{width:100%;max-width:420px;text-align:center;font-size:.7rem;color:var(--magenta);min-height:1.1em;margin-top:6px;opacity:0;transition:opacity .25s}
+.insight-hint.show{opacity:1}
+.music-ctrl{display:flex;align-items:center;gap:4px;margin-left:6px}
+.mute-btn{
+  width:32px;height:32px;border-radius:10px;cursor:pointer;
+  border:1px solid var(--border);background:var(--surface);color:var(--cyan);
+  font:700 1rem/1 var(--font);padding:0;flex-shrink:0;
+}
+.mute-btn.off{color:var(--muted);opacity:.7}
+#volSlider{
+  width:72px;height:22px;accent-color:#22d3ee;cursor:pointer;
+}
+@media(max-width:380px){#volSlider{width:56px}}
+
+
+.title-screen{
+  position:fixed;inset:0;z-index:2000;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:14px;padding:28px 22px;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% 20%, rgba(34,211,238,.18), transparent 60%),
+    radial-gradient(ellipse 70% 45% at 50% 85%, rgba(232,121,249,.14), transparent 55%),
+    #0d1117;
+  text-align:center;
+}
+.title-screen.hide{display:none}
+.title-screen .logo{
+  font-size:clamp(2.6rem,12vw,3.6rem);font-weight:900;letter-spacing:.18em;
+  background:linear-gradient(135deg,#67e8f9,#22d3ee 40%,#e879f9);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  text-shadow:none;line-height:1;
+}
+.title-screen .logo-sub{
+  margin-top:-6px;font-size:.85rem;font-weight:800;letter-spacing:.35em;color:var(--magenta);
+}
+.title-screen .tag{
+  max-width:320px;color:var(--muted);font-size:.92rem;line-height:1.45;margin-top:4px;
+}
+.title-screen .best-pill{
+  display:inline-flex;gap:8px;align-items:center;padding:8px 14px;border-radius:999px;
+  border:1px solid var(--border);background:rgba(22,27,34,.9);color:var(--text);
+  font-size:.8rem;font-weight:700;
+}
+.title-screen .best-pill b{color:var(--cyan);font-variant-numeric:tabular-nums}
+.title-screen .play-btn{
+  margin-top:10px;min-width:220px;padding:16px 36px;border:none;border-radius:14px;cursor:pointer;
+  font:800 1rem var(--font);letter-spacing:.12em;text-transform:uppercase;
+  background:linear-gradient(135deg,#22d3ee,#e879f9);color:#0d1117;
+  box-shadow:0 0 28px rgba(34,211,238,.35);
+}
+.title-screen .play-btn:active{transform:scale(.98)}
+.title-screen .howto{
+  margin-top:8px;max-width:340px;font-size:.75rem;color:var(--muted);line-height:1.5;
+}
+.title-screen .howto b{color:var(--text)}
+.title-screen .credit{position:absolute;bottom:18px;font-size:.65rem;letter-spacing:.12em;color:#484f58;text-transform:uppercase}
+body.title-locked .header,
+body.title-locked .meta,
+body.title-locked .tip,
+body.title-locked .pulse-wrap,
+body.title-locked .powers,
+body.title-locked .board-wrap,
+body.title-locked .tray-section,
+body.title-locked .insight-hint,
+body.title-locked .music-ctrl{visibility:hidden}
+
+@media(max-width:380px){.brand h1{font-size:1.25rem}.piece-cell{width:14px;height:14px}}
+</style>
+</head>
+<body class="title-locked">
+
+<div id="titleScreen" class="title-screen" role="dialog" aria-label="PULSE Insight title">
+  <div class="logo">PULSE</div>
+  <div class="logo-sub">INSIGHT</div>
+  <p class="tag">Keep your Pulse alive. Clear lines. Climb Levels. Don&rsquo;t flatline.</p>
+  <div class="best-pill">Best score <b id="titleBest">0</b></div>
+  <button type="button" class="play-btn" id="playBtn">Play</button>
+  <p class="howto"><b>How to play:</b> Tap a tray piece, then tap the board. Fill a row or column to clear. Pulse drains — clears pump it back up.</p>
+  <div class="credit">Digital AIM</div>
+</div>
+
+<header class="header">
+  <div class="brand"><h1>PULSE</h1><span class="badge">INSIGHT</span></div>
+  <div class="stats">
+    <div class="stat"><label>Score</label><span id="scoreEl">0</span></div>
+    <div class="stat"><label>Best</label><span id="bestEl">0</span></div>
+    <div class="music-ctrl" title="Music volume">
+      <button type="button" id="volDownBtn" class="mute-btn" aria-label="Volume down">−</button>
+      <input type="range" id="volSlider" min="0" max="100" value="45" aria-label="Music volume">
+      <button type="button" id="volUpBtn" class="mute-btn" aria-label="Volume up">+</button>
+      <button type="button" id="muteBtn" class="mute-btn" aria-label="Mute music">♪</button>
+    </div>
+  </div>
+</header>
+
+<div class="meta">
+  <div class="level-pill">LEVEL <span id="levelEl">1</span></div>
+  <div class="streak">Streak <b id="streakEl">0</b></div>
+  <button id="restartBtn" type="button">Restart</button>
+</div>
+
+<p class="tip" id="placeTip">Your Pulse is a heartbeat — it drains. Clear lines to pump it back up. Fill it to climb Levels.</p>
+
+<div class="pulse-wrap">
+  <div class="pulse-label-row">
+    <span class="pulse-label">Pulse</span>
+    <span class="pulse-value"><span id="pulseEl">55</span>%</span>
+  </div>
+  <div class="pulse-track"><div class="pulse-fill pump" id="pulseFill"></div></div>
+</div>
+
+<div class="powers">
+  <button class="power" id="insightBtn" disabled type="button">Insight<small>see dead ends</small></button>
+  <button class="power" id="surgeBtn" disabled type="button">Surge<small>2× next clear</small></button>
+  <button class="power" id="blastBtn" disabled type="button">Blast<small>tap a cell</small></button>
+</div>
+
+<div class="board-wrap">
+  <div id="board" aria-label="Game board"></div>
+  <div class="combo-toast" id="comboToast"></div>
+  <div class="overlay" id="gameOver">
+    <h2>FLATLINE</h2>
+    <p class="reason" id="endReason">No moves left</p>
+    <div class="final-score" id="finalScore">0</div>
+    <p class="hi" id="newBestEl"></p>
+    <p class="meta-line">Best: <b id="overlayBest">0</b> · Reached Level <b id="finalLevel">1</b></p>
+    <div class="btn-row">
+      <button type="button" id="watchContinue">Watch ad · continue</button>
+      <button type="button" class="secondary" id="playAgain">Play Again</button>
+      <button type="button" class="secondary" id="menuBtn">Main Menu</button>
+    </div>
+  </div>
+</div>
+
+<div class="tray-section">
+  <div class="tray-label">Tray — tap piece, then tap board</div>
+  <div id="tray"></div>
+</div>
+<p class="insight-hint" id="insightHint">Insight ON — red = dead end for remaining pieces</p>
+<div id="dragGhost"></div>
+
+<script>
+(function(){
+"use strict";
+const SIZE=8;
+const INSIGHT_COST=22, SURGE_COST=18, BLAST_COST=24;
+const START_PULSE=70;
+const CLEAR_PULSE_BASE=32; // per line — tuned so Levels climb often
+
+const SHAPES={
+  I4:[[0,0],[0,1],[0,2],[0,3]], O:[[0,0],[0,1],[1,0],[1,1]], T:[[0,0],[0,1],[0,2],[1,1]],
+  L:[[0,0],[1,0],[2,0],[2,1]], J:[[0,1],[1,1],[2,0],[2,1]], S:[[0,1],[0,2],[1,0],[1,1]], Z:[[0,0],[0,1],[1,1],[1,2]],
+  mono:[[0,0]], domH:[[0,0],[0,1]], domV:[[0,0],[1,0]],
+  triI:[[0,0],[0,1],[0,2]], triV:[[0,0],[1,0],[2,0]], triL:[[0,0],[1,0],[1,1]], triJ:[[0,1],[1,0],[1,1]],
+  plus:[[0,1],[1,0],[1,1],[1,2],[2,1]], I3:[[0,0],[0,1],[0,2]], I2:[[0,0],[0,1]],
+  square3:[[0,0],[0,1],[0,2],[1,0],[1,1],[1,2],[2,0],[2,1],[2,2]],
+  U:[[0,0],[0,2],[1,0],[1,1],[1,2]], bigL:[[0,0],[1,0],[2,0],[3,0],[3,1]]
+};
+
+// Soft start → intense later
+const POOLS={
+  1:["mono","mono","mono","domH","domH","domV","domV","I2","I2","triI","triV","triL","O","T"],
+  2:["mono","domH","domV","I2","I3","triI","triV","triL","triJ","O","O","T","L","J"],
+  3:["domH","domV","I2","I3","I4","O","T","T","L","J","S","Z","triL","triJ","plus"],
+  4:["I3","I4","O","T","L","J","S","Z","plus","U","I4","T","L","J"],
+  5:["I4","O","T","L","J","S","Z","plus","U","bigL","square3","I4","T","L","J","S"],
+  6:["I4","I4","T","L","J","S","Z","plus","U","bigL","square3","U","bigL"]
+};
+
+const boardEl=document.getElementById("board"), trayEl=document.getElementById("tray");
+const scoreEl=document.getElementById("scoreEl"), bestEl=document.getElementById("bestEl");
+const pulseEl=document.getElementById("pulseEl"), pulseFill=document.getElementById("pulseFill");
+const insightBtn=document.getElementById("insightBtn"), surgeBtn=document.getElementById("surgeBtn"), blastBtn=document.getElementById("blastBtn");
+const restartBtn=document.getElementById("restartBtn"), gameOverEl=document.getElementById("gameOver");
+const finalScoreEl=document.getElementById("finalScore"), finalLevelEl=document.getElementById("finalLevel");
+const playAgainBtn=document.getElementById("playAgain"), comboToast=document.getElementById("comboToast");
+const dragGhost=document.getElementById("dragGhost"), insightHint=document.getElementById("insightHint");
+const placeTip=document.getElementById("placeTip"), levelEl=document.getElementById("levelEl"), streakEl=document.getElementById("streakEl");
+const endReason=document.getElementById("endReason"), newBestEl=document.getElementById("newBestEl"), overlayBest=document.getElementById("overlayBest");
+
+let grid=[], tray=[], score=0, pulse=START_PULSE, level=1, clearStreak=0;
+let insightActive=false, surgeArmed=false, blastMode=false;
+let selectedIdx=null, cells=[], clearing=false, gameOver=false;
+let dragIdx=null, dragPointerId=null, hoverRC=null, lastPlaceAt=0;
+let tickTimer=null, lastTick=0;
+
+
+
+/* --- Original BGM (procedural Web Audio — no third-party samples) --- */
+const muteBtn=document.getElementById("muteBtn");
+const volSlider=document.getElementById("volSlider");
+const volDownBtn=document.getElementById("volDownBtn");
+const volUpBtn=document.getElementById("volUpBtn");
+let audioCtx=null, musicOn=true, musicVol=0.45, musicNodes=null, musicStarted=false;
+try{
+  const savedOn = localStorage.getItem("pulseMusicOn");
+  if(savedOn !== null) musicOn = savedOn !== "0";
+  const savedVol = parseInt(localStorage.getItem("pulseMusicVol")||"45",10);
+  if(!isNaN(savedVol)) musicVol = Math.min(1, Math.max(0, savedVol/100));
+}catch(_){}
+if(volSlider) volSlider.value = String(Math.round(musicVol*100));
+
+function masterGainValue(){
+  // map 0..1 UI to a quiet bed under gameplay
+  return musicOn ? (0.10 * musicVol) : 0;
+}
+function applyMusicGain(){
+  if(musicNodes && musicNodes.gain && audioCtx){
+    try{ musicNodes.gain.gain.setTargetAtTime(masterGainValue(), audioCtx.currentTime, 0.04); }catch(_){}
+  }
+}
+function syncMuteUi(){
+  if(muteBtn){
+    muteBtn.textContent = (!musicOn || musicVol<=0.001) ? "🔇" : "♪";
+    muteBtn.classList.toggle("off", !musicOn || musicVol<=0.001);
+    muteBtn.title = musicOn ? "Mute music" : "Unmute music";
+  }
+  if(volSlider){
+    volSlider.value = String(Math.round(musicVol*100));
+    volSlider.disabled = false;
+  }
+}
+syncMuteUi();
+
+function ensureAudio(){
+  if(audioCtx) return audioCtx;
+  const AC = window.AudioContext || window.webkitAudioContext;
+  if(!AC) return null;
+  audioCtx = new AC();
+  return audioCtx;
+}
+
+function stopMusic(){
+  if(!musicNodes) return;
+  try{ musicNodes.gain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.03); }catch(_){}
+  try{ musicNodes.interval && clearInterval(musicNodes.interval); }catch(_){}
+  try{ musicNodes.oscs.forEach(o=>{try{o.stop()}catch(_){}}); }catch(_){}
+  musicNodes=null;
+}
+
+function startMusic(){
+  const ctx = ensureAudio();
+  if(!ctx) return;
+  if(ctx.state === "suspended") ctx.resume();
+  stopMusic();
+  const master = ctx.createGain();
+  master.gain.value = masterGainValue();
+  master.connect(ctx.destination);
+
+  const root = 110;
+  const scale = [0, 3, 5, 7, 10, 12, 15, 17];
+  let step = 0;
+  const oscs = [];
+
+  function beep(freq, dur, type, gainVal, t0){
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.type = type;
+    o.frequency.value = freq;
+    g.gain.value = 0;
+    o.connect(g); g.connect(master);
+    const t = t0 || ctx.currentTime;
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(gainVal, t + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.start(t); o.stop(t + dur + 0.02);
+    oscs.push(o);
+  }
+
+  const drone = ctx.createOscillator();
+  const droneG = ctx.createGain();
+  drone.type = "sine";
+  drone.frequency.value = root;
+  droneG.gain.value = 0.35;
+  drone.connect(droneG); droneG.connect(master);
+  drone.start();
+  oscs.push(drone);
+
+  const interval = setInterval(()=>{
+    if(!audioCtx) return;
+    if(!musicOn || musicVol<=0.001) return;
+    const i = scale[step % scale.length];
+    const freq = root * Math.pow(2, i/12);
+    const t = ctx.currentTime;
+    beep(freq*2, 0.28, "triangle", 0.55, t);
+    if(step % 4 === 0) beep(freq, 0.5, "sine", 0.35, t);
+    if(step % 2 === 0) beep(root*4, 0.06, "square", 0.08, t);
+    step++;
+  }, 320);
+
+  musicNodes = {gain: master, oscs, interval, droneG};
+  musicStarted = true;
+}
+
+function persistMusic(){
+  try{
+    localStorage.setItem("pulseMusicOn", musicOn ? "1" : "0");
+    localStorage.setItem("pulseMusicVol", String(Math.round(musicVol*100)));
+  }catch(_){}
+}
+
+function setMusicOn(on){
+  musicOn = !!on;
+  if(musicOn && musicVol<=0.001) musicVol = 0.45;
+  persistMusic();
+  syncMuteUi();
+  applyMusicGain();
+  if(musicOn){ if(!musicNodes) startMusic(); else applyMusicGain(); }
+  else applyMusicGain();
+}
+
+function setMusicVol(v01){
+  musicVol = Math.min(1, Math.max(0, v01));
+  if(musicVol<=0.001){ musicOn = false; }
+  else if(!musicOn){ musicOn = true; }
+  persistMusic();
+  syncMuteUi();
+  if(musicOn && !musicNodes) startMusic();
+  else applyMusicGain();
+}
+
+if(muteBtn){
+  muteBtn.addEventListener("click",(e)=>{
+    e.stopPropagation();
+    setMusicOn(!musicOn);
+  });
+}
+if(volSlider){
+  volSlider.addEventListener("input",(e)=>{
+    e.stopPropagation();
+    setMusicVol(parseInt(volSlider.value,10)/100);
+  });
+  volSlider.addEventListener("pointerdown",(e)=>e.stopPropagation());
+}
+if(volDownBtn){
+  volDownBtn.addEventListener("click",(e)=>{
+    e.stopPropagation();
+    setMusicVol(musicVol - 0.1);
+  });
+}
+if(volUpBtn){
+  volUpBtn.addEventListener("click",(e)=>{
+    e.stopPropagation();
+    setMusicVol(musicVol + 0.1);
+  });
+}
+function unlockAudioOnce(){
+  ensureAudio();
+  if(musicOn && musicVol>0.001) startMusic();
+}
+["pointerdown","keydown","touchstart"].forEach(ev=>{
+  document.addEventListener(ev, unlockAudioOnce, {once:true, passive:true});
+});
+
+
+
+/* --- AdMob (Capacitor) --- */
+// Production units; fall back to Google SAMPLE rewarded/interstitial if no fill
+// (common while AdMob account is still "Requires review").
+const PROD_REWARDED = "ca-app-pub-3600954472890613/8958393072";
+const PROD_INTERSTITIAL = "ca-app-pub-3600954472890613/9791399496";
+const TEST_REWARDED = "ca-app-pub-3940256099942544/5224354917";
+const TEST_INTERSTITIAL = "ca-app-pub-3940256099942544/1033173712";
+
+const CONTINUE_PULSE = 55;
+let admobReady = false;
+let continueUsedThisRun = false;
+let levelsSinceInterstitial = 0;
+let rewardedReady = false;
+const watchContinueBtn = document.getElementById("watchContinue");
+
+function nativeAdMob(){
+  try{
+    const Cap = window.Capacitor;
+    if(!Cap) return null;
+    const native = (typeof Cap.isNativePlatform === "function")
+      ? Cap.isNativePlatform()
+      : !!(Cap.getPlatform && Cap.getPlatform() !== "web");
+    if(!native) return null;
+    if(Cap.Plugins && Cap.Plugins.AdMob) return Cap.Plugins.AdMob;
+    if(typeof Cap.getPlugin === "function"){
+      try{ return Cap.getPlugin("AdMob"); }catch(_){}
+    }
+  }catch(_){}
+  return null;
+}
+
+function setContinueLabel(text, disabled){
+  if(!watchContinueBtn) return;
+  watchContinueBtn.textContent = text;
+  watchContinueBtn.disabled = !!disabled;
+}
+
+async function initAds(){
+  const AdMob = nativeAdMob();
+  if(!AdMob){
+    setContinueLabel("Watch ad · continue", false);
+    if(watchContinueBtn) watchContinueBtn.title = "Ads need the Android app build";
+    return;
+  }
+  try{
+    await AdMob.initialize({
+      initializeForTesting: true,
+      testingDevices: []
+    });
+    // UMP consent — required in many regions before ads fill
+    try{
+      const info = await AdMob.requestConsentInfo({
+        debugGeography: 0,
+        timeout: 10000
+      });
+      if(info && (info.isConsentFormAvailable || info.status === "REQUIRED")){
+        try{ await AdMob.showConsentForm(); }catch(ce){ console.warn("consent form", ce); }
+      }
+    }catch(ce){ console.warn("consent", ce); }
+    admobReady = true;
+    preloadRewarded();
+  }catch(err){
+    console.warn("AdMob init failed", err);
+    admobReady = false;
+  }
+}
+
+async function prepareRewarded(adId, isTesting){
+  const AdMob = nativeAdMob();
+  if(!AdMob) throw new Error("no_plugin");
+  await AdMob.prepareRewardVideoAd({ adId: adId, isTesting: !!isTesting });
+  rewardedReady = true;
+}
+
+async function preloadRewarded(){
+  if(!admobReady) return;
+  rewardedReady = false;
+  try{
+    await prepareRewarded(PROD_REWARDED, false);
+  }catch(e1){
+    console.warn("prod rewarded preload failed", e1);
+    try{
+      await prepareRewarded(TEST_REWARDED, true);
+    }catch(e2){
+      console.warn("test rewarded preload failed", e2);
+      rewardedReady = false;
+    }
+  }
+}
+
+async function showRewardedContinue(){
+  const AdMob = nativeAdMob();
+  if(!AdMob){
+    placeTip.textContent = "Ads only work in the Android app install.";
+    return false;
+  }
+  if(!admobReady){
+    placeTip.textContent = "Ads still starting — tap again in a second.";
+    try{ await initAds(); }catch(_){}
+    if(!admobReady) return false;
+  }
+
+  setContinueLabel("Loading ad…", true);
+  placeTip.textContent = "Loading rewarded ad…";
+
+  async function showPrepared(){
+    const reward = await AdMob.showRewardVideoAd();
+    rewardedReady = false;
+    // preload next for later runs
+    setTimeout(preloadRewarded, 500);
+    return !!reward || true; // shown + completed path
+  }
+
+  try{
+    if(!rewardedReady){
+      try{
+        await prepareRewarded(PROD_REWARDED, false);
+      }catch(_){
+        await prepareRewarded(TEST_REWARDED, true);
+        placeTip.textContent = "Using test ad (AdMob still under review)…";
+      }
+    }
+    await showPrepared();
+    placeTip.textContent = "Thanks — Pulse restored!";
+    return true;
+  }catch(err1){
+    console.warn("rewarded show failed, retrying test unit", err1);
+    rewardedReady = false;
+    try{
+      await prepareRewarded(TEST_REWARDED, true);
+      placeTip.textContent = "Using test ad…";
+      await showPrepared();
+      placeTip.textContent = "Thanks — Pulse restored!";
+      return true;
+    }catch(err2){
+      console.warn("rewarded failed", err2);
+      const msg = (err2 && (err2.message || err2.errorMessage)) || "Ad unavailable";
+      placeTip.textContent = "No ad available yet (" + String(msg).slice(0,60) + "). Tap to retry.";
+      setContinueLabel("Retry ad · continue", false);
+      setTimeout(preloadRewarded, 1200);
+      return false;
+    }
+  }finally{
+    if(watchContinueBtn && !continueUsedThisRun && watchContinueBtn.textContent === "Loading ad…"){
+      setContinueLabel("Watch ad · continue", false);
+    }
+  }
+}
+
+async function maybeShowInterstitial(){
+  const AdMob = nativeAdMob();
+  if(!AdMob || !admobReady) return;
+  if(levelsSinceInterstitial < 3) return;
+  levelsSinceInterstitial = 0;
+  try{
+    try{
+      await AdMob.prepareInterstitial({ adId: PROD_INTERSTITIAL, isTesting: false });
+    }catch(_){
+      await AdMob.prepareInterstitial({ adId: TEST_INTERSTITIAL, isTesting: true });
+    }
+    await AdMob.showInterstitial();
+  }catch(err){
+    console.warn("Interstitial failed", err);
+  }
+}
+
+function continueFromFlatline(){
+  if(!gameOver || continueUsedThisRun) return;
+  continueUsedThisRun = true;
+  gameOver = false;
+  gameOverEl.classList.remove("show");
+  pulse = CONTINUE_PULSE;
+  pulseEl.textContent = Math.round(pulse);
+  pulseFill.style.width = pulse + "%";
+  pulseFill.classList.remove("low","critical");
+  pulseFill.classList.add("pump");
+  placeTip.textContent = "Back in — Pulse restored. Clear to stay alive!";
+  updatePowers();
+  startDrain();
+  buzz([20,40,20]);
+  if(watchContinueBtn){
+    watchContinueBtn.disabled = true;
+    watchContinueBtn.textContent = "Continue used";
+  }
+}
+
+
+try{bestEl.textContent=localStorage.getItem("pulseGridBest")||"0"}catch(_){bestEl.textContent="0"}
+
+function buzz(p){try{if(navigator.vibrate)navigator.vibrate(p)}catch(_){}}
+function cloneShape(n){return SHAPES[n].map(([r,c])=>[r,c])}
+function shapeBounds(sh){let mr=0,mc=0;for(const[r,c]of sh){mr=Math.max(mr,r);mc=Math.max(mc,c)}return{rows:mr+1,cols:mc+1}}
+function poolForLevel(){
+  const k=Math.min(6,Math.max(1,level));
+  return POOLS[k];
+}
+function drainPerSecond(){
+  // Softer drain so players climb many Levels before intensity ramps
+  if(level<=1) return 1.35;
+  if(level===2) return 1.55;
+  if(level===3) return 1.8;
+  if(level===4) return 2.1;
+  if(level===5) return 2.45;
+  if(level===6) return 2.85;
+  if(level===7) return 3.3;
+  if(level===8) return 3.8;
+  return 4.2 + Math.min(2.5,(level-9)*0.25);
+}
+function randomPiece(){const pool=poolForLevel();const name=pool[(Math.random()*pool.length)|0];return{name,shape:cloneShape(name)}}
+function fillTray(){tray=[randomPiece(),randomPiece(),randomPiece()]}
+function refillIfEmpty(){if(tray.every(p=>!p))fillTray()}
+
+function buildBoard(){
+  boardEl.innerHTML=""; cells=[];
+  for(let r=0;r<SIZE;r++){cells[r]=[];for(let c=0;c<SIZE;c++){
+    const d=document.createElement("div"); d.className="cell"; d.dataset.r=r; d.dataset.c=c;
+    boardEl.appendChild(d); cells[r][c]=d;
+  }}
+}
+function paintBoard(){
+  for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++){
+    const el=cells[r][c];
+    el.classList.remove("preview","preview-bad","clearing");
+    el.classList.toggle("filled",!!grid[r][c]);
+  }
+}
+function canPlace(shape,row,col,g){
+  const board=g||grid;
+  for(const[dr,dc]of shape){const r=row+dr,c=col+dc;if(r<0||c<0||r>=SIZE||c>=SIZE||board[r][c])return false}
+  return true;
+}
+function anyPlacement(shape,g){
+  const board=g||grid,{rows,cols}=shapeBounds(shape);
+  for(let r=0;r<=SIZE-rows;r++)for(let c=0;c<=SIZE-cols;c++)if(canPlace(shape,r,c,board))return true;
+  return false;
+}
+function simulatePlace(shape,row,col){
+  const g=grid.map(row=>row.slice());
+  for(const[dr,dc]of shape)g[row+dr][col+dc]=1;
+  const{fullRows,fullCols}=findFullLines(g);
+  for(const r of fullRows)for(let c=0;c<SIZE;c++)g[r][c]=0;
+  for(const c of fullCols)for(let r=0;r<SIZE;r++)g[r][c]=0;
+  return g;
+}
+function isDeadEndPlacement(trayIdx,row,col){
+  const piece=tray[trayIdx]; if(!piece)return false;
+  const after=simulatePlace(piece.shape,row,col);
+  const remaining=tray.map((p,i)=>(i===trayIdx||!p?null:p)).filter(Boolean);
+  if(!remaining.length)return false;
+  return remaining.every(p=>!anyPlacement(p.shape,after));
+}
+function findFullLines(g){
+  const fullRows=[],fullCols=[];
+  for(let r=0;r<SIZE;r++)if(g[r].every(v=>v))fullRows.push(r);
+  for(let c=0;c<SIZE;c++){let full=true;for(let r=0;r<SIZE;r++)if(!g[r][c]){full=false;break}if(full)fullCols.push(c)}
+  return{fullRows,fullCols};
+}
+
+function setPulse(v, opts){
+  const prev=pulse;
+  pulse=Math.max(0,Math.min(100,v));
+  pulseEl.textContent=Math.round(pulse);
+  pulseFill.style.width=pulse+"%";
+  pulseFill.classList.toggle("low", pulse<=30);
+  pulseFill.classList.toggle("critical", pulse<=15);
+  pulseFill.classList.toggle("pump", pulse>30);
+  updatePowers();
+  if(pulse<=0 && !gameOver && !(opts&&opts.silent)){
+    endGame("Pulse flatlined — keep clearing to stay alive");
+    return;
+  }
+  // Level up when reaching the top
+  if(prev<100 && pulse>=100 && !gameOver){
+    levelUp();
+  }
+}
+function levelUp(){
+  level+=1;
+  levelEl.textContent=level;
+  // Keep momentum after level-up so Levels chain feel rewarding
+  pulse=58;
+  pulseEl.textContent=Math.round(pulse);
+  pulseFill.style.width=pulse+"%";
+  pulseFill.classList.remove("low","critical");
+  pulseFill.classList.add("pump");
+  showCombo("LEVEL "+level+"!");
+  buzz([20,40,20,40,60]);
+  placeTip.textContent="Level "+level+" — Pulse drains faster. Stay intense.";
+  // Refresh tray with new difficulty pieces
+  fillTray(); renderTray();
+  updatePowers();
+  checkGameOver();
+  levelsSinceInterstitial += 1;
+  maybeShowInterstitial();
+}
+function updatePowers(){
+  if(insightActive){
+    insightBtn.disabled=false; insightBtn.classList.add("ready","active");
+    insightBtn.childNodes[0].nodeValue="Insight ON"; insightHint.classList.add("show");
+  }else if(pulse>=55 && !gameOver){
+    insightBtn.disabled=false; insightBtn.classList.add("ready"); insightBtn.classList.remove("active");
+    insightBtn.childNodes[0].nodeValue="Insight"; insightHint.classList.remove("show");
+  }else{
+    insightBtn.disabled=true; insightBtn.classList.remove("ready","active");
+    insightBtn.childNodes[0].nodeValue="Insight"; insightHint.classList.remove("show");
+    if(pulse<55) insightActive=false;
+  }
+  if(surgeArmed){surgeBtn.disabled=false;surgeBtn.classList.add("ready","active")}
+  else if(pulse>=SURGE_COST+15 && !gameOver){surgeBtn.disabled=false;surgeBtn.classList.add("ready");surgeBtn.classList.remove("active")}
+  else{surgeBtn.disabled=true;surgeBtn.classList.remove("ready","active")}
+  if(blastMode){blastBtn.disabled=false;blastBtn.classList.add("ready","active")}
+  else if(pulse>=BLAST_COST+15 && !gameOver){blastBtn.disabled=false;blastBtn.classList.add("ready");blastBtn.classList.remove("active")}
+  else{blastBtn.disabled=true;blastBtn.classList.remove("ready","active")}
+}
+function updateScore(n){score=n;scoreEl.textContent=score}
+function setStreak(s){clearStreak=s;streakEl.textContent=clearStreak}
+function getBest(){try{return parseInt(localStorage.getItem("pulseGridBest")||"0",10)}catch(_){return 0}}
+function saveBest(){
+  const best=getBest();
+  if(score>best){
+    try{localStorage.setItem("pulseGridBest",String(score))}catch(_){}
+    bestEl.textContent=String(score);
+    return true;
+  }
+  return false;
+}
+function showCombo(text){
+  comboToast.textContent=text; comboToast.classList.add("show");
+  setTimeout(()=>comboToast.classList.remove("show"),800);
+}
+
+function startDrain(){
+  stopDrain();
+  lastTick=performance.now();
+  tickTimer=requestAnimationFrame(drainTick);
+}
+function stopDrain(){
+  if(tickTimer){cancelAnimationFrame(tickTimer);tickTimer=null}
+}
+function drainTick(now){
+  tickTimer=requestAnimationFrame(drainTick);
+  if(gameOver||clearing){lastTick=now;return}
+  const dt=(now-lastTick)/1000; lastTick=now;
+  if(dt<=0||dt>0.25)return;
+  setPulse(pulse - drainPerSecond()*dt, {silent:false});
+}
+
+function renderTray(){
+  trayEl.innerHTML="";
+  tray.forEach((piece,idx)=>{
+    const slot=document.createElement("div");
+    slot.className="piece-slot"+(piece?"":" empty")+(selectedIdx===idx?" selected":"");
+    slot.dataset.idx=idx;
+    if(piece){
+      const{rows,cols}=shapeBounds(piece.shape);
+      const pg=document.createElement("div"); pg.className="piece-grid";
+      pg.style.gridTemplateColumns=`repeat(${cols},16px)`; pg.style.gridTemplateRows=`repeat(${rows},16px)`;
+      const map=Array.from({length:rows},()=>Array(cols).fill(false));
+      for(const[r,c]of piece.shape)map[r][c]=true;
+      for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
+        const cell=document.createElement("div");
+        if(map[r][c])cell.className="piece-cell"; else{cell.style.width=cell.style.height="16px"}
+        pg.appendChild(cell);
+      }
+      slot.appendChild(pg);
+      slot.addEventListener("pointerdown",onPiecePointerDown);
+      slot.addEventListener("click",onPieceClick);
+    }
+    trayEl.appendChild(slot);
+  });
+}
+function selectPiece(idx){
+  if(!tray[idx]||blastMode||gameOver)return;
+  selectedIdx=selectedIdx===idx?null:idx;
+  renderTray(); clearPreview();
+  placeTip.textContent=selectedIdx!=null?"Selected — tap the board to place":"Tap a tray piece, then tap the board.";
+}
+function onPieceClick(e){
+  if(gameOver||clearing||blastMode)return;
+  e.preventDefault(); e.stopPropagation();
+  if(e.currentTarget._didDrag){e.currentTarget._didDrag=false;return}
+  selectPiece(+e.currentTarget.dataset.idx);
+}
+function onPiecePointerDown(e){
+  if(gameOver||clearing||blastMode)return;
+  if(e.button!=null&&e.button!==0)return;
+  const idx=+e.currentTarget.dataset.idx; if(!tray[idx])return;
+  const isCoarse=window.matchMedia&&window.matchMedia("(pointer: coarse)").matches;
+  const dragThreshold=isCoarse?22:10;
+  dragIdx=idx; dragPointerId=e.pointerId; e.currentTarget._didDrag=false;
+  const startX=e.clientX,startY=e.clientY; let moved=false; const target=e.currentTarget;
+  try{target.setPointerCapture(e.pointerId)}catch(_){}
+  const onMove=(ev)=>{
+    if(ev.pointerId!==dragPointerId)return;
+    const dx=ev.clientX-startX,dy=ev.clientY-startY;
+    if(!moved&&Math.hypot(dx,dy)<dragThreshold)return;
+    moved=true; target._didDrag=true; selectedIdx=idx;
+    showGhost(tray[idx],ev.clientX,ev.clientY); updateHoverFromPoint(ev.clientX,ev.clientY);
+    document.querySelector(`.piece-slot[data-idx="${idx}"]`)?.classList.add("dragging");
+    if(ev.cancelable)ev.preventDefault();
+  };
+  const onUp=(ev)=>{
+    if(ev.pointerId!==dragPointerId)return;
+    try{target.releasePointerCapture(ev.pointerId)}catch(_){}
+    target.removeEventListener("pointermove",onMove); target.removeEventListener("pointerup",onUp); target.removeEventListener("pointercancel",onUp);
+    hideGhost(); document.querySelectorAll(".piece-slot.dragging").forEach(el=>el.classList.remove("dragging"));
+    if(moved&&hoverRC&&tray[dragIdx]){tryPlace(dragIdx,hoverRC.r,hoverRC.c);selectedIdx=null;renderTray()}
+    else if(!moved){selectPiece(idx);target._didDrag=true;setTimeout(()=>{target._didDrag=false},400)}
+    dragIdx=null; dragPointerId=null; hoverRC=null; clearPreview();
+  };
+  target.addEventListener("pointermove",onMove,{passive:false});
+  target.addEventListener("pointerup",onUp); target.addEventListener("pointercancel",onUp);
+}
+function showGhost(piece,x,y){
+  const{rows,cols}=shapeBounds(piece.shape);
+  const map=Array.from({length:rows},()=>Array(cols).fill(false));
+  for(const[r,c]of piece.shape)map[r][c]=true;
+  let h=`<div class="piece-grid" style="grid-template-columns:repeat(${cols},auto);grid-template-rows:repeat(${rows},auto)">`;
+  for(let r=0;r<rows;r++)for(let c=0;c<cols;c++)h+=map[r][c]?'<div class="piece-cell"></div>':'<div style="width:28px;height:28px"></div>';
+  h+="</div>"; dragGhost.innerHTML=h; dragGhost.style.display="block"; positionGhost(x,y,piece);
+}
+function positionGhost(x,y,piece){
+  const{cols,rows}=shapeBounds(piece.shape); const cellSize=getBoardCellSize();
+  dragGhost.style.left=(x-cols*cellSize/2)+"px"; dragGhost.style.top=(y-rows*cellSize/2)+"px";
+  dragGhost.querySelectorAll(".piece-cell").forEach(el=>{el.style.width=cellSize-3+"px";el.style.height=cellSize-3+"px"});
+}
+function hideGhost(){dragGhost.style.display="none";dragGhost.innerHTML=""}
+function getBoardCellSize(){const rect=boardEl.getBoundingClientRect();return(rect.width-12-21)/8}
+function pointToCell(x,y,shape){
+  const rect=boardEl.getBoundingClientRect(),gap=3,pad=6,cellSize=(rect.width-pad*2-gap*7)/8;
+  const{rows,cols}=shapeBounds(shape);
+  const localX=x-rect.left-pad-(cols*(cellSize+gap)-gap)/2;
+  const localY=y-rect.top-pad-(rows*(cellSize+gap)-gap)/2;
+  let c=Math.round(localX/(cellSize+gap)), r=Math.round(localY/(cellSize+gap));
+  r=Math.max(0,Math.min(SIZE-rows,r)); c=Math.max(0,Math.min(SIZE-cols,c));
+  return{r,c};
+}
+function updateHoverFromPoint(x,y){
+  const idx=dragIdx!=null?dragIdx:selectedIdx;
+  if(idx==null||!tray[idx]){clearPreview();return}
+  const rect=boardEl.getBoundingClientRect();
+  if(x<rect.left||x>rect.right||y<rect.top||y>rect.bottom){hoverRC=null;clearPreview();return}
+  const rc=pointToCell(x,y,tray[idx].shape); hoverRC=rc; showPreview(idx,rc.r,rc.c);
+}
+function clearPreview(){for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++)cells[r][c].classList.remove("preview","preview-bad")}
+function showPreview(trayIdx,row,col){
+  clearPreview(); const piece=tray[trayIdx]; if(!piece||!canPlace(piece.shape,row,col))return;
+  const bad=insightActive&&isDeadEndPlacement(trayIdx,row,col);
+  for(const[dr,dc]of piece.shape)cells[row+dr][col+dc].classList.add(bad?"preview-bad":"preview");
+}
+function placeFromPoint(clientX,clientY){
+  if(gameOver||clearing||dragIdx!=null)return;
+  if(Date.now()-lastPlaceAt<350)return;
+  if(blastMode){doBlastAt(clientX,clientY);return}
+  if(selectedIdx==null||!tray[selectedIdx])return;
+  const{rows,cols}=shapeBounds(tray[selectedIdx].shape);
+  const rect=boardEl.getBoundingClientRect();
+  if(clientX<rect.left||clientX>rect.right||clientY<rect.top||clientY>rect.bottom)return;
+  const gap=3,pad=6,cellSize=(rect.width-pad*2-gap*7)/8;
+  let c=Math.floor((clientX-rect.left-pad)/(cellSize+gap));
+  let r=Math.floor((clientY-rect.top-pad)/(cellSize+gap));
+  r=Math.max(0,Math.min(SIZE-rows,r)); c=Math.max(0,Math.min(SIZE-cols,c));
+  if(!canPlace(tray[selectedIdx].shape,r,c)){
+    let ok=false;
+    for(let dr=-1;dr<=1&&!ok;dr++)for(let dc=-1;dc<=1&&!ok;dc++){
+      const rr=Math.max(0,Math.min(SIZE-rows,r+dr)), cc=Math.max(0,Math.min(SIZE-cols,c+dc));
+      if(canPlace(tray[selectedIdx].shape,rr,cc)){r=rr;c=cc;ok=true}
+    }
+    if(!ok)return;
+  }
+  lastPlaceAt=Date.now(); tryPlace(selectedIdx,r,c);
+}
+function doBlastAt(clientX,clientY){
+  const rect=boardEl.getBoundingClientRect();
+  if(clientX<rect.left||clientX>rect.right||clientY<rect.top||clientY>rect.bottom)return;
+  const gap=3,pad=6,cellSize=(rect.width-pad*2-gap*7)/8;
+  let c=Math.floor((clientX-rect.left-pad)/(cellSize+gap));
+  let r=Math.floor((clientY-rect.top-pad)/(cellSize+gap));
+  r=Math.max(0,Math.min(SIZE-1,r)); c=Math.max(0,Math.min(SIZE-1,c));
+  if(!grid[r][c]){placeTip.textContent="Tap a filled cell for Blast";return}
+  const toClear=new Set();
+  for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){
+    const rr=r+dr,cc=c+dc; if(rr>=0&&cc>=0&&rr<SIZE&&cc<SIZE&&grid[rr][cc])toClear.add(rr+","+cc);
+  }
+  if(!toClear.size)return;
+  blastMode=false; clearing=true; buzz([25,40,25]);
+  toClear.forEach(key=>{const[rr,cc]=key.split(",").map(Number);cells[rr][cc].classList.add("clearing");cells[rr][cc].classList.remove("filled")});
+  const points=toClear.size*8+level*5; updateScore(score+points);
+  setPulse(pulse-BLAST_COST); // spend life carefully
+  // Blast also pumps a little life from the clear
+  setPulse(pulse+Math.min(20,toClear.size*3));
+  showCombo("BLAST!");
+  setTimeout(()=>{
+    toClear.forEach(key=>{const[rr,cc]=key.split(",").map(Number);grid[rr][cc]=0});
+    clearing=false; paintBoard(); updatePowers(); checkGameOver();
+    placeTip.textContent="Keep the heartbeat alive — clear lines to refill Pulse.";
+  },380);
+}
+function tryPlace(trayIdx,row,col){
+  if(gameOver||clearing)return;
+  const piece=tray[trayIdx]; if(!piece||!canPlace(piece.shape,row,col))return;
+  for(const[dr,dc]of piece.shape)grid[row+dr][col+dc]=1;
+  tray[trayIdx]=null; selectedIdx=null; paintBoard(); renderTray();
+  const{fullRows,fullCols}=findFullLines(grid);
+  const lineCount=fullRows.length+fullCols.length;
+  if(lineCount>0){
+    clearing=true; const toClear=new Set();
+    for(const r of fullRows)for(let c=0;c<SIZE;c++)toClear.add(r+","+c);
+    for(const c of fullCols)for(let r=0;r<SIZE;r++)toClear.add(r+","+c);
+    toClear.forEach(key=>{const[r,c]=key.split(",").map(Number);cells[r][c].classList.add("clearing");cells[r][c].classList.remove("filled")});
+    setStreak(clearStreak+1);
+    let mult=lineCount*(surgeArmed?2:1);
+    if(surgeArmed){surgeArmed=false;showCombo(lineCount+"× SURGE!");buzz([20,30,20,30,40])}
+    else if(lineCount>=2){showCombo(lineCount+"× COMBO!");buzz([20,40,30])}
+    else buzz(18);
+    const points=lineCount*12*mult+toClear.size*2+clearStreak*3+level*4;
+    updateScore(score+points);
+    // Add TIME / pulse — this is the pump
+    const gain=CLEAR_PULSE_BASE*lineCount + Math.min(20,clearStreak*3) + (lineCount>=2?14:0) + Math.min(10,level);
+    setPulse(pulse+gain);
+    setTimeout(()=>{
+      toClear.forEach(key=>{const[r,c]=key.split(",").map(Number);grid[r][c]=0});
+      clearing=false; paintBoard(); afterPlace();
+    },420);
+  }else{
+    // Dry place: small panic drain (not the confusing big swing)
+    setStreak(0); buzz(8); setPulse(pulse-1.5); afterPlace();
+  }
+}
+function afterPlace(){refillIfEmpty();renderTray();paintBoard();updatePowers();checkGameOver()}
+function hasAnyMove(){
+  const rem=tray.filter(Boolean);
+  if(!rem.length)return true;
+  return rem.some(p=>anyPlacement(p.shape));
+}
+function checkGameOver(){
+  if(gameOver)return;
+  refillIfEmpty();
+  const rem=tray.filter(Boolean);
+  if(!rem.length){fillTray();renderTray()}
+  if(!hasAnyMove()){
+    endGame("No moves left — board is locked");
+  }
+}
+function endGame(reason){
+  if(gameOver)return;
+  gameOver=true; stopDrain();
+  const isNew=saveBest();
+  endReason.textContent=reason||"Game over";
+  finalScoreEl.textContent=score;
+  finalLevelEl.textContent=level;
+  overlayBest.textContent=bestEl.textContent;
+  newBestEl.textContent=isNew?"★ NEW HIGH SCORE ★":"";
+  gameOverEl.classList.add("show");
+  hideGhost(); clearPreview(); blastMode=false; insightActive=false; surgeArmed=false;
+  updatePowers();
+  buzz([40,60,40,80,120]);
+  if(watchContinueBtn){
+    if(continueUsedThisRun){
+      setContinueLabel("Continue used", true);
+    }else{
+      setContinueLabel("Watch ad · continue", false);
+      preloadRewarded();
+    }
+  }
+}
+function startGame(){
+  stopDrain();
+  grid=Array.from({length:SIZE},()=>Array(SIZE).fill(0));
+  score=0; pulse=START_PULSE; level=1; clearStreak=0;
+  insightActive=false; surgeArmed=false; blastMode=false;
+  continueUsedThisRun=false; levelsSinceInterstitial=0;
+  selectedIdx=null; clearing=false; gameOver=false; hoverRC=null; dragIdx=null;
+  updateScore(0); setStreak(0); levelEl.textContent=level;
+  pulseEl.textContent=Math.round(pulse); pulseFill.style.width=pulse+"%";
+  pulseFill.classList.remove("low","critical"); pulseFill.classList.add("pump");
+  fillTray(); buildBoard(); paintBoard(); renderTray();
+  gameOverEl.classList.remove("show"); hideGhost(); newBestEl.textContent="";
+  placeTip.textContent="Pulse drains like a heartbeat. Clear lines to pump it up — fill it to reach the next Level.";
+  updatePowers();
+  startDrain();
+}
+
+insightBtn.addEventListener("click",()=>{
+  if(gameOver)return;
+  if(!insightActive && pulse>=55){insightActive=true;setPulse(pulse-INSIGHT_COST);buzz(12);placeTip.textContent="Insight ON — avoid red dead-end placements"}
+  else if(insightActive){insightActive=false;updatePowers();clearPreview();placeTip.textContent="Insight off"}
+});
+surgeBtn.addEventListener("click",()=>{
+  if(surgeArmed||gameOver||pulse<SURGE_COST+15)return;
+  surgeArmed=true; setPulse(pulse-SURGE_COST); buzz(15);
+  placeTip.textContent="Surge armed — next clear scores 2×"; updatePowers();
+});
+blastBtn.addEventListener("click",()=>{
+  if(gameOver||clearing)return;
+  if(blastMode){blastMode=false;placeTip.textContent="Blast cancelled";updatePowers();return}
+  if(pulse<BLAST_COST+15)return;
+  blastMode=true; selectedIdx=null; renderTray(); clearPreview(); updatePowers(); buzz(15);
+  placeTip.textContent="Blast armed — tap a filled cell";
+});
+
+boardEl.addEventListener("pointermove",(e)=>{
+  if(dragIdx!=null||blastMode)return;
+  if(selectedIdx==null||!tray[selectedIdx]||gameOver||clearing)return;
+  updateHoverFromPoint(e.clientX,e.clientY);
+});
+boardEl.addEventListener("pointerleave",()=>{if(dragIdx!=null)return;hoverRC=null;clearPreview()});
+boardEl.addEventListener("pointerup",(e)=>{if(e.button!=null&&e.button!==0)return;placeFromPoint(e.clientX,e.clientY)});
+boardEl.addEventListener("click",(e)=>{if(gameOver||clearing||dragIdx!=null)return;placeFromPoint(e.clientX,e.clientY)});
+document.body.addEventListener("touchmove",(e)=>{
+  const t=e.target; if(!(t instanceof Element))return;
+  if(t.closest("#board,#tray,.piece-slot,#dragGhost,.board-wrap,.powers"))e.preventDefault();
+},{passive:false});
+
+restartBtn.addEventListener("click",startGame);
+playAgainBtn.addEventListener("click",startGame);
+if(watchContinueBtn){
+  watchContinueBtn.addEventListener("click", async ()=>{
+    if(!gameOver || continueUsedThisRun) return;
+    const ok = await showRewardedContinue();
+    if(ok) continueFromFlatline();
+  });
+}
+document.addEventListener("visibilitychange",()=>{if(document.hidden)stopDrain();else if(!gameOver)startDrain()});
+const titleScreen=document.getElementById("titleScreen");
+const playBtn=document.getElementById("playBtn");
+const menuBtn=document.getElementById("menuBtn");
+const titleBest=document.getElementById("titleBest");
+let inGame=false;
+
+function refreshTitleBest(){
+  try{
+    const b=localStorage.getItem("pulseGridBest")||"0";
+    if(titleBest) titleBest.textContent=b;
+    if(bestEl) bestEl.textContent=b;
+  }catch(_){}
+}
+
+function showTitleScreen(){
+  inGame=false;
+  stopDrain();
+  gameOver=true; // block input while on title
+  if(gameOverEl) gameOverEl.classList.remove("show");
+  document.body.classList.add("title-locked");
+  if(titleScreen) titleScreen.classList.remove("hide");
+  refreshTitleBest();
+}
+
+function beginFromTitle(){
+  document.body.classList.remove("title-locked");
+  if(titleScreen) titleScreen.classList.add("hide");
+  inGame=true;
+  // unlock audio + music on intentional Play tap
+  try{ unlockAudioOnce(); }catch(_){}
+  try{ if(typeof setMusicOn==="function" && musicOn) startMusic(); }catch(_){}
+  startGame();
+}
+
+if(playBtn){
+  playBtn.addEventListener("click",(e)=>{
+    e.preventDefault();
+    beginFromTitle();
+  });
+}
+if(menuBtn){
+  menuBtn.addEventListener("click",(e)=>{
+    e.preventDefault();
+    showTitleScreen();
+  });
+}
+
+refreshTitleBest();
+initAds(); // preload ads while on title — do NOT auto-start game
+showTitleScreen();
+
+if("serviceWorker" in navigator)navigator.serviceWorker.register("./sw.js").catch(()=>{});
+})();
+</script>
+</body>
+</html>

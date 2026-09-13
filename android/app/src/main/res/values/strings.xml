@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">PULSE Insight</string>
+    <string name="title_activity_main">PULSE Insight</string>
+    <string name="package_name">com.digitalaimgroup.pulseinsight</string>
+    <string name="custom_url_scheme">com.digitalaimgroup.pulseinsight</string>
+    <!-- Replace with real AdMob app id (ca-app-pub-xxxx~yyyy) before production ads -->
+    <string name="admob_app_id">ca-app-pub-3600954472890613~8549987511</string>
+</resources>

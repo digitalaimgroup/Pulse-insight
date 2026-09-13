@@ -1,0 +1,12 @@
+{
+  "appId": "com.digitalaimgroup.pulseinsight",
+  "appName": "PULSE Insight",
+  "webDir": "www",
+  "android": {
+    "allowMixedContent": true
+  },
+  "server": {
+    "androidScheme": "https",
+    "iosScheme": "https"
+  }
+}
