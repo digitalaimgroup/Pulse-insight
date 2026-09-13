@@ -17,6 +17,7 @@
     "sync": "npx cap sync",
     "sync:ios": "npx cap sync ios",
     "sync:android": "npx cap sync android",
-    "open:ios": "npx cap open ios"
+    "open:ios": "npx cap open ios",
+    "postinstall": "node scripts/patch-admob-ump.js"
   }
 }

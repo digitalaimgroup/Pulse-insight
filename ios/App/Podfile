@@ -18,8 +18,9 @@ def capacitor_pods
 end
 
 target 'App' do
+  # Pin UMP v2 — GoogleUserMessagingPlatform 3 renames APIs that AdMob 6.x still uses
+  pod 'GoogleUserMessagingPlatform', '~> 2.7.0'
   capacitor_pods
-  # Add your Pods here
 end
 
 post_install do |installer|
