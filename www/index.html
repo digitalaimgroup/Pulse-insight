@@ -18,7 +18,8 @@
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{
   height:100%;background:var(--bg);color:var(--text);font-family:var(--font);
-  overflow:hidden;overscroll-behavior:none;touch-action:none;
+  overflow:hidden;overscroll-behavior:none;overscroll-behavior-x:none;overscroll-behavior-y:none;
+  touch-action:none;-webkit-user-select:none;user-select:none;
   position:fixed;inset:0;width:100%;
 }
 body{
@@ -503,6 +504,35 @@ let levelsSinceInterstitial = 0;
 let rewardedReady = false;
 const watchContinueBtn = document.getElementById("watchContinue");
 
+/* Freeze drain/input while fullscreen ads are up (WebView often stays "visible"). */
+let pausedForAd = false;
+function pauseForAd(){
+  if(pausedForAd) return;
+  pausedForAd = true;
+  stopDrain();
+}
+function resumeAfterAd(){
+  if(!pausedForAd) return;
+  pausedForAd = false;
+  if(!gameOver && inGame && !document.hidden) startDrain();
+}
+let adPauseListenersWired = false;
+function wireAdPauseListeners(AdMob){
+  if(!AdMob || adPauseListenersWired || typeof AdMob.addListener !== "function") return;
+  adPauseListenersWired = true;
+  const onShow = () => pauseForAd();
+  const onEnd = () => resumeAfterAd();
+  try{
+    AdMob.addListener("interstitialAdShowed", onShow);
+    AdMob.addListener("interstitialAdDismissed", onEnd);
+    AdMob.addListener("interstitialAdFailedToShow", onEnd);
+    AdMob.addListener("onRewardedVideoAdShowed", onShow);
+    AdMob.addListener("onRewardedVideoAdDismissed", onEnd);
+    AdMob.addListener("onRewardedVideoAdFailedToShow", onEnd);
+  }catch(e){ console.warn("ad pause listeners", e); }
+}
+
+
 function nativeAdMob(){
   try{
     const Cap = window.Capacitor;
@@ -548,6 +578,7 @@ async function initAds(){
       }
     }catch(ce){ console.warn("consent", ce); }
     admobReady = true;
+    wireAdPauseListeners(AdMob);
     preloadRewarded();
   }catch(err){
     console.warn("AdMob init failed", err);
@@ -594,11 +625,16 @@ async function showRewardedContinue(){
   placeTip.textContent = "Loading rewarded ad…";
 
   async function showPrepared(){
-    const reward = await AdMob.showRewardVideoAd();
-    rewardedReady = false;
-    // preload next for later runs
-    setTimeout(preloadRewarded, 500);
-    return !!reward || true; // shown + completed path
+    pauseForAd();
+    try{
+      const reward = await AdMob.showRewardVideoAd();
+      rewardedReady = false;
+      // preload next for later runs
+      setTimeout(preloadRewarded, 500);
+      return !!reward || true; // shown + completed path
+    }finally{
+      resumeAfterAd();
+    }
   }
 
   try{
@@ -642,6 +678,7 @@ async function maybeShowInterstitial(){
   if(!AdMob || !admobReady) return;
   if(levelsSinceInterstitial < 3) return;
   levelsSinceInterstitial = 0;
+  pauseForAd();
   try{
     try{
       await AdMob.prepareInterstitial({ adId: PROD_INTERSTITIAL, isTesting: false });
@@ -651,6 +688,8 @@ async function maybeShowInterstitial(){
     await AdMob.showInterstitial();
   }catch(err){
     console.warn("Interstitial failed", err);
+  }finally{
+    resumeAfterAd();
   }
 }
 
@@ -829,7 +868,7 @@ function stopDrain(){
 }
 function drainTick(now){
   tickTimer=requestAnimationFrame(drainTick);
-  if(gameOver||clearing){lastTick=now;return}
+  if(gameOver||clearing||pausedForAd){lastTick=now;return}
   const dt=(now-lastTick)/1000; lastTick=now;
   if(dt<=0||dt>0.25)return;
   setPulse(pulse - drainPerSecond()*dt, {silent:false});
@@ -1098,8 +1137,8 @@ boardEl.addEventListener("pointerleave",()=>{if(dragIdx!=null)return;hoverRC=nul
 boardEl.addEventListener("pointerup",(e)=>{if(e.button!=null&&e.button!==0)return;placeFromPoint(e.clientX,e.clientY)});
 boardEl.addEventListener("click",(e)=>{if(gameOver||clearing||dragIdx!=null)return;placeFromPoint(e.clientX,e.clientY)});
 document.body.addEventListener("touchmove",(e)=>{
-  const t=e.target; if(!(t instanceof Element))return;
-  if(t.closest("#board,#tray,.piece-slot,#dragGhost,.board-wrap,.powers"))e.preventDefault();
+  // Always cancel browser/WebView overscroll & edge history gestures during the app shell.
+  if(e.cancelable) e.preventDefault();
 },{passive:false});
 
 restartBtn.addEventListener("click",startGame);
@@ -1111,7 +1150,7 @@ if(watchContinueBtn){
     if(ok) continueFromFlatline();
   });
 }
-document.addEventListener("visibilitychange",()=>{if(document.hidden)stopDrain();else if(!gameOver)startDrain()});
+document.addEventListener("visibilitychange",()=>{if(document.hidden)stopDrain();else if(!gameOver&&inGame&&!pausedForAd)startDrain()});
 const titleScreen=document.getElementById("titleScreen");
 const playBtn=document.getElementById("playBtn");
 const menuBtn=document.getElementById("menuBtn");
@@ -1160,6 +1199,21 @@ if(menuBtn){
 }
 
 refreshTitleBest();
+try{
+  const Cap = window.Capacitor;
+  const AppPlugin = Cap && Cap.Plugins && Cap.Plugins.App;
+  if(AppPlugin && typeof AppPlugin.addListener === "function"){
+    AppPlugin.addListener("backButton", ()=>{
+      // Consume system/WebView back so edge gestures don't navigate or exit mid-play.
+      if(inGame && gameOverEl && gameOverEl.classList.contains("show")){
+        showTitleScreen();
+        return;
+      }
+      if(inGame) return;
+      // On title: ignore (stay in app) — player can use Home/Recents to leave.
+    });
+  }
+}catch(_){}
 initAds(); // preload ads while on title — do NOT auto-start game
 showTitleScreen();
 
