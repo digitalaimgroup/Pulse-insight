@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0d1117">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.webmanifest">
@@ -23,7 +23,9 @@ html,body{
   position:fixed;inset:0;width:100%;
 }
 body{
-  display:flex;flex-direction:column;align-items:center;padding:10px 10px 16px;
+  display:flex;flex-direction:column;align-items:center;
+  padding:max(10px, env(safe-area-inset-top, 0px)) max(10px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(10px, env(safe-area-inset-left, 0px));
+  width:100%;min-height:100%;min-height:100dvh;
   background:
     radial-gradient(ellipse 80% 50% at 50% -20%, rgba(34,211,238,.12), transparent),
     radial-gradient(ellipse 60% 40% at 100% 100%, rgba(232,121,249,.08), transparent),
@@ -200,6 +202,35 @@ body.title-locked .insight-hint,
 body.title-locked .music-ctrl{visibility:hidden}
 
 @media(max-width:380px){.brand h1{font-size:1.25rem}.piece-cell{width:14px;height:14px}}
+
+/* iPad / large screens — use more of the display (less phone-narrow max-width) */
+html.device-ipad, html.device-ipad body,
+body.device-ipad{
+  --layout-max:min(720px, 94vw);
+  --board-max:min(640px, 72vh, 92vw);
+}
+.device-ipad .header,
+.device-ipad .tip,
+.device-ipad .meta,
+.device-ipad .pulse-wrap,
+.device-ipad .powers,
+.device-ipad .tray-section,
+.device-ipad .insight-hint{max-width:var(--layout-max)}
+.device-ipad .board-wrap{width:var(--board-max);max-width:none}
+.device-ipad .piece-cell{width:20px;height:20px}
+.device-ipad .brand h1{font-size:1.75rem}
+.device-ipad .title-screen .logo{font-size:clamp(3.2rem,10vw,4.4rem)}
+.device-ipad .title-screen .tag{max-width:420px;font-size:1.05rem}
+.device-ipad .title-screen .howto{max-width:440px;font-size:.85rem}
+.device-ipad #board{gap:4px;padding:8px}
+.device-ipad #tray{min-height:112px;padding:14px 12px}
+.device-ipad .piece-slot{min-height:96px}
+@media(min-width:900px){
+  html.device-ipad{
+    --layout-max:min(820px, 90vw);
+    --board-max:min(700px, 68vh, 88vw);
+  }
+}
 </style>
 </head>
 <body class="title-locked">
@@ -277,6 +308,55 @@ body.title-locked .music-ctrl{visibility:hidden}
 <script>
 (function(){
 "use strict";
+
+/* Device class: iPhone vs iPad (iPadOS 13+ may report as Mac) */
+function detectPulseDevice(){
+  const ua = navigator.userAgent || "";
+  const platform = navigator.platform || "";
+  const maxTouch = navigator.maxTouchPoints || 0;
+  // iPadOS 13+: Safari often reports Macintosh + touch
+  const iPadOSDesktopUA = (/Macintosh|MacIntel/i.test(ua) || platform === "MacIntel") && maxTouch > 1;
+  const isIpad = /iPad/i.test(ua) || iPadOSDesktopUA;
+  const isIphone = /iPhone/i.test(ua) && !isIpad;
+  let form = "other";
+  if (isIpad) form = "ipad";
+  else if (isIphone) form = "iphone";
+  // Prefer Capacitor Device if present (not currently a dep — keep for future)
+  try{
+    const Cap = window.Capacitor;
+    const Device = Cap && Cap.Plugins && Cap.Plugins.Device;
+    if(Device && typeof Device.getInfo === "function"){
+      // sync path unavailable; fire-and-forget refine
+      Device.getInfo().then((info)=>{
+        const model = (info && (info.model || info.name || "")) + "";
+        const p = ((info && info.platform) || "").toLowerCase();
+        let f = form;
+        if(/ipad/i.test(model) || (p === "ios" && /ipad/i.test(model))) f = "ipad";
+        else if(/iphone/i.test(model)) f = "iphone";
+        else if(p === "ios" && !isIpad && /iphone|ipod/i.test(ua)) f = "iphone";
+        applyPulseDevice(f);
+      }).catch(()=>{});
+    }
+  }catch(_){}
+  return { form, isIpad: form==="ipad", isIphone: form==="iphone" };
+}
+function applyPulseDevice(form){
+  const root = document.documentElement;
+  const body = document.body;
+  root.classList.remove("device-iphone","device-ipad","device-other");
+  body.classList.remove("device-iphone","device-ipad","device-other");
+  const cls = "device-" + form;
+  root.classList.add(cls);
+  body.classList.add(cls);
+  root.dataset.device = form;
+  window.PULSE_DEVICE = { form, isIpad: form==="ipad", isIphone: form==="iphone" };
+}
+(function initPulseDevice(){
+  const d = detectPulseDevice();
+  applyPulseDevice(d.form);
+  try{ console.info("[PULSE] device:", window.PULSE_DEVICE); }catch(_){}
+})();
+
 const SIZE=8;
 const INSIGHT_COST=22, SURGE_COST=18, BLAST_COST=24;
 const START_PULSE=70;
