@@ -25,4 +25,13 @@ end
 
 post_install do |installer|
   assertDeploymentTarget(installer)
+  # ITMS-90068: App Store requires iOS 15.0+ (April 2027). Capacitor defaults to 13.0.
+  installer.pods_project.targets.each do |target|
+    target.build_configurations.each do |config|
+      current = config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'].to_f
+      if current > 0 && current < 15.0
+        config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.0'
+      end
+    end
+  end
 end
