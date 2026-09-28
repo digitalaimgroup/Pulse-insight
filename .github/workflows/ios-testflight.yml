@@ -38,6 +38,27 @@ jobs:
       - name: Sync Capacitor iOS
         run: npx cap sync ios
 
+      - name: Enforce iOS 15.0+ deployment target (ITMS-90068)
+        run: |
+          set -euo pipefail
+          MIN=15.0
+          if [[ -f ios/App/Podfile ]]; then
+            sed -i '' "s/platform :ios, '[0-9.]*'/platform :ios, '${MIN}'/" ios/App/Podfile
+          fi
+          if [[ -f ios/App/App.xcodeproj/project.pbxproj ]]; then
+            sed -i '' "s/IPHONEOS_DEPLOYMENT_TARGET = [0-9.]*;/IPHONEOS_DEPLOYMENT_TARGET = ${MIN};/g" ios/App/App.xcodeproj/project.pbxproj
+          fi
+          echo "Podfile:"; grep "platform :ios" ios/App/Podfile || true
+          echo "pbxproj targets:"; grep IPHONEOS_DEPLOYMENT_TARGET ios/App/App.xcodeproj/project.pbxproj | sort -u
+          if grep -E "IPHONEOS_DEPLOYMENT_TARGET = (1[0-4]|[0-9])\." ios/App/App.xcodeproj/project.pbxproj; then
+            echo "::error::IPHONEOS_DEPLOYMENT_TARGET still below 15.0 (ITMS-90068)" >&2
+            exit 1
+          fi
+          if grep -E "platform :ios, '(1[0-4]|[0-9])\." ios/App/Podfile; then
+            echo "::error::Podfile platform still below 15.0 (ITMS-90068)" >&2
+            exit 1
+          fi
+
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
