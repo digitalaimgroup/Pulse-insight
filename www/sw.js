@@ -1,5 +1,5 @@
-const CACHE = 'pulse-insight-v7';
-const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon.svg'];
+const CACHE = 'pulse-insight-v8';
+const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon.svg', './fonts/lilita-one.woff', './fonts/nunito.woff'];
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting()));
 });

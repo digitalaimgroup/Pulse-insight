@@ -3,330 +3,690 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<meta name="theme-color" content="#0d1117">
+<meta name="theme-color" content="#1b1a5c">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <title>PULSE Insight</title>
 <style>
-:root {
-  --bg:#0d1117; --surface:#161b22; --surface2:#21262d; --border:#30363d;
-  --cyan:#22d3ee; --magenta:#e879f9; --text:#e6edf3; --muted:#8b949e;
-  --danger:#f85149; --cell:#1c2128; --gold:#f0c14b;
-  --radius:12px; --font:"Segoe UI",system-ui,-apple-system,sans-serif;
+@font-face{font-family:"Lilita";src:url("fonts/lilita-one.woff") format("woff");font-display:swap}
+@font-face{font-family:"Nunito";src:url("fonts/nunito.woff") format("woff");font-weight:200 1000;font-display:swap}
+:root{
+  --ink:#0d0b2e; --night:#141249; --indigo:#23227a; --violet:#3a2a9c;
+  --panel:rgba(20,18,70,.72); --panel-edge:rgba(140,150,255,.22);
+  --text:#ffffff; --muted:#aeb3ea; --gold:#ffcf3f; --gold-d:#d68f00;
+  --good:#3ddc6a; --warn:#ffb020; --bad:#ff4d5e;
+  --display:"Lilita","Arial Rounded MT Bold","Trebuchet MS",system-ui,sans-serif;
+  --ui:"Nunito",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --col:min(100%,480px);
+  --sat:env(safe-area-inset-top,0px); --sab:env(safe-area-inset-bottom,0px);
+  --sal:env(safe-area-inset-left,0px); --sar:env(safe-area-inset-right,0px);
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{
-  height:100%;background:var(--bg);color:var(--text);font-family:var(--font);
-  overflow:hidden;overscroll-behavior:none;overscroll-behavior-x:none;overscroll-behavior-y:none;
-  touch-action:none;-webkit-user-select:none;user-select:none;
-  position:fixed;inset:0;width:100%;
+  height:100%;color:var(--text);font-family:var(--ui);
+  overflow:hidden;overscroll-behavior:none;touch-action:none;-webkit-user-select:none;user-select:none;
+  position:fixed;inset:0;width:100%;background:var(--ink);
 }
 body{
-  display:flex;flex-direction:column;align-items:center;
-  padding:max(10px, env(safe-area-inset-top, 0px)) max(10px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(10px, env(safe-area-inset-left, 0px));
-  width:100%;min-height:100%;min-height:100dvh;
   background:
-    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(34,211,238,.12), transparent),
-    radial-gradient(ellipse 60% 40% at 100% 100%, rgba(232,121,249,.08), transparent),
-    var(--bg);
+    radial-gradient(120% 55% at 50% -8%, rgba(98,112,255,.55), transparent 62%),
+    radial-gradient(90% 45% at 50% 108%, rgba(186,64,220,.45), transparent 60%),
+    linear-gradient(180deg,#26257f 0%,#1a185e 45%,#120f40 100%);
 }
-.header{width:100%;max-width:420px;display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}
-.brand{display:flex;align-items:baseline;gap:8px}
-.brand h1{
-  font-size:1.5rem;font-weight:800;letter-spacing:.16em;
-  background:linear-gradient(135deg,var(--cyan),var(--magenta));
-  -webkit-background-clip:text;background-clip:text;color:transparent;
+button{font-family:inherit;color:inherit;border:none;background:none;cursor:pointer}
+svg.i{width:1em;height:1em;fill:currentColor;display:block}
+
+/* ---------- Candy blocks (shared by board, tray, ghost, logo) ---------- */
+[data-c="1"]{--a:#ff9a9f;--b:#ff4d5e;--d:#c01a39}
+[data-c="2"]{--a:#ffc98a;--b:#ff9a2e;--d:#cf5e06}
+[data-c="3"]{--a:#fff39a;--b:#ffd23f;--d:#d99a00}
+[data-c="4"]{--a:#a6ffb0;--b:#3ddc6a;--d:#109142}
+[data-c="5"]{--a:#a8f5ff;--b:#29d3f5;--d:#0786b8}
+[data-c="6"]{--a:#a9c3ff;--b:#3d7bff;--d:#1b3fc0}
+[data-c="7"]{--a:#d4b5ff;--b:#9b5cff;--d:#5a26cc}
+[data-c="8"]{--a:#ffb3e8;--b:#ff5fc8;--d:#c41f8e}
+[data-pc="1"]{--a:#ff9a9f;--b:#ff4d5e;--d:#c01a39}
+[data-pc="2"]{--a:#ffc98a;--b:#ff9a2e;--d:#cf5e06}
+[data-pc="3"]{--a:#fff39a;--b:#ffd23f;--d:#d99a00}
+[data-pc="4"]{--a:#a6ffb0;--b:#3ddc6a;--d:#109142}
+[data-pc="5"]{--a:#a8f5ff;--b:#29d3f5;--d:#0786b8}
+[data-pc="6"]{--a:#a9c3ff;--b:#3d7bff;--d:#1b3fc0}
+[data-pc="7"]{--a:#d4b5ff;--b:#9b5cff;--d:#5a26cc}
+[data-pc="8"]{--a:#ffb3e8;--b:#ff5fc8;--d:#c41f8e}
+.blk{
+  --bv:var(--bevel,3px);
+  position:relative;border-radius:calc(var(--bv)*1.8);
+  background:linear-gradient(160deg,var(--a) 0%,var(--b) 38%,var(--b) 70%,var(--d) 100%);
+  box-shadow:
+    inset 0 calc(var(--bv)*-1) 0 var(--d),
+    inset 0 var(--bv) 0 rgba(255,255,255,.45),
+    inset var(--bv) 0 0 rgba(255,255,255,.14),
+    inset calc(var(--bv)*-1) 0 0 rgba(0,0,0,.14),
+    0 2px 3px rgba(0,0,0,.28);
 }
-.badge{font-size:.6rem;font-weight:700;letter-spacing:.1em;color:var(--magenta);border:1px solid var(--magenta);border-radius:4px;padding:2px 6px}
-.stats{display:flex;gap:12px;font-variant-numeric:tabular-nums}
-.stat{text-align:right}
-.stat label{display:block;font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
-.stat span{font-size:1.05rem;font-weight:700;color:var(--cyan)}
-.tip{width:100%;max-width:420px;font-size:.72rem;color:var(--muted);text-align:center;margin-bottom:8px;line-height:1.35;min-height:2.2em}
-.meta{width:100%;max-width:420px;display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;gap:8px}
-.level-pill{
-  font-size:.75rem;font-weight:800;letter-spacing:.1em;color:var(--gold);
-  border:1px solid rgba(240,193,75,.45);border-radius:6px;padding:5px 10px;background:rgba(240,193,75,.08);
+.blk::after{
+  content:"";position:absolute;left:16%;top:13%;width:34%;height:17%;
+  border-radius:99px;background:rgba(255,255,255,.55);filter:blur(.3px);
 }
-.streak{font-size:.7rem;color:var(--muted)}.streak b{color:var(--magenta)}
-#restartBtn{font:700 .72rem var(--font);border:1px solid var(--border);border-radius:8px;padding:6px 10px;background:var(--surface);color:var(--text);cursor:pointer}
-.pulse-wrap{width:100%;max-width:420px;margin-bottom:8px}
-.pulse-label-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
-.pulse-label{font-size:.68rem;font-weight:700;letter-spacing:.12em;color:var(--cyan);text-transform:uppercase}
-.pulse-value{font-size:.75rem;color:var(--text);font-variant-numeric:tabular-nums}
+
+/* ---------- Background FX layers ---------- */
+#bgfx,#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none}
+#bgfx{z-index:0;opacity:.9}
+#fx{z-index:4000}
+
+/* ---------- App shell ---------- */
+#app{
+  position:fixed;inset:0;z-index:1;display:flex;flex-direction:column;align-items:center;
+  padding:calc(var(--sat) + 8px) calc(var(--sar) + 12px) calc(var(--sab) + 10px) calc(var(--sal) + 12px);
+}
+#app > *{width:var(--col)}
+body.title-locked #app{visibility:hidden}
+#app.shake-1{animation:shake1 .28s ease}
+#app.shake-2{animation:shake2 .38s ease}
+@keyframes shake1{20%{transform:translate(-3px,1px)}40%{transform:translate(3px,-1px)}60%{transform:translate(-2px,0)}80%{transform:translate(2px,1px)}}
+@keyframes shake2{15%{transform:translate(-7px,3px) rotate(-.6deg)}30%{transform:translate(6px,-3px) rotate(.5deg)}45%{transform:translate(-5px,2px)}60%{transform:translate(4px,-2px)}80%{transform:translate(-2px,1px)}}
+.vignette{position:fixed;inset:0;pointer-events:none;z-index:2;opacity:0;transition:opacity .4s;
+  background:radial-gradient(ellipse at center, transparent 55%, rgba(255,40,70,.45) 100%)}
+body.danger .vignette{opacity:1;animation:dangerPulse .7s ease-in-out infinite}
+@keyframes dangerPulse{50%{opacity:.45}}
+
+/* Top bar */
+.topbar{display:grid;grid-template-columns:48px 1fr 48px;align-items:center;gap:8px;margin-bottom:6px}
+.round-btn{
+  width:46px;height:46px;border-radius:15px;display:grid;place-items:center;font-size:22px;
+  background:linear-gradient(180deg,#5a63ff,#3b3fd4);color:#fff;
+  box-shadow:0 4px 0 #23259a,0 6px 14px rgba(0,0,0,.35),inset 0 2px 0 rgba(255,255,255,.3);
+  transition:transform .08s;
+}
+.round-btn:active{transform:translateY(3px);box-shadow:0 1px 0 #23259a,inset 0 2px 0 rgba(255,255,255,.3)}
+.scorebox{text-align:center;line-height:1}
+.best-row{display:inline-flex;align-items:center;gap:5px;color:var(--gold);font:800 .9rem var(--ui);text-shadow:0 2px 0 rgba(0,0,0,.35)}
+.best-row svg{width:18px;height:18px}
+#scoreEl{
+  display:block;font-family:var(--display);font-size:clamp(2.3rem,11vw,3.1rem);letter-spacing:.02em;
+  color:#fff;text-shadow:0 3px 0 #2a2296,0 6px 14px rgba(0,0,0,.4);font-variant-numeric:tabular-nums;
+  transition:transform .12s;
+}
+#scoreEl.bump{transform:scale(1.14)}
+.level-badge{
+  width:48px;height:48px;position:relative;display:grid;place-items:center;
+  font-family:var(--display);color:#6b3b00;
+}
+.level-badge svg{position:absolute;inset:0;width:100%;height:100%;fill:url(#gGold);filter:drop-shadow(0 3px 0 #b36a00) drop-shadow(0 5px 8px rgba(0,0,0,.35))}
+.level-badge .lv{position:relative;display:flex;flex-direction:column;align-items:center;line-height:.9;margin-top:3px}
+.level-badge .lv small{font-size:.55rem;letter-spacing:.06em}
+.level-badge .lv b{font-size:1.15rem;font-weight:400}
+.level-badge.pop{animation:badgePop .6s cubic-bezier(.2,1.6,.4,1)}
+@keyframes badgePop{0%{transform:scale(.6) rotate(-20deg)}100%{transform:scale(1) rotate(0)}}
+
+/* Pulse meter */
+.pulse-wrap{display:flex;align-items:center;gap:8px;margin:2px 0 8px}
+.heart{
+  width:40px;height:40px;flex:0 0 40px;display:grid;place-items:center;
+  color:#ff4d6d;filter:drop-shadow(0 3px 0 #9c1233) drop-shadow(0 0 10px rgba(255,77,109,.6));
+  animation:beat var(--beat,.7s) ease-in-out infinite;
+}
+.heart svg{width:36px;height:36px}
+@keyframes beat{0%,100%{transform:scale(1)}14%{transform:scale(1.22)}28%{transform:scale(.96)}42%{transform:scale(1.12)}70%{transform:scale(1)}}
 .pulse-track{
-  height:16px;background:var(--surface);border:1px solid var(--border);border-radius:99px;overflow:hidden;
-  position:relative;box-shadow:inset 0 1px 3px rgba(0,0,0,.45);
+  flex:1;height:26px;border-radius:99px;position:relative;overflow:hidden;
+  background:#0f0d38;box-shadow:inset 0 3px 6px rgba(0,0,0,.55),0 0 0 3px rgba(255,255,255,.08),0 2px 0 rgba(255,255,255,.08);
 }
 .pulse-fill{
-  height:100%;width:55%;border-radius:99px;
-  background:linear-gradient(90deg,var(--cyan),var(--magenta));
-  transform-origin:left center;
-  box-shadow:0 0 12px rgba(34,211,238,.5);
-  transition:width .08s linear, background .3s, box-shadow .3s;
+  position:absolute;left:0;top:0;bottom:0;width:55%;border-radius:99px;
+  background:linear-gradient(180deg,rgba(255,255,255,.35),transparent 45%),linear-gradient(90deg,#1ec8a0,#3ddc6a 60%,#9dff7a);
+  box-shadow:0 0 14px rgba(61,220,106,.55);
+  transition:width .1s linear,filter .3s;
 }
-.pulse-fill.pump{animation:heartbeat 1s ease-in-out infinite}
-.pulse-fill.low{background:linear-gradient(90deg,#f85149,#e879f9);box-shadow:0 0 14px rgba(248,81,73,.55);animation:heartbeat .55s ease-in-out infinite}
-.pulse-fill.critical{animation:heartbeat .35s ease-in-out infinite}
-@keyframes heartbeat{
-  0%,100%{filter:brightness(1);box-shadow:0 0 10px rgba(34,211,238,.4)}
-  30%{filter:brightness(1.25);box-shadow:0 0 22px rgba(232,121,249,.7)}
-  50%{filter:brightness(.95)}
+.pulse-fill::after{
+  content:"";position:absolute;inset:0;border-radius:inherit;opacity:.55;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='26'%3E%3Cpolyline points='0,13 16,13 19,7 23,21 27,3 31,17 34,13 48,13' fill='none' stroke='white' stroke-width='2' stroke-linejoin='round' stroke-linecap='round'/%3E%3C/svg%3E") repeat-x left center/48px 100%;
+  animation:ecg calc(var(--beat,.7s)*2) linear infinite;
 }
-.powers{width:100%;max-width:420px;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:8px}
+@keyframes ecg{to{background-position-x:-48px}}
+.pulse-fill.mid{background:linear-gradient(180deg,rgba(255,255,255,.35),transparent 45%),linear-gradient(90deg,#ff9a2e,#ffd23f);box-shadow:0 0 14px rgba(255,190,50,.55)}
+.pulse-fill.low{background:linear-gradient(180deg,rgba(255,255,255,.35),transparent 45%),linear-gradient(90deg,#ff2d55,#ff5fc8);box-shadow:0 0 16px rgba(255,45,85,.7);animation:lowFlash .55s ease-in-out infinite}
+.pulse-fill.critical{animation-duration:.32s}
+@keyframes lowFlash{50%{filter:brightness(1.35)}}
+.pulse-fill.surge-up{filter:brightness(1.5)}
+.pulse-pct{
+  position:absolute;right:10px;top:50%;transform:translateY(-50%);
+  font:900 .82rem var(--ui);color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.7);font-variant-numeric:tabular-nums;
+}
+.pulse-goal{position:absolute;right:0;top:0;bottom:0;width:4px;background:rgba(255,215,64,.8);box-shadow:0 0 8px #ffd23f}
+.pulse-cap{font:800 .62rem var(--ui);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);text-align:center;margin:-4px 0 6px}
+.pulse-cap b{color:var(--gold)}
+.streak-chip{
+  display:inline-flex;align-items:center;gap:3px;margin-left:6px;padding:1px 8px 1px 5px;border-radius:99px;
+  background:linear-gradient(180deg,#ff8a2e,#ff4d2e);color:#fff;font:900 .66rem var(--ui);letter-spacing:.04em;
+  box-shadow:0 2px 0 #b3300c;opacity:0;transform:scale(.6);transition:opacity .2s,transform .25s cubic-bezier(.2,1.6,.4,1);vertical-align:middle
+}
+.streak-chip svg{width:12px;height:12px}
+.streak-chip.on{opacity:1;transform:scale(1)}
+
+/* Powers */
+.powers{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:8px}
 .power{
-  font:700 .68rem var(--font);letter-spacing:.04em;text-transform:uppercase;
-  border:1px solid var(--border);border-radius:8px;padding:8px 4px;background:var(--surface);color:var(--muted);
-  cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;
+  position:relative;display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:16px;text-align:left;min-width:0;overflow:hidden;
+  background:linear-gradient(180deg,rgba(255,255,255,.12),rgba(255,255,255,.04));
+  box-shadow:inset 0 0 0 2px rgba(255,255,255,.08),0 4px 0 rgba(0,0,0,.25);
+  transition:transform .08s,filter .2s,opacity .2s;
 }
-.power small{font-size:.58rem;font-weight:600;opacity:.85;text-transform:none;letter-spacing:0}
-.power.ready{color:var(--bg);border-color:transparent;background:linear-gradient(135deg,var(--cyan),var(--magenta))}
-.power.active{color:#fff;background:linear-gradient(135deg,#0891b2,#c026d3);box-shadow:0 0 16px rgba(232,121,249,.45)}
-.power:disabled{opacity:.4;cursor:not-allowed}
-.board-wrap{position:relative;width:min(100%,420px);aspect-ratio:1;margin-bottom:10px}
+.power:active:not(:disabled){transform:translateY(2px)}
+.pw-ic{
+  flex:0 0 34px;width:34px;height:34px;border-radius:11px;display:grid;place-items:center;font-size:20px;color:#fff;
+  box-shadow:inset 0 -3px 0 rgba(0,0,0,.25),inset 0 2px 0 rgba(255,255,255,.4);
+}
+#insightBtn .pw-ic{background:linear-gradient(180deg,#b98bff,#7b3cf0)}
+#surgeBtn .pw-ic{background:linear-gradient(180deg,#ffe066,#ffae00);color:#7a3d00}
+#blastBtn .pw-ic{background:linear-gradient(180deg,#ff8a7a,#ff3d4f)}
+.pw-txt{display:flex;flex-direction:column;min-width:0;line-height:1.05}
+.pw-name{font:400 1rem var(--display);letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pw-cost{display:inline-flex;align-items:center;gap:2px;font:900 .72rem var(--ui);color:#ff9fb0;white-space:nowrap}
+.pw-cost svg{width:10px;height:10px}
+.power:disabled{filter:grayscale(1) brightness(.75);opacity:.55;cursor:not-allowed}
+.power.ready{animation:readyGlow 2.2s ease-in-out infinite}
+@keyframes readyGlow{50%{box-shadow:inset 0 0 0 2px rgba(255,255,255,.3),0 4px 0 rgba(0,0,0,.25),0 0 16px rgba(160,140,255,.35)}}
+.power.active{background:linear-gradient(180deg,#fff6c9,#ffd23f);color:#5a2c00;box-shadow:0 0 0 3px #fff,0 0 22px rgba(255,210,63,.8),0 4px 0 #c78a00;animation:none}
+.power.active .pw-cost{color:#8a4b00}
+@media (max-width:370px){.pw-ic{flex-basis:28px;width:28px;height:28px;font-size:16px}.pw-name{font-size:.8rem}.power{padding:6px;gap:5px}}
+
+/* Board */
+.board-area{flex:1 1 auto;min-height:0;display:flex;align-items:center;justify-content:center;position:relative}
+.board-wrap{position:relative}
 #board{
-  width:100%;height:100%;display:grid;grid-template:repeat(8,1fr)/repeat(8,1fr);gap:3px;padding:6px;
-  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
-  user-select:none;touch-action:none;box-shadow:0 8px 32px rgba(0,0,0,.4);
+  position:relative;display:grid;grid-template:repeat(8,1fr)/repeat(8,1fr);
+  gap:var(--gap,3px);padding:var(--pad,8px);border-radius:18px;
+  background:linear-gradient(180deg,#252a78,#171a52);
+  box-shadow:0 0 0 3px #3b44b8,0 0 0 6px #1b1d5c,0 14px 30px rgba(0,0,0,.5),inset 0 2px 0 rgba(255,255,255,.12);
+  touch-action:none;
 }
-.cell{background:var(--cell);border-radius:4px;transition:background .12s,box-shadow .12s}
-.cell.filled{background:linear-gradient(145deg,#67e8f9,#22d3ee 40%,#0891b2);box-shadow:0 0 8px rgba(34,211,238,.4),inset 0 1px 0 rgba(255,255,255,.35)}
-.cell.preview{background:rgba(34,211,238,.35);box-shadow:inset 0 0 0 2px var(--cyan)}
-.cell.preview-bad{background:rgba(248,81,73,.45);box-shadow:inset 0 0 0 2px var(--danger)}
-.cell.clearing{animation:clearFlash .45s ease-out forwards}
-@keyframes clearFlash{0%{background:#fff;transform:scale(1.05)}40%{background:var(--magenta)}100%{background:var(--cell);opacity:.3}}
+.cell{border-radius:6px;background:#12154a;box-shadow:inset 0 2px 4px rgba(0,0,0,.55),inset 0 -1px 0 rgba(255,255,255,.05)}
+.cell.blk{background:linear-gradient(160deg,var(--a) 0%,var(--b) 38%,var(--b) 70%,var(--d) 100%);box-shadow:inset 0 calc(var(--bv)*-1) 0 var(--d),inset 0 var(--bv) 0 rgba(255,255,255,.45),inset var(--bv) 0 0 rgba(255,255,255,.14),inset calc(var(--bv)*-1) 0 0 rgba(0,0,0,.14),0 2px 3px rgba(0,0,0,.28)}
+.cell.preview{opacity:.5;animation:none}
+.cell.preview::after{display:none}
+.cell.wc{animation:wcGlow .6s ease-in-out infinite;z-index:1}
+@keyframes wcGlow{50%{filter:brightness(1.35) saturate(1.2)}}
+.cell.pop{animation:pop .22s cubic-bezier(.2,1.8,.4,1)}
+@keyframes pop{0%{transform:scale(.72)}100%{transform:scale(1)}}
+.cell.clearing{animation:clearOut .3s ease-in forwards;z-index:2}
+@keyframes clearOut{0%{transform:scale(1);filter:brightness(1)}35%{transform:scale(1.18);filter:brightness(2.4)}100%{transform:scale(0) rotate(25deg);opacity:0}}
+.cell.dead{filter:grayscale(1) brightness(.6);transition:filter .25s}
+.cell.blast-target{box-shadow:inset 0 0 0 3px #fff,0 0 12px #ff4d5e;filter:brightness(1.2)}
+#board.blast-mode{box-shadow:0 0 0 3px #ff4d5e,0 0 0 6px #5c1020,0 0 30px rgba(255,77,94,.6)}
+#board.insight-on{box-shadow:0 0 0 3px #9b5cff,0 0 0 6px #2c1766,0 0 30px rgba(155,92,255,.55)}
+#board.surge-on{box-shadow:0 0 0 3px #ffd23f,0 0 0 6px #5c4300,0 0 30px rgba(255,210,63,.6)}
+.cell.preview-bad{opacity:.85;background:repeating-linear-gradient(45deg,#ff4d5e 0 6px,#a8132c 6px 12px)!important;box-shadow:inset 0 0 0 2px #fff!important}
+.sweep{position:absolute;pointer-events:none;border-radius:8px;z-index:3;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.95),transparent);mix-blend-mode:screen;animation:sweepH .38s ease-out forwards}
+.sweep.v{background:linear-gradient(180deg,transparent,rgba(255,255,255,.95),transparent);animation-name:sweepV}
+@keyframes sweepH{0%{opacity:0;transform:scaleX(.1)}30%{opacity:1}100%{opacity:0;transform:scaleX(1.15)}}
+@keyframes sweepV{0%{opacity:0;transform:scaleY(.1)}30%{opacity:1}100%{opacity:0;transform:scaleY(1.15)}}
+
+/* Praise + floating score */
 .combo-toast{
-  position:absolute;top:40%;left:50%;transform:translate(-50%,-50%) scale(.8);
-  font-size:1.25rem;font-weight:800;letter-spacing:.08em;color:var(--magenta);
-  text-shadow:0 0 20px rgba(232,121,249,.8);opacity:0;pointer-events:none;z-index:5;
-  transition:opacity .2s,transform .3s;text-align:center;max-width:90%;
+  position:absolute;left:50%;top:42%;z-index:6;pointer-events:none;white-space:nowrap;
+  font-family:var(--display);font-size:clamp(2rem,10vw,3rem);letter-spacing:.02em;
+  color:#fff;-webkit-text-stroke:0;paint-order:stroke fill;
+  text-shadow:0 4px 0 #6a1fb3,0 0 24px rgba(255,120,255,.7);
+  transform:translate(-50%,-50%) scale(0);opacity:0;
 }
-.combo-toast.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
-.overlay{
-  position:absolute;inset:0;background:rgba(13,17,23,.92);backdrop-filter:blur(8px);
-  border-radius:var(--radius);display:none;flex-direction:column;align-items:center;justify-content:center;
-  gap:8px;z-index:10;padding:22px;text-align:center;
-}
-.overlay.show{display:flex}
-.overlay h2{font-size:1.35rem;letter-spacing:.14em;background:linear-gradient(135deg,var(--cyan),var(--magenta));-webkit-background-clip:text;background-clip:text;color:transparent}
-.overlay .reason{color:var(--muted);font-size:.85rem}
-.overlay .final-score{font-size:2.2rem;font-weight:800;color:var(--cyan);font-variant-numeric:tabular-nums}
-.overlay .hi{font-size:.9rem;color:var(--gold);min-height:1.2em}
-.overlay .meta-line{font-size:.8rem;color:var(--muted)}
-.overlay .btn-row{display:flex;flex-direction:column;gap:10px;width:100%;max-width:260px;margin-top:10px}
-.overlay button{
-  margin-top:0;padding:12px 28px;border:none;border-radius:8px;cursor:pointer;
-  font:700 .85rem var(--font);text-transform:uppercase;
-  background:linear-gradient(135deg,var(--cyan),var(--magenta));color:var(--bg);
-}
-.overlay button.secondary{
-  background:transparent;color:var(--cyan);border:1px solid rgba(34,211,238,.45);
-}
-.overlay button:disabled{opacity:.45;cursor:default}
+.combo-toast.show{animation:praise 1s cubic-bezier(.2,1.5,.4,1) forwards}
+.combo-toast .grad{background:linear-gradient(180deg,#fff9c4,#ffd23f 45%,#ff8a2e);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 4px 0 #8b2bd1) drop-shadow(0 0 16px rgba(255,170,60,.7))}
+.combo-toast small{display:block;text-align:center;font-size:.45em;color:#fff;margin-top:2px;text-shadow:0 2px 0 #3b1a8a}
+@keyframes praise{0%{transform:translate(-50%,-50%) scale(.2) rotate(-8deg);opacity:0}25%{transform:translate(-50%,-50%) scale(1.12) rotate(2deg);opacity:1}45%{transform:translate(-50%,-50%) scale(1)}80%{opacity:1;transform:translate(-50%,-60%) scale(1)}100%{opacity:0;transform:translate(-50%,-80%) scale(.9)}}
+.float-score{position:absolute;z-index:7;pointer-events:none;font-family:var(--display);font-size:1.6rem;color:#fff;
+  text-shadow:0 3px 0 rgba(0,0,0,.35),0 0 12px rgba(255,255,255,.5);transform:translate(-50%,-50%);animation:floatUp 1s ease-out forwards}
+@keyframes floatUp{0%{opacity:0;transform:translate(-50%,-20%) scale(.6)}20%{opacity:1;transform:translate(-50%,-50%) scale(1.15)}100%{opacity:0;transform:translate(-50%,-160%) scale(1)}}
 
-.tray-section{width:100%;max-width:420px}
-.tray-label{font-size:.65rem;font-weight:700;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;text-align:center;margin-bottom:6px}
-#tray{display:flex;justify-content:space-evenly;align-items:center;gap:8px;padding:10px 8px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);min-height:96px}
-.piece-slot{flex:1;display:flex;justify-content:center;align-items:center;min-height:84px;border-radius:8px;border:1px dashed transparent;padding:6px;cursor:pointer;touch-action:none;user-select:none}
-.piece-slot.selected{background:rgba(34,211,238,.2);border-color:var(--cyan);box-shadow:0 0 0 1px var(--cyan)}
-.piece-slot.empty{opacity:.35;cursor:default}
-.piece-slot.dragging{opacity:.35}
-.piece-grid{display:grid;gap:2px;pointer-events:none}
-.piece-cell{width:16px;height:16px;border-radius:3px;background:linear-gradient(145deg,#e879f9,#c026d3);box-shadow:0 0 6px rgba(232,121,249,.4)}
-.piece-slot.selected .piece-cell{background:linear-gradient(145deg,#67e8f9,#22d3ee)}
-#dragGhost{position:fixed;pointer-events:none;z-index:1000;display:none;opacity:.9;filter:drop-shadow(0 8px 16px rgba(0,0,0,.5))}
-.insight-hint{width:100%;max-width:420px;text-align:center;font-size:.7rem;color:var(--magenta);min-height:1.1em;margin-top:6px;opacity:0;transition:opacity .25s}
+/* Tray */
+.tray-section{flex:0 0 auto;margin-top:10px}
+#tray{
+  height:clamp(96px,17vh,150px);display:grid;grid-template-columns:repeat(3,1fr);align-items:center;
+  border-radius:22px;padding:6px;
+  background:linear-gradient(180deg,rgba(255,255,255,.1),rgba(255,255,255,.03));
+  box-shadow:inset 0 0 0 2px rgba(255,255,255,.08),inset 0 -4px 0 rgba(0,0,0,.18);
+}
+.piece-slot{height:100%;display:grid;place-items:center;border-radius:16px;touch-action:none;cursor:grab;transition:background .15s,transform .15s}
+.piece-slot.selected{background:rgba(255,255,255,.14);box-shadow:inset 0 0 0 2px rgba(255,255,255,.55);transform:scale(1.06)}
+.piece-slot.dragging .piece-grid{opacity:0}
+.piece-slot.nofit .piece-grid{filter:grayscale(.85) brightness(.6)}
+.piece-slot.spawn .piece-grid{animation:spawn .4s cubic-bezier(.2,1.6,.4,1) backwards}
+.piece-slot:nth-child(2).spawn .piece-grid{animation-delay:.06s}
+.piece-slot:nth-child(3).spawn .piece-grid{animation-delay:.12s}
+@keyframes spawn{0%{transform:scale(0) rotate(-20deg)}100%{transform:scale(1)}}
+.piece-grid{display:grid;gap:2px;pointer-events:none;--bevel:2px}
+.piece-grid > div{width:var(--tcs,20px);height:var(--tcs,20px)}
+#dragGhost{position:fixed;left:0;top:0;pointer-events:none;z-index:3000;display:none;filter:drop-shadow(0 12px 14px rgba(0,0,0,.45))}
+#dragGhost .piece-grid{transform-origin:center}
+#dragGhost.back{transition:transform .16s ease-in,opacity .16s}
+.tip{flex:0 0 auto;text-align:center;font:700 .74rem var(--ui);color:var(--muted);min-height:1.3em;margin-top:7px;line-height:1.3}
+.insight-hint{position:absolute;left:50%;bottom:-2px;transform:translate(-50%,100%);white-space:nowrap;padding:3px 10px;border-radius:99px;
+  font:800 .66rem var(--ui);background:#7b3cf0;color:#fff;opacity:0;transition:opacity .25s;pointer-events:none;z-index:4}
 .insight-hint.show{opacity:1}
-.music-ctrl{display:flex;align-items:center;gap:4px;margin-left:6px}
-.mute-btn{
-  width:32px;height:32px;border-radius:10px;cursor:pointer;
-  border:1px solid var(--border);background:var(--surface);color:var(--cyan);
-  font:700 1rem/1 var(--font);padding:0;flex-shrink:0;
-}
-.mute-btn.off{color:var(--muted);opacity:.7}
-#volSlider{
-  width:72px;height:22px;accent-color:#22d3ee;cursor:pointer;
-}
-@media(max-width:380px){#volSlider{width:56px}}
 
+/* ---------- Full-screen scenes ---------- */
+.scene{position:fixed;inset:0;z-index:2000;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
+  padding:calc(var(--sat) + 24px) 22px calc(var(--sab) + 24px)}
+.hide{display:none!important}
 
-.title-screen{
-  position:fixed;inset:0;z-index:2000;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;gap:14px;padding:28px 22px;
-  background:
-    radial-gradient(ellipse 80% 50% at 50% 20%, rgba(34,211,238,.18), transparent 60%),
-    radial-gradient(ellipse 70% 45% at 50% 85%, rgba(232,121,249,.14), transparent 55%),
-    #0d1117;
-  text-align:center;
+/* Logo */
+.logo{display:flex;flex-direction:column;align-items:center;gap:6px}
+.emblem{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;width:clamp(120px,36vw,170px);position:relative;--bevel:2px}
+.emblem > i{aspect-ratio:1;display:block}
+.emblem > i.x{visibility:hidden}
+.emblem svg.ecg{position:absolute;left:-14%;top:26%;width:128%;height:40%;overflow:visible}
+.emblem svg.ecg polyline{fill:none;stroke:#fff;stroke-width:5;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 6px #fff) drop-shadow(0 0 12px #7af);
+  stroke-dasharray:400;stroke-dashoffset:400}
+.wordmark{display:flex;gap:.02em;font-family:var(--display);font-size:clamp(3.6rem,19vw,5.6rem);line-height:.9;letter-spacing:.01em}
+.wordmark span{display:inline-block;color:var(--lc);-webkit-text-stroke:.07em #1a0f55;paint-order:stroke fill;
+  text-shadow:0 .08em 0 #1a0f55,0 .12em 0 #1a0f55,0 .2em .25em rgba(0,0,0,.45)}
+.wordmark span:nth-child(1){--lc:#ff5d6c;transform:rotate(-6deg)}
+.wordmark span:nth-child(2){--lc:#ffa23a;transform:translateY(-.04em) rotate(3deg)}
+.wordmark span:nth-child(3){--lc:#ffd84a;transform:rotate(-3deg)}
+.wordmark span:nth-child(4){--lc:#4fe07a;transform:translateY(-.05em) rotate(4deg)}
+.wordmark span:nth-child(5){--lc:#3fd6ff;transform:rotate(-4deg)}
+.ribbon{
+  margin-top:-.2em;padding:.28em 1.2em .32em;border-radius:12px;font-family:var(--display);font-size:clamp(1.05rem,5vw,1.4rem);letter-spacing:.3em;
+  background:linear-gradient(180deg,#b67bff,#7b3cf0);color:#fff;box-shadow:0 4px 0 #4a1a9e,0 8px 16px rgba(0,0,0,.35);text-indent:.3em;
 }
-.title-screen.hide{display:none}
-.title-screen .logo{
-  font-size:clamp(2.6rem,12vw,3.6rem);font-weight:900;letter-spacing:.18em;
-  background:linear-gradient(135deg,#67e8f9,#22d3ee 40%,#e879f9);
-  -webkit-background-clip:text;background-clip:text;color:transparent;
-  text-shadow:none;line-height:1;
-}
-.title-screen .logo-sub{
-  margin-top:-6px;font-size:.85rem;font-weight:800;letter-spacing:.35em;color:var(--magenta);
-}
-.title-screen .tag{
-  max-width:320px;color:var(--muted);font-size:.92rem;line-height:1.45;margin-top:4px;
-}
-.title-screen .best-pill{
-  display:inline-flex;gap:8px;align-items:center;padding:8px 14px;border-radius:999px;
-  border:1px solid var(--border);background:rgba(22,27,34,.9);color:var(--text);
-  font-size:.8rem;font-weight:700;
-}
-.title-screen .best-pill b{color:var(--cyan);font-variant-numeric:tabular-nums}
-.title-screen .play-btn{
-  margin-top:10px;min-width:220px;padding:16px 36px;border:none;border-radius:14px;cursor:pointer;
-  font:800 1rem var(--font);letter-spacing:.12em;text-transform:uppercase;
-  background:linear-gradient(135deg,#22d3ee,#e879f9);color:#0d1117;
-  box-shadow:0 0 28px rgba(34,211,238,.35);
-}
-.title-screen .play-btn:active{transform:scale(.98)}
-.title-screen .howto{
-  margin-top:8px;max-width:340px;font-size:.75rem;color:var(--muted);line-height:1.5;
-}
-.title-screen .howto b{color:var(--text)}
-.title-screen .credit{position:absolute;bottom:18px;font-size:.65rem;letter-spacing:.12em;color:#484f58;text-transform:uppercase}
-body.title-locked .header,
-body.title-locked .meta,
-body.title-locked .tip,
-body.title-locked .pulse-wrap,
-body.title-locked .powers,
-body.title-locked .board-wrap,
-body.title-locked .tray-section,
-body.title-locked .insight-hint,
-body.title-locked .music-ctrl{visibility:hidden}
 
-@media(max-width:380px){.brand h1{font-size:1.25rem}.piece-cell{width:14px;height:14px}}
+/* Boot splash */
+#boot{z-index:3500;background:
+  radial-gradient(100% 60% at 50% 30%, #4b43d8 0%, transparent 70%),
+  linear-gradient(180deg,#2a268c,#120f40);transition:opacity .5s}
+#boot.out{opacity:0;pointer-events:none}
+#boot .emblem > i{opacity:0;transform:translateY(-60px) scale(.6)}
+#boot.go .emblem > i{animation:drop .5s cubic-bezier(.3,1.5,.5,1) forwards;animation-delay:calc(var(--k)*28ms)}
+@keyframes drop{to{opacity:1;transform:none}}
+#boot.go .emblem svg.ecg polyline{animation:draw .9s ease-out 1s forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+#boot .wordmark span{opacity:0;transform:scale(0)}
+#boot.go .wordmark span{animation:letterPop .5s cubic-bezier(.2,1.7,.4,1) forwards}
+#boot.go .wordmark span:nth-child(1){animation-delay:1.05s}#boot.go .wordmark span:nth-child(2){animation-delay:1.13s}
+#boot.go .wordmark span:nth-child(3){animation-delay:1.21s}#boot.go .wordmark span:nth-child(4){animation-delay:1.29s}#boot.go .wordmark span:nth-child(5){animation-delay:1.37s}
+@keyframes letterPop{0%{opacity:0;transform:scale(0) rotate(-30deg)}100%{opacity:1;transform:scale(1) rotate(var(--r,0deg))}}
+#boot .wordmark span:nth-child(1){--r:-6deg}#boot .wordmark span:nth-child(2){--r:3deg}#boot .wordmark span:nth-child(3){--r:-3deg}#boot .wordmark span:nth-child(4){--r:4deg}#boot .wordmark span:nth-child(5){--r:-4deg}
+#boot .ribbon{opacity:0;transform:scaleX(0)}
+#boot.go .ribbon{animation:ribbonIn .45s cubic-bezier(.2,1.5,.4,1) 1.6s forwards}
+@keyframes ribbonIn{to{opacity:1;transform:scaleX(1)}}
+.loadbar{margin-top:44px;width:min(60vw,240px);height:14px;border-radius:99px;background:rgba(0,0,0,.35);box-shadow:inset 0 2px 4px rgba(0,0,0,.5);overflow:hidden}
+.loadbar i{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(180deg,rgba(255,255,255,.4),transparent 50%),linear-gradient(90deg,#3ddc6a,#29d3f5)}
+#boot.go .loadbar i{animation:load 2.1s cubic-bezier(.4,0,.2,1) .2s forwards}
+@keyframes load{to{width:100%}}
+.presents{position:absolute;bottom:calc(var(--sab) + 26px);font:800 .7rem var(--ui);letter-spacing:.3em;text-transform:uppercase;color:rgba(255,255,255,.55)}
 
-/* iPad / large screens — use more of the display (less phone-narrow max-width) */
-html.device-ipad, html.device-ipad body,
-body.device-ipad{
-  --layout-max:min(720px, 94vw);
-  --board-max:min(640px, 72vh, 92vw);
+/* Title */
+#titleScreen{background:transparent;gap:0;justify-content:space-between}
+#titleScreen .top{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px}
+#titleScreen .logo{animation:float 3.6s ease-in-out infinite}
+#titleScreen .emblem svg.ecg polyline{stroke-dasharray:none;stroke-dashoffset:0;animation:ecgGlow 1.2s ease-in-out infinite}
+@keyframes ecgGlow{0%,100%{opacity:.75}15%{opacity:1;stroke-width:6}}
+@keyframes float{50%{transform:translateY(-8px)}}
+.tag{max-width:320px;color:#d6d9ff;font:700 .98rem var(--ui);line-height:1.4;margin-top:6px;text-shadow:0 2px 0 rgba(0,0,0,.25)}
+.best-pill{display:inline-flex;align-items:center;gap:8px;margin-top:8px;padding:8px 18px 8px 10px;border-radius:99px;
+  background:rgba(0,0,0,.28);box-shadow:inset 0 0 0 2px rgba(255,207,63,.35);font:800 .9rem var(--ui);color:#fff}
+.best-pill svg{width:24px;height:24px;color:var(--gold);filter:drop-shadow(0 2px 0 #9a6200)}
+.best-pill b{font-family:var(--display);font-weight:400;font-size:1.3rem;color:var(--gold);font-variant-numeric:tabular-nums}
+.stat-line{margin-top:6px;font:700 .75rem var(--ui);color:var(--muted)}
+.bottom{width:100%;display:flex;flex-direction:column;align-items:center;gap:18px}
+.candy-btn{
+  --c1:#6dff8e;--c2:#2fcf5a;--c3:#138a3a;
+  position:relative;min-width:240px;padding:18px 40px 20px;border-radius:24px;
+  font-family:var(--display);font-size:2rem;letter-spacing:.05em;color:#fff;text-shadow:0 3px 0 var(--c3);
+  background:linear-gradient(180deg,var(--c1),var(--c2));
+  box-shadow:0 7px 0 var(--c3),0 14px 24px rgba(0,0,0,.35),inset 0 3px 0 rgba(255,255,255,.5),inset 0 -4px 0 rgba(0,0,0,.12);
+  transition:transform .08s,box-shadow .08s;
 }
-.device-ipad .header,
-.device-ipad .tip,
-.device-ipad .meta,
-.device-ipad .pulse-wrap,
-.device-ipad .powers,
-.device-ipad .tray-section,
-.device-ipad .insight-hint{max-width:var(--layout-max)}
-.device-ipad .board-wrap{width:var(--board-max);max-width:none}
-.device-ipad .piece-cell{width:20px;height:20px}
-.device-ipad .brand h1{font-size:1.75rem}
-.device-ipad .title-screen .logo{font-size:clamp(3.2rem,10vw,4.4rem)}
-.device-ipad .title-screen .tag{max-width:420px;font-size:1.05rem}
-.device-ipad .title-screen .howto{max-width:440px;font-size:.85rem}
-.device-ipad #board{gap:4px;padding:8px}
-.device-ipad #tray{min-height:112px;padding:14px 12px}
-.device-ipad .piece-slot{min-height:96px}
-@media(min-width:900px){
-  html.device-ipad{
-    --layout-max:min(820px, 90vw);
-    --board-max:min(700px, 68vh, 88vw);
-  }
+.candy-btn::before{content:"";position:absolute;left:14px;right:14px;top:7px;height:30%;border-radius:99px;background:rgba(255,255,255,.28)}
+.candy-btn:active{transform:translateY(5px);box-shadow:0 2px 0 var(--c3),0 5px 10px rgba(0,0,0,.35),inset 0 3px 0 rgba(255,255,255,.5)}
+.candy-btn:disabled{filter:grayscale(.8);opacity:.6}
+.candy-btn.blue{--c1:#7fb2ff;--c2:#3d7bff;--c3:#1d3fb0}
+.candy-btn.gold{--c1:#ffe680;--c2:#ffbe1a;--c3:#b06d00}
+.candy-btn.purple{--c1:#c9a2ff;--c2:#8b4dff;--c3:#4f1eb0}
+.candy-btn.sm{min-width:0;width:100%;font-size:1.3rem;padding:13px 18px 15px;border-radius:18px}
+.candy-btn .row{display:inline-flex;align-items:center;gap:10px;position:relative}
+.candy-btn svg{width:1em;height:1em;filter:drop-shadow(0 2px 0 var(--c3))}
+#playBtn{animation:breathe 1.6s ease-in-out infinite}
+@keyframes breathe{50%{transform:scale(1.05)}}
+#playBtn:active{animation:none}
+.icon-row{display:flex;gap:16px}
+.icon-row .round-btn{width:56px;height:56px;border-radius:18px;font-size:26px;font-family:var(--display)}
+.icon-row .round-btn.off{background:linear-gradient(180deg,#6d70a8,#4a4c80);box-shadow:0 4px 0 #2b2d5c,inset 0 2px 0 rgba(255,255,255,.25)}
+.credit{font:800 .64rem var(--ui);letter-spacing:.28em;text-transform:uppercase;color:rgba(255,255,255,.35)}
+
+/* Modal cards (tutorial, pause, settings, game over) */
+.modal{position:fixed;inset:0;z-index:2500;display:flex;align-items:center;justify-content:center;padding:calc(var(--sat) + 16px) 18px calc(var(--sab) + 16px);
+  background:rgba(8,6,32,.66);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);animation:fadeIn .2s ease}
+@keyframes fadeIn{from{opacity:0}}
+.card{
+  width:min(100%,380px);position:relative;border-radius:28px;padding:26px 20px 22px;text-align:center;
+  background:linear-gradient(180deg,#4a4fd6 0%,#2e2c9a 55%,#262287 100%);
+  box-shadow:0 0 0 4px #6d74ff,0 0 0 8px #1b1860,0 24px 50px rgba(0,0,0,.55),inset 0 3px 0 rgba(255,255,255,.25);
+  animation:cardIn .42s cubic-bezier(.2,1.5,.4,1);
 }
+@keyframes cardIn{from{transform:scale(.6) translateY(30px);opacity:0}}
+.card h2{font-family:var(--display);font-weight:400;font-size:2.2rem;letter-spacing:.03em;line-height:1;color:#fff;text-shadow:0 4px 0 #1b1860}
+.card .close{position:absolute;top:-14px;right:-10px;width:44px;height:44px;border-radius:50%;font-size:20px;font-family:var(--display);
+  background:linear-gradient(180deg,#ff7a86,#ff3d52);box-shadow:0 4px 0 #a3142a,0 0 0 3px #fff;color:#fff;display:grid;place-items:center}
+.btn-col{display:flex;flex-direction:column;gap:14px;margin-top:18px}
+
+/* Tutorial */
+.tut-stage{height:170px;margin:14px auto 12px;width:100%;display:grid;place-items:center;position:relative;border-radius:18px;background:rgba(0,0,0,.22);box-shadow:inset 0 3px 8px rgba(0,0,0,.35);overflow:hidden}
+.tut-title{font-family:var(--display);font-size:1.6rem;line-height:1.05;text-shadow:0 3px 0 #1b1860}
+.tut-body{font:700 .95rem var(--ui);color:#dfe2ff;line-height:1.4;margin-top:8px;min-height:4.2em}
+.dots{display:flex;gap:8px;justify-content:center;margin-top:14px}
+.dots i{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.25);transition:all .2s}
+.dots i.on{width:26px;border-radius:99px;background:var(--gold)}
+.mini{display:grid;gap:3px;--bevel:2px}
+.mini > i{width:22px;height:22px;display:block}
+.mini > i:not(.blk){border-radius:5px;background:#12154a;box-shadow:inset 0 2px 3px rgba(0,0,0,.5)}
+.mini > i.blk{box-shadow:inset 0 -2px 0 var(--d),inset 0 2px 0 rgba(255,255,255,.45),0 1px 2px rgba(0,0,0,.3)}
+.tut-piece{position:absolute;display:grid;grid-template-columns:repeat(2,22px);gap:3px;--bevel:2px}
+.tut-piece > i{width:22px;height:22px;display:block}
+.tut-hand{position:absolute;width:34px;height:34px;color:#fff;filter:drop-shadow(0 3px 3px rgba(0,0,0,.5))}
+.t1 .tut-piece{animation:t1move 2.6s ease-in-out infinite}
+.t1 .tut-hand{animation:t1move 2.6s ease-in-out infinite;margin:34px 0 0 22px}
+@keyframes t1move{0%,15%{transform:translate(70px,60px) scale(.8)}55%,100%{transform:translate(0,0) scale(1)}}
+.t2 .rowdemo{display:grid;grid-template-columns:repeat(6,24px);gap:3px;--bevel:2px}
+.t2 .rowdemo > i{width:24px;height:24px;display:block}
+.t2 .rowdemo > i.gap{background:#12154a;box-shadow:inset 0 2px 3px rgba(0,0,0,.5);border-radius:5px}
+.t2 .drop{animation:t2drop 2.4s ease-in infinite}
+.t2 .rowdemo > i:not(.gap){animation:t2clear 2.4s ease infinite}
+@keyframes t2drop{0%{transform:translateY(-70px);opacity:0}25%{opacity:1}40%,100%{transform:translateY(0)}}
+@keyframes t2clear{0%,42%{transform:scale(1);filter:none;opacity:1}52%{transform:scale(1.2);filter:brightness(2.5)}66%,88%{transform:scale(0);opacity:0}100%{transform:scale(1);opacity:1}}
+.t3 .demo-meter{display:flex;align-items:center;gap:8px;width:80%}
+.t3 .demo-meter .pulse-track{height:24px}
+.t3 .demo-meter .pulse-fill{animation:t3fill 3s ease-in-out infinite}
+@keyframes t3fill{0%{width:60%}40%{width:25%}45%{width:70%}70%{width:48%}78%{width:100%}100%{width:60%}}
+.t3 .lvl-pop{position:absolute;bottom:22px;font-family:var(--display);font-size:1.3rem;color:var(--gold);text-shadow:0 3px 0 #8a4b00;animation:t3lv 3s ease infinite;opacity:0}
+@keyframes t3lv{0%,74%{opacity:0;transform:scale(.4)}82%{opacity:1;transform:scale(1.15)}96%{opacity:1;transform:scale(1)}100%{opacity:0}}
+.t4 .plist{display:flex;flex-direction:column;gap:10px;text-align:left;width:86%}
+.t4 .plist div{display:flex;align-items:center;gap:10px;font:700 .82rem var(--ui);color:#fff;line-height:1.2}
+.t4 .plist b{font-family:var(--display);font-weight:400;font-size:1rem;display:block}
+
+/* Sheet (pause + settings) */
+.set-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border-radius:16px;background:rgba(0,0,0,.2);margin-top:10px;text-align:left}
+.set-row .lbl{display:flex;align-items:center;gap:10px;font:800 1rem var(--ui)}
+.set-row .lbl svg{width:22px;height:22px;color:var(--gold)}
+.toggle{width:58px;height:32px;border-radius:99px;position:relative;background:#171553;box-shadow:inset 0 2px 4px rgba(0,0,0,.5);transition:background .2s;flex:0 0 58px}
+.toggle::after{content:"";position:absolute;top:3px;left:3px;width:26px;height:26px;border-radius:50%;background:#fff;box-shadow:0 2px 0 rgba(0,0,0,.3);transition:transform .2s cubic-bezier(.3,1.5,.5,1)}
+.toggle.on{background:linear-gradient(180deg,#5ef08a,#26c451)}
+.toggle.on::after{transform:translateX(26px)}
+.vol{display:flex;align-items:center;gap:6px;flex:1;justify-content:flex-end}
+.mute-btn{width:32px;height:32px;border-radius:10px;display:grid;place-items:center;font:400 1.1rem var(--display);background:rgba(255,255,255,.14);color:#fff;flex:0 0 32px}
+.mute-btn.off{opacity:.55}
+#volSlider{-webkit-appearance:none;appearance:none;width:100%;max-width:120px;height:10px;border-radius:99px;background:#171553;box-shadow:inset 0 2px 3px rgba(0,0,0,.5);touch-action:pan-x}
+#volSlider::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;border-radius:50%;background:linear-gradient(180deg,#ffe680,#ffbe1a);box-shadow:0 2px 0 #b06d00}
+#volSlider::-moz-range-thumb{width:24px;height:24px;border:none;border-radius:50%;background:#ffbe1a}
+.sheet-actions{display:grid;grid-template-columns:1fr;gap:12px;margin-top:18px}
+#sheet.mode-settings .pause-only{display:none}
+#sheet.mode-pause .settings-only{display:none}
+
+/* Ready / Level-up splashes */
+#ready{z-index:2600;pointer-events:none;background:transparent}
+#ready .word{font-family:var(--display);font-size:clamp(3.5rem,18vw,5.5rem);color:#fff;-webkit-text-stroke:.06em #1a0f55;paint-order:stroke fill;
+  text-shadow:0 .1em 0 #1a0f55,0 0 30px rgba(120,160,255,.8)}
+#ready .word.go{color:#5ef08a}
+#ready .word.anim{animation:readyPop .6s cubic-bezier(.2,1.6,.4,1) forwards}
+@keyframes readyPop{0%{transform:scale(3);opacity:0}40%{transform:scale(.95);opacity:1}70%{transform:scale(1.05)}100%{transform:scale(1);opacity:1}}
+#levelUp{z-index:2700;background:rgba(10,8,40,.55);overflow:hidden}
+#levelUp .rays{position:absolute;left:50%;top:50%;width:220vmax;height:220vmax;margin:-110vmax 0 0 -110vmax;
+  background:repeating-conic-gradient(from 0deg,rgba(255,215,64,.22) 0 10deg,transparent 10deg 20deg);animation:spin 8s linear infinite;
+  -webkit-mask:radial-gradient(circle,#000 0,transparent 45%);mask:radial-gradient(circle,#000 0,transparent 45%)}
+@keyframes spin{to{transform:rotate(360deg)}}
+#levelUp .lu{position:relative;display:flex;flex-direction:column;align-items:center;animation:cardIn .55s cubic-bezier(.2,1.6,.4,1)}
+#levelUp .star{width:190px;height:190px;position:relative;display:grid;place-items:center}
+#levelUp .star svg{position:absolute;inset:0;width:100%;height:100%;fill:url(#gGold);filter:drop-shadow(0 8px 0 #b36a00) drop-shadow(0 0 40px rgba(255,200,40,.8));animation:wob 1.2s ease-in-out infinite}
+@keyframes wob{50%{transform:rotate(8deg) scale(1.05)}}
+#levelUp .star b{position:relative;font-family:var(--display);font-weight:400;font-size:4.2rem;color:#7a3b00;margin-top:14px;text-shadow:0 3px 0 rgba(255,255,255,.5)}
+#levelUp h3{font-family:var(--display);font-weight:400;font-size:clamp(2.6rem,13vw,3.6rem);color:#fff;-webkit-text-stroke:.06em #1a0f55;paint-order:stroke fill;text-shadow:0 .1em 0 #1a0f55;margin-top:6px}
+#levelUp p{font:800 1rem var(--ui);color:#ffe9a8;margin-top:6px;text-shadow:0 2px 0 rgba(0,0,0,.4)}
+#levelUp .tapnote{position:absolute;bottom:calc(var(--sab) + 30px);font:800 .7rem var(--ui);letter-spacing:.2em;color:rgba(255,255,255,.55);text-transform:uppercase}
+
+/* Game over */
+#gameOver{display:none}
+#gameOver.show{display:flex}
+.go-icon{width:92px;height:92px;margin:-70px auto 6px;border-radius:50%;display:grid;place-items:center;font-size:52px;
+  background:linear-gradient(180deg,#ff7a86,#e0223f);box-shadow:0 0 0 5px #fff,0 6px 0 5px #8e1026,0 12px 24px rgba(0,0,0,.4);color:#fff}
+.go-icon.moves{background:linear-gradient(180deg,#8fa2ff,#4a5bdc);box-shadow:0 0 0 5px #fff,0 6px 0 5px #26307e,0 12px 24px rgba(0,0,0,.4)}
+.go-ecg{width:70%;height:34px;margin:4px auto 0;display:block}
+.go-ecg polyline{fill:none;stroke:#ff6b7d;stroke-width:3;stroke-linejoin:round;stroke-linecap:round;stroke-dasharray:300;stroke-dashoffset:300;animation:draw 1.4s ease-out .2s forwards;filter:drop-shadow(0 0 4px #ff4d5e)}
+.reason{font:700 .88rem var(--ui);color:#cfd3ff;margin-top:6px;line-height:1.3}
+.score-lbl{margin-top:14px;font:900 .72rem var(--ui);letter-spacing:.24em;color:var(--muted);text-transform:uppercase}
+.final-score{font-family:var(--display);font-size:clamp(3rem,16vw,4.2rem);line-height:1;color:#fff;text-shadow:0 5px 0 #1b1860,0 0 24px rgba(140,160,255,.6);font-variant-numeric:tabular-nums}
+.hi{display:inline-block;margin-top:8px;padding:6px 18px;border-radius:12px;font-family:var(--display);font-size:1.15rem;letter-spacing:.06em;color:#6b3b00;
+  background:linear-gradient(180deg,#ffe680,#ffbe1a);box-shadow:0 4px 0 #b06d00;animation:hiPop .6s cubic-bezier(.2,1.8,.4,1) .9s backwards,shine 1.4s ease-in-out 1.5s infinite}
+.hi:empty{display:none}
+@keyframes hiPop{from{transform:scale(0) rotate(-12deg)}}
+@keyframes shine{50%{filter:brightness(1.18)}}
+.go-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:14px}
+.go-stats div{border-radius:14px;background:rgba(0,0,0,.22);padding:8px 2px 7px}
+.go-stats b{display:block;font-family:var(--display);font-weight:400;font-size:1.3rem;color:#fff;font-variant-numeric:tabular-nums}
+.go-stats span{font:900 .56rem var(--ui);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.go-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+/* iPad / large screens */
+html.device-ipad{--col:min(94vw,700px)}
+.device-ipad #tray{height:clamp(120px,16vh,190px)}
+.device-ipad .card{width:min(100%,460px)}
+.device-ipad .topbar,.device-ipad .pulse-wrap,.device-ipad .pulse-cap,.device-ipad .powers,.device-ipad .tip{zoom:1.4}
+html.device-ipad #app > .topbar,html.device-ipad #app > .pulse-wrap,html.device-ipad #app > .pulse-cap,html.device-ipad #app > .powers,html.device-ipad #app > .tip{width:calc(var(--col)/1.4)}
+.device-ipad .card{zoom:1.2}
+@media (min-width:700px) and (min-height:800px){:root{--col:min(92vw,620px)}}
+@media (max-height:640px){.tip{display:none}.pulse-cap{display:none}#scoreEl{font-size:2.1rem}.powers{margin-bottom:6px}}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important}}
 </style>
 </head>
 <body class="title-locked">
 
-<div id="titleScreen" class="title-screen" role="dialog" aria-label="PULSE Insight title">
-  <div class="logo">PULSE</div>
-  <div class="logo-sub">INSIGHT</div>
-  <p class="tag">Keep your Pulse alive. Clear lines. Climb Levels. Don&rsquo;t flatline.</p>
-  <div class="best-pill">Best score <b id="titleBest">0</b></div>
-  <button type="button" class="play-btn" id="playBtn">Play</button>
-  <p class="howto"><b>How to play:</b> Tap a tray piece, then tap the board. Fill a row or column to clear. Pulse drains — clears pump it back up.</p>
-  <div class="credit">Digital AIM</div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="gGold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff0a0"/><stop offset=".5" stop-color="#ffcf3f"/><stop offset="1" stop-color="#ffa000"/></linearGradient>
+    <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><rect x="6" y="4.5" width="4.2" height="15" rx="1.6"/><rect x="13.8" y="4.5" width="4.2" height="15" rx="1.6"/></symbol>
+    <symbol id="i-crown" viewBox="0 0 24 24"><path d="M3 18.5h18l1.2-11.2-5.7 4.3L12 4.2l-4.5 7.4-5.7-4.3L3 18.5z"/><rect x="3" y="19.6" width="18" height="2.2" rx="1"/></symbol>
+    <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 1.8l3.2 6.5 7.1 1-5.2 5 1.3 7.1L12 18.1l-6.4 3.3 1.3-7.1-5.2-5 7.1-1z" stroke-linejoin="round"/></symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24"><path d="M12 5C6.6 5 2.6 9 1.3 12c1.3 3 5.3 7 10.7 7s9.4-4 10.7-7C21.4 9 17.4 5 12 5zm0 11.6a4.6 4.6 0 110-9.2 4.6 4.6 0 010 9.2z"/><circle cx="12" cy="12" r="2.3"/></symbol>
+    <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13.5 1.5L3.8 13.6h6.6l-1.2 8.9 10-12.4h-6.7z"/></symbol>
+    <symbol id="i-bomb" viewBox="0 0 24 24"><circle cx="10.5" cy="14" r="7.5"/><rect x="13.3" y="4.6" width="4" height="4.4" rx="1" transform="rotate(40 15.3 6.8)"/><path d="M18 3.2l1-2 .6 2.2 2.2-.3-1.7 1.5 1.3 1.8-2.2-.6-.9 2-.2-2.2-2.2-.4 2-1z" fill="#ffd23f"/><circle cx="7.6" cy="11.2" r="1.8" fill="rgba(255,255,255,.55)"/></symbol>
+    <symbol id="i-gear" viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 00.12-.61l-1.92-3.32a.49.49 0 00-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.48.48 0 00-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 00-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 00-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6a3.6 3.6 0 110-7.2 3.6 3.6 0 010 7.2z"/></symbol>
+    <symbol id="i-music" viewBox="0 0 24 24"><path d="M12 3v10.55A4 4 0 1014 17V7h4V3h-6z"/></symbol>
+    <symbol id="i-sfx" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0014 7.97v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06a7 7 0 010 13.42v2.06A9 9 0 0014 3.23z"/></symbol>
+    <symbol id="i-vib" viewBox="0 0 24 24"><rect x="7" y="3" width="10" height="18" rx="2.2"/><rect x="2" y="8" width="2.2" height="8" rx="1"/><rect x="19.8" y="8" width="2.2" height="8" rx="1"/></symbol>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></symbol>
+    <symbol id="i-restart" viewBox="0 0 24 24"><path d="M17.65 6.35A7.95 7.95 0 0012 4a8 8 0 108 8h-2a6 6 0 11-1.76-4.24L13 11h7V4l-2.35 2.35z"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.5v15a1 1 0 001.5.86l12-7.5a1 1 0 000-1.72l-12-7.5A1 1 0 007 4.5z"/></symbol>
+    <symbol id="i-flame" viewBox="0 0 24 24"><path d="M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z"/></symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2" opacity=".45"/></symbol>
+    <symbol id="i-hand" viewBox="0 0 24 24"><path d="M9 11.2V4.5a1.6 1.6 0 013.2 0v5.2l.3-.1V8.3a1.6 1.6 0 013.2 0v1.8a1.6 1.6 0 013.1.5v1.1a1.5 1.5 0 012.8.8v3.6c0 3.6-2.7 6.4-6.3 6.4h-1.7c-2 0-3.6-.9-4.8-2.4L4.5 15a1.6 1.6 0 012.4-2.1z" stroke="#1a0f55" stroke-width="1.2"/></symbol>
+  </defs>
+</svg>
+
+<canvas id="bgfx"></canvas>
+<div class="vignette"></div>
+
+<!-- ===== Boot splash ===== -->
+<div id="boot" class="scene" aria-hidden="true">
+  <div class="logo">
+    <div class="emblem" id="bootEmblem"></div>
+    <div class="wordmark"><span>P</span><span>U</span><span>L</span><span>S</span><span>E</span></div>
+    <div class="ribbon">INSIGHT</div>
+  </div>
+  <div class="loadbar"><i></i></div>
+  <div class="presents">Digital AIM</div>
 </div>
 
-<header class="header">
-  <div class="brand"><h1>PULSE</h1><span class="badge">INSIGHT</span></div>
-  <div class="stats">
-    <div class="stat"><label>Score</label><span id="scoreEl">0</span></div>
-    <div class="stat"><label>Best</label><span id="bestEl">0</span></div>
-    <div class="music-ctrl" title="Music volume">
-      <button type="button" id="volDownBtn" class="mute-btn" aria-label="Volume down">−</button>
-      <input type="range" id="volSlider" min="0" max="100" value="45" aria-label="Music volume">
-      <button type="button" id="volUpBtn" class="mute-btn" aria-label="Volume up">+</button>
-      <button type="button" id="muteBtn" class="mute-btn" aria-label="Mute music">♪</button>
+<!-- ===== Title ===== -->
+<div id="titleScreen" class="scene hide" role="dialog" aria-label="PULSE Insight title">
+  <div class="top">
+    <div class="logo">
+      <div class="emblem" id="titleEmblem"></div>
+      <div class="wordmark"><span>P</span><span>U</span><span>L</span><span>S</span><span>E</span></div>
+      <div class="ribbon">INSIGHT</div>
+    </div>
+    <p class="tag">Drop blocks. Blast lines.<br>Keep the beat alive!</p>
+    <div class="best-pill"><svg class="i"><use href="#i-crown"/></svg>BEST <b id="titleBest">0</b></div>
+    <div class="stat-line" id="titleStats"></div>
+  </div>
+  <div class="bottom">
+    <button type="button" class="candy-btn" id="playBtn"><span class="row"><svg class="i"><use href="#i-play"/></svg>PLAY</span></button>
+    <div class="icon-row">
+      <button type="button" class="round-btn" id="howBtn" aria-label="How to play">?</button>
+      <button type="button" class="round-btn" id="titleSettingsBtn" aria-label="Settings"><svg class="i"><use href="#i-gear"/></svg></button>
+      <button type="button" class="round-btn" id="titleMusicBtn" aria-label="Toggle music"><svg class="i"><use href="#i-music"/></svg></button>
+    </div>
+    <div class="credit">Digital AIM</div>
+  </div>
+</div>
+
+<!-- ===== Game ===== -->
+<div id="app">
+  <header class="topbar">
+    <button type="button" class="round-btn" id="pauseBtn" aria-label="Pause"><svg class="i"><use href="#i-pause"/></svg></button>
+    <div class="scorebox">
+      <div class="best-row"><svg class="i"><use href="#i-crown"/></svg><span id="bestEl">0</span></div>
+      <span id="scoreEl">0</span>
+    </div>
+    <div class="level-badge" id="levelBadge" aria-label="Level"><svg viewBox="0 0 24 24"><use href="#i-star"/></svg><div class="lv"><small>LV</small><b id="levelEl">1</b></div></div>
+  </header>
+
+  <div class="pulse-wrap">
+    <div class="heart"><svg class="i"><use href="#i-heart"/></svg></div>
+    <div class="pulse-track">
+      <div class="pulse-fill" id="pulseFill"></div>
+      <div class="pulse-goal"></div>
+      <span class="pulse-pct"><span id="pulseEl">55</span>%</span>
     </div>
   </div>
-</header>
+  <div class="pulse-cap">Pulse · fill it to <b>level up</b><span class="streak-chip" id="streakChip"><svg class="i"><use href="#i-flame"/></svg>x<span id="streakEl">0</span></span></div>
 
-<div class="meta">
-  <div class="level-pill">LEVEL <span id="levelEl">1</span></div>
-  <div class="streak">Streak <b id="streakEl">0</b></div>
-  <button id="restartBtn" type="button">Restart</button>
-</div>
-
-<p class="tip" id="placeTip">Your Pulse is a heartbeat — it drains. Clear lines to pump it back up. Fill it to climb Levels.</p>
-
-<div class="pulse-wrap">
-  <div class="pulse-label-row">
-    <span class="pulse-label">Pulse</span>
-    <span class="pulse-value"><span id="pulseEl">55</span>%</span>
+  <div class="powers">
+    <button class="power" id="insightBtn" disabled type="button"><span class="pw-ic"><svg class="i"><use href="#i-eye"/></svg></span><span class="pw-txt"><span class="pw-name">Insight</span><span class="pw-cost"><svg class="i"><use href="#i-heart"/></svg>22</span></span></button>
+    <button class="power" id="surgeBtn" disabled type="button"><span class="pw-ic"><svg class="i"><use href="#i-bolt"/></svg></span><span class="pw-txt"><span class="pw-name">Surge</span><span class="pw-cost"><svg class="i"><use href="#i-heart"/></svg>18</span></span></button>
+    <button class="power" id="blastBtn" disabled type="button"><span class="pw-ic"><svg class="i"><use href="#i-bomb"/></svg></span><span class="pw-txt"><span class="pw-name">Blast</span><span class="pw-cost"><svg class="i"><use href="#i-heart"/></svg>24</span></span></button>
   </div>
-  <div class="pulse-track"><div class="pulse-fill pump" id="pulseFill"></div></div>
+
+  <div class="board-area" id="boardArea">
+    <div class="board-wrap" id="boardWrap">
+      <div id="board" aria-label="Game board"></div>
+      <div class="combo-toast" id="comboToast"></div>
+      <p class="insight-hint" id="insightHint">Insight ON · red = dead end</p>
+    </div>
+  </div>
+
+  <div class="tray-section">
+    <div id="tray"></div>
+  </div>
+  <p class="tip" id="placeTip">Drag a block onto the board.</p>
+</div>
+<div id="dragGhost"></div>
+
+<!-- ===== Ready / GO ===== -->
+<div id="ready" class="scene hide"><div class="word" id="readyWord">READY?</div></div>
+
+<!-- ===== Level up ===== -->
+<div id="levelUp" class="scene hide">
+  <div class="rays"></div>
+  <div class="lu">
+    <div class="star"><svg viewBox="0 0 24 24"><use href="#i-star"/></svg><b id="luNum">2</b></div>
+    <h3>LEVEL UP!</h3>
+    <p id="luSub">Pulse drains faster. Stay sharp!</p>
+  </div>
+  <div class="tapnote">Tap to continue</div>
 </div>
 
-<div class="powers">
-  <button class="power" id="insightBtn" disabled type="button">Insight<small>see dead ends</small></button>
-  <button class="power" id="surgeBtn" disabled type="button">Surge<small>2× next clear</small></button>
-  <button class="power" id="blastBtn" disabled type="button">Blast<small>tap a cell</small></button>
+<!-- ===== Tutorial ===== -->
+<div id="tutorial" class="modal hide" role="dialog" aria-label="How to play">
+  <div class="card">
+    <button type="button" class="close" id="tutClose" aria-label="Close">✕</button>
+    <div class="tut-stage" id="tutStage"></div>
+    <div class="tut-title" id="tutTitle"></div>
+    <div class="tut-body" id="tutBody"></div>
+    <div class="dots" id="tutDots"></div>
+    <div class="btn-col"><button type="button" class="candy-btn sm" id="tutNext">NEXT</button></div>
+  </div>
 </div>
 
-<div class="board-wrap">
-  <div id="board" aria-label="Game board"></div>
-  <div class="combo-toast" id="comboToast"></div>
-  <div class="overlay" id="gameOver">
-    <h2>FLATLINE</h2>
+<!-- ===== Pause / Settings ===== -->
+<div id="sheet" class="modal hide mode-pause" role="dialog" aria-label="Pause">
+  <div class="card">
+    <button type="button" class="close settings-only" id="sheetClose" aria-label="Close">✕</button>
+    <h2 class="pause-only">PAUSED</h2>
+    <h2 class="settings-only">SETTINGS</h2>
+    <div class="set-row">
+      <div class="lbl"><svg class="i"><use href="#i-music"/></svg>Music</div>
+      <div class="vol">
+        <button type="button" id="volDownBtn" class="mute-btn" aria-label="Volume down">−</button>
+        <input type="range" id="volSlider" min="0" max="100" value="45" aria-label="Music volume">
+        <button type="button" id="volUpBtn" class="mute-btn" aria-label="Volume up">+</button>
+        <button type="button" id="muteBtn" class="mute-btn" aria-label="Mute music">♪</button>
+      </div>
+    </div>
+    <div class="set-row"><div class="lbl"><svg class="i"><use href="#i-sfx"/></svg>Sound FX</div><button type="button" class="toggle" id="sfxToggle" aria-label="Sound effects"></button></div>
+    <div class="set-row"><div class="lbl"><svg class="i"><use href="#i-vib"/></svg>Vibration</div><button type="button" class="toggle" id="hapToggle" aria-label="Vibration"></button></div>
+    <div class="sheet-actions pause-only">
+      <button type="button" class="candy-btn sm" id="resumeBtn"><span class="row"><svg class="i"><use href="#i-play"/></svg>RESUME</span></button>
+      <div class="go-row">
+        <button type="button" class="candy-btn sm blue" id="restartBtn"><span class="row"><svg class="i"><use href="#i-restart"/></svg>RETRY</span></button>
+        <button type="button" class="candy-btn sm purple" id="pauseHomeBtn"><span class="row"><svg class="i"><use href="#i-home"/></svg>HOME</span></button>
+      </div>
+    </div>
+    <div class="sheet-actions settings-only">
+      <button type="button" class="candy-btn sm blue" id="replayTutBtn">HOW TO PLAY</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Game over ===== -->
+<div class="modal" id="gameOver" role="dialog" aria-label="Game over">
+  <div class="card">
+    <div class="go-icon" id="goIcon"><svg class="i"><use href="#i-heart"/></svg></div>
+    <h2 id="goTitle">FLATLINE</h2>
+    <svg class="go-ecg" id="goEcg" viewBox="0 0 200 34"><polyline points="0,17 40,17 48,6 56,30 64,17 90,17 96,12 102,17 200,17"/></svg>
     <p class="reason" id="endReason">No moves left</p>
+    <div class="score-lbl">Score</div>
     <div class="final-score" id="finalScore">0</div>
     <p class="hi" id="newBestEl"></p>
-    <p class="meta-line">Best: <b id="overlayBest">0</b> · Reached Level <b id="finalLevel">1</b></p>
-    <div class="btn-row">
-      <button type="button" id="watchContinue">Watch ad · continue</button>
-      <button type="button" class="secondary" id="playAgain">Play Again</button>
-      <button type="button" class="secondary" id="menuBtn">Main Menu</button>
+    <div class="go-stats">
+      <div><b id="overlayBest">0</b><span>Best</span></div>
+      <div><b id="finalLevel">1</b><span>Level</span></div>
+      <div><b id="finalLines">0</b><span>Lines</span></div>
+      <div><b id="finalCombo">0</b><span>Combo</span></div>
+    </div>
+    <div class="btn-col">
+      <button type="button" class="candy-btn sm gold" id="watchContinue">Watch ad · continue</button>
+      <div class="go-row">
+        <button type="button" class="candy-btn sm" id="playAgain"><span class="row"><svg class="i"><use href="#i-restart"/></svg>AGAIN</span></button>
+        <button type="button" class="candy-btn sm purple" id="menuBtn"><span class="row"><svg class="i"><use href="#i-home"/></svg>HOME</span></button>
+      </div>
     </div>
   </div>
 </div>
 
-<div class="tray-section">
-  <div class="tray-label">Tray — tap piece, then tap board</div>
-  <div id="tray"></div>
-</div>
-<p class="insight-hint" id="insightHint">Insight ON — red = dead end for remaining pieces</p>
-<div id="dragGhost"></div>
+<canvas id="fx"></canvas>
 
 <script>
 (function(){
 "use strict";
 
-/* Device class: iPhone vs iPad (iPadOS 13+ may report as Mac) */
+/* ================= Device class: iPhone vs iPad ================= */
 function detectPulseDevice(){
   const ua = navigator.userAgent || "";
   const platform = navigator.platform || "";
   const maxTouch = navigator.maxTouchPoints || 0;
-  // iPadOS 13+: Safari often reports Macintosh + touch
   const iPadOSDesktopUA = (/Macintosh|MacIntel/i.test(ua) || platform === "MacIntel") && maxTouch > 1;
   const isIpad = /iPad/i.test(ua) || iPadOSDesktopUA;
   const isIphone = /iPhone/i.test(ua) && !isIpad;
   let form = "other";
   if (isIpad) form = "ipad";
   else if (isIphone) form = "iphone";
-  // Prefer Capacitor Device if present (not currently a dep — keep for future)
   try{
     const Cap = window.Capacitor;
     const Device = Cap && Cap.Plugins && Cap.Plugins.Device;
     if(Device && typeof Device.getInfo === "function"){
-      // sync path unavailable; fire-and-forget refine
       Device.getInfo().then((info)=>{
         const model = (info && (info.model || info.name || "")) + "";
         const p = ((info && info.platform) || "").toLowerCase();
@@ -341,26 +701,27 @@ function detectPulseDevice(){
   return { form, isIpad: form==="ipad", isIphone: form==="iphone" };
 }
 function applyPulseDevice(form){
-  const root = document.documentElement;
-  const body = document.body;
+  const root = document.documentElement, body = document.body;
   root.classList.remove("device-iphone","device-ipad","device-other");
   body.classList.remove("device-iphone","device-ipad","device-other");
-  const cls = "device-" + form;
-  root.classList.add(cls);
-  body.classList.add(cls);
+  root.classList.add("device-" + form); body.classList.add("device-" + form);
   root.dataset.device = form;
   window.PULSE_DEVICE = { form, isIpad: form==="ipad", isIphone: form==="iphone" };
+  try{ layout(); }catch(_){}
 }
-(function initPulseDevice(){
-  const d = detectPulseDevice();
-  applyPulseDevice(d.form);
-  try{ console.info("[PULSE] device:", window.PULSE_DEVICE); }catch(_){}
-})();
+(function initPulseDevice(){ applyPulseDevice(detectPulseDevice().form); })();
 
+/* Native status bar: light text on our dark-blue theme */
+try{
+  const SB = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.StatusBar;
+  if(SB){ SB.setStyle && SB.setStyle({style:"DARK"}).catch(()=>{}); SB.setBackgroundColor && SB.setBackgroundColor({color:"#1b1a5c"}).catch(()=>{}); }
+}catch(_){}
+
+/* ================= Game rules (unchanged tuning) ================= */
 const SIZE=8;
 const INSIGHT_COST=22, SURGE_COST=18, BLAST_COST=24;
 const START_PULSE=70;
-const CLEAR_PULSE_BASE=32; // per line — tuned so Levels climb often
+const CLEAR_PULSE_BASE=32;
 
 const SHAPES={
   I4:[[0,0],[0,1],[0,2],[0,3]], O:[[0,0],[0,1],[1,0],[1,1]], T:[[0,0],[0,1],[0,2],[1,1]],
@@ -371,8 +732,6 @@ const SHAPES={
   square3:[[0,0],[0,1],[0,2],[1,0],[1,1],[1,2],[2,0],[2,1],[2,2]],
   U:[[0,0],[0,2],[1,0],[1,1],[1,2]], bigL:[[0,0],[1,0],[2,0],[3,0],[3,1]]
 };
-
-// Soft start → intense later
 const POOLS={
   1:["mono","mono","mono","domH","domH","domV","domV","I2","I2","triI","triV","triL","O","T"],
   2:["mono","domH","domV","I2","I3","triI","triV","triL","triJ","O","O","T","L","J"],
@@ -381,32 +740,43 @@ const POOLS={
   5:["I4","O","T","L","J","S","Z","plus","U","bigL","square3","I4","T","L","J","S"],
   6:["I4","I4","T","L","J","S","Z","plus","U","bigL","square3","U","bigL"]
 };
+/* Candy colours: index 1..8 */
+const COLORS=[null,"#ff4d5e","#ff9a2e","#ffd23f","#3ddc6a","#29d3f5","#3d7bff","#9b5cff","#ff5fc8"];
+const LIGHTS=[null,"#ffb3b8","#ffd29c","#fff5a8","#b5ffc0","#b8f7ff","#b8ceff","#dcc4ff","#ffc2ec"];
 
-const boardEl=document.getElementById("board"), trayEl=document.getElementById("tray");
-const scoreEl=document.getElementById("scoreEl"), bestEl=document.getElementById("bestEl");
-const pulseEl=document.getElementById("pulseEl"), pulseFill=document.getElementById("pulseFill");
-const insightBtn=document.getElementById("insightBtn"), surgeBtn=document.getElementById("surgeBtn"), blastBtn=document.getElementById("blastBtn");
-const restartBtn=document.getElementById("restartBtn"), gameOverEl=document.getElementById("gameOver");
-const finalScoreEl=document.getElementById("finalScore"), finalLevelEl=document.getElementById("finalLevel");
-const playAgainBtn=document.getElementById("playAgain"), comboToast=document.getElementById("comboToast");
-const dragGhost=document.getElementById("dragGhost"), insightHint=document.getElementById("insightHint");
-const placeTip=document.getElementById("placeTip"), levelEl=document.getElementById("levelEl"), streakEl=document.getElementById("streakEl");
-const endReason=document.getElementById("endReason"), newBestEl=document.getElementById("newBestEl"), overlayBest=document.getElementById("overlayBest");
+const $=(id)=>document.getElementById(id);
+const boardEl=$("board"), trayEl=$("tray");
+const scoreEl=$("scoreEl"), bestEl=$("bestEl");
+const pulseEl=$("pulseEl"), pulseFill=$("pulseFill");
+const insightBtn=$("insightBtn"), surgeBtn=$("surgeBtn"), blastBtn=$("blastBtn");
+const restartBtn=$("restartBtn"), gameOverEl=$("gameOver");
+const finalScoreEl=$("finalScore"), finalLevelEl=$("finalLevel");
+const playAgainBtn=$("playAgain"), comboToast=$("comboToast");
+const dragGhost=$("dragGhost"), insightHint=$("insightHint");
+const placeTip=$("placeTip"), levelEl=$("levelEl"), streakEl=$("streakEl");
+const endReason=$("endReason"), newBestEl=$("newBestEl"), overlayBest=$("overlayBest");
+const appEl=$("app"), boardWrap=$("boardWrap"), boardArea=$("boardArea");
 
 let grid=[], tray=[], score=0, pulse=START_PULSE, level=1, clearStreak=0;
 let insightActive=false, surgeArmed=false, blastMode=false;
-let selectedIdx=null, cells=[], clearing=false, gameOver=false;
-let dragIdx=null, dragPointerId=null, hoverRC=null, lastPlaceAt=0;
+let selectedIdx=null, cells=[], clearing=false, gameOver=true;
+let dragIdx=null, hoverRC=null;
 let tickTimer=null, lastTick=0;
+let inGame=false;
+let linesCleared=0, bestCombo=0, shownScore=0, scoreRaf=0;
+const holds=new Set();                    // UI pauses: ready, level, menu, tutorial
+const uiPaused=()=>holds.size>0;
+let M={size:320,pad:8,gap:3,cell:36,tcs:20};
 
+/* ================= Storage helpers ================= */
+function lsGet(k,d){try{const v=localStorage.getItem(k);return v===null?d:v}catch(_){return d}}
+function lsSet(k,v){try{localStorage.setItem(k,String(v))}catch(_){}}
+let sfxOn = lsGet("pulseSfxOn","1")!=="0";
+let hapticsOn = lsGet("pulseHapticsOn","1")!=="0";
 
-
-/* --- Original BGM (procedural Web Audio — no third-party samples) --- */
-const muteBtn=document.getElementById("muteBtn");
-const volSlider=document.getElementById("volSlider");
-const volDownBtn=document.getElementById("volDownBtn");
-const volUpBtn=document.getElementById("volUpBtn");
-let audioCtx=null, musicOn=true, musicVol=0.45, musicNodes=null, musicStarted=false;
+/* ================= Audio: music (procedural) ================= */
+const muteBtn=$("muteBtn"), volSlider=$("volSlider"), volDownBtn=$("volDownBtn"), volUpBtn=$("volUpBtn");
+let audioCtx=null, musicOn=true, musicVol=0.45, musicNodes=null, musicStarted=false, sfxGain=null, noiseBuf=null;
 try{
   const savedOn = localStorage.getItem("pulseMusicOn");
   if(savedOn !== null) musicOn = savedOn !== "0";
@@ -415,25 +785,17 @@ try{
 }catch(_){}
 if(volSlider) volSlider.value = String(Math.round(musicVol*100));
 
-function masterGainValue(){
-  // map 0..1 UI to a quiet bed under gameplay
-  return musicOn ? (0.10 * musicVol) : 0;
-}
+function masterGainValue(){ return musicOn ? (0.16 * musicVol) : 0; }
 function applyMusicGain(){
   if(musicNodes && musicNodes.gain && audioCtx){
     try{ musicNodes.gain.gain.setTargetAtTime(masterGainValue(), audioCtx.currentTime, 0.04); }catch(_){}
   }
 }
 function syncMuteUi(){
-  if(muteBtn){
-    muteBtn.textContent = (!musicOn || musicVol<=0.001) ? "🔇" : "♪";
-    muteBtn.classList.toggle("off", !musicOn || musicVol<=0.001);
-    muteBtn.title = musicOn ? "Mute music" : "Unmute music";
-  }
-  if(volSlider){
-    volSlider.value = String(Math.round(musicVol*100));
-    volSlider.disabled = false;
-  }
+  const off = !musicOn || musicVol<=0.001;
+  if(muteBtn){ muteBtn.textContent = off ? "✕" : "♪"; muteBtn.classList.toggle("off", off); muteBtn.title = musicOn ? "Mute music" : "Unmute music"; }
+  if(volSlider){ volSlider.value = String(Math.round(musicVol*100)); }
+  const tm=$("titleMusicBtn"); if(tm) tm.classList.toggle("off", off);
 }
 syncMuteUi();
 
@@ -442,136 +804,139 @@ function ensureAudio(){
   const AC = window.AudioContext || window.webkitAudioContext;
   if(!AC) return null;
   audioCtx = new AC();
+  sfxGain = audioCtx.createGain(); sfxGain.gain.value = 0.55; sfxGain.connect(audioCtx.destination);
+  const len = audioCtx.sampleRate * 0.5; noiseBuf = audioCtx.createBuffer(1, len, audioCtx.sampleRate);
+  const d = noiseBuf.getChannelData(0); for(let i=0;i<len;i++) d[i]=Math.random()*2-1;
   return audioCtx;
 }
-
 function stopMusic(){
   if(!musicNodes) return;
   try{ musicNodes.gain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.03); }catch(_){}
   try{ musicNodes.interval && clearInterval(musicNodes.interval); }catch(_){}
-  try{ musicNodes.oscs.forEach(o=>{try{o.stop()}catch(_){}}); }catch(_){}
   musicNodes=null;
 }
-
+/* Bouncy arcade loop: Am – F – C – G, tempo rises a little with Level */
 function startMusic(){
-  const ctx = ensureAudio();
-  if(!ctx) return;
+  const ctx = ensureAudio(); if(!ctx) return;
   if(ctx.state === "suspended") ctx.resume();
   stopMusic();
-  const master = ctx.createGain();
-  master.gain.value = masterGainValue();
-  master.connect(ctx.destination);
-
-  const root = 110;
-  const scale = [0, 3, 5, 7, 10, 12, 15, 17];
-  let step = 0;
-  const oscs = [];
-
-  function beep(freq, dur, type, gainVal, t0){
-    const o = ctx.createOscillator();
-    const g = ctx.createGain();
-    o.type = type;
-    o.frequency.value = freq;
-    g.gain.value = 0;
-    o.connect(g); g.connect(master);
-    const t = t0 || ctx.currentTime;
-    g.gain.setValueAtTime(0, t);
-    g.gain.linearRampToValueAtTime(gainVal, t + 0.02);
-    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-    o.start(t); o.stop(t + dur + 0.02);
-    oscs.push(o);
+  const master = ctx.createGain(); master.gain.value = masterGainValue(); master.connect(ctx.destination);
+  const chords=[[57,60,64],[53,57,60],[48,52,55],[55,59,62]];
+  const arp=[0,1,2,1,0,2,1,2];
+  const lead=[[12,0,14,0,16,0,14,12],[12,0,9,0,12,0,0,0],[7,0,9,0,12,0,16,14],[14,0,12,0,11,0,7,0]];
+  const hz=(m)=>440*Math.pow(2,(m-69)/12);
+  let step=0, next=ctx.currentTime+0.08;
+  function note(f,t,dur,type,vol){
+    const o=ctx.createOscillator(), g=ctx.createGain();
+    o.type=type; o.frequency.value=f; o.connect(g); g.connect(master);
+    g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(vol,t+0.012); g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+    o.start(t); o.stop(t+dur+0.03);
   }
-
-  const drone = ctx.createOscillator();
-  const droneG = ctx.createGain();
-  drone.type = "sine";
-  drone.frequency.value = root;
-  droneG.gain.value = 0.35;
-  drone.connect(droneG); droneG.connect(master);
-  drone.start();
-  oscs.push(drone);
-
-  const interval = setInterval(()=>{
+  function hat(t,vol){
+    const s=ctx.createBufferSource(), f=ctx.createBiquadFilter(), g=ctx.createGain();
+    s.buffer=noiseBuf; f.type="highpass"; f.frequency.value=7000; s.connect(f); f.connect(g); g.connect(master);
+    g.gain.setValueAtTime(vol,t); g.gain.exponentialRampToValueAtTime(0.0001,t+0.04); s.start(t); s.stop(t+0.05);
+  }
+  function kick(t){
+    const o=ctx.createOscillator(), g=ctx.createGain(); o.connect(g); g.connect(master);
+    o.frequency.setValueAtTime(140,t); o.frequency.exponentialRampToValueAtTime(45,t+0.12);
+    g.gain.setValueAtTime(0.9,t); g.gain.exponentialRampToValueAtTime(0.0001,t+0.16); o.start(t); o.stop(t+0.18);
+  }
+  const interval=setInterval(()=>{
     if(!audioCtx) return;
-    if(!musicOn || musicVol<=0.001) return;
-    const i = scale[step % scale.length];
-    const freq = root * Math.pow(2, i/12);
-    const t = ctx.currentTime;
-    beep(freq*2, 0.28, "triangle", 0.55, t);
-    if(step % 4 === 0) beep(freq, 0.5, "sine", 0.35, t);
-    if(step % 2 === 0) beep(root*4, 0.06, "square", 0.08, t);
-    step++;
-  }, 320);
-
-  musicNodes = {gain: master, oscs, interval, droneG};
+    if(!musicOn || musicVol<=0.001){ next=ctx.currentTime+0.05; return; }
+    const tempo = 104 + Math.min(28,(level-1)*3);
+    const stepDur = 60/tempo/2;
+    while(next < ctx.currentTime + 0.12){
+      const bar=Math.floor(step/8)%4, s=step%8, ch=chords[bar];
+      note(hz(ch[arp[s]]+12), next, stepDur*0.9, "triangle", 0.22);
+      if(s===0||s===4){ note(hz(ch[0]-12), next, stepDur*3.2, "sine", 0.55); kick(next); }
+      if(s%2===1) hat(next, 0.12);
+      const ln=lead[bar][s]; if(ln && (Math.floor(step/32)%2===1)) note(hz(ch[0]+ln+12), next, stepDur*1.6, "square", 0.05);
+      next += stepDur; step++;
+    }
+  }, 40);
+  musicNodes = {gain: master, interval};
   musicStarted = true;
 }
-
-function persistMusic(){
-  try{
-    localStorage.setItem("pulseMusicOn", musicOn ? "1" : "0");
-    localStorage.setItem("pulseMusicVol", String(Math.round(musicVol*100)));
-  }catch(_){}
-}
-
+function persistMusic(){ lsSet("pulseMusicOn", musicOn ? "1" : "0"); lsSet("pulseMusicVol", Math.round(musicVol*100)); }
 function setMusicOn(on){
   musicOn = !!on;
   if(musicOn && musicVol<=0.001) musicVol = 0.45;
-  persistMusic();
-  syncMuteUi();
-  applyMusicGain();
+  persistMusic(); syncMuteUi(); applyMusicGain();
   if(musicOn){ if(!musicNodes) startMusic(); else applyMusicGain(); }
-  else applyMusicGain();
 }
-
 function setMusicVol(v01){
   musicVol = Math.min(1, Math.max(0, v01));
-  if(musicVol<=0.001){ musicOn = false; }
-  else if(!musicOn){ musicOn = true; }
-  persistMusic();
-  syncMuteUi();
-  if(musicOn && !musicNodes) startMusic();
-  else applyMusicGain();
+  if(musicVol<=0.001){ musicOn = false; } else if(!musicOn){ musicOn = true; }
+  persistMusic(); syncMuteUi();
+  if(musicOn && !musicNodes) startMusic(); else applyMusicGain();
 }
-
-if(muteBtn){
-  muteBtn.addEventListener("click",(e)=>{
-    e.stopPropagation();
-    setMusicOn(!musicOn);
-  });
-}
+if(muteBtn) muteBtn.addEventListener("click",(e)=>{ e.stopPropagation(); setMusicOn(!musicOn); sfx.click(); });
 if(volSlider){
-  volSlider.addEventListener("input",(e)=>{
-    e.stopPropagation();
-    setMusicVol(parseInt(volSlider.value,10)/100);
-  });
+  volSlider.addEventListener("input",(e)=>{ e.stopPropagation(); setMusicVol(parseInt(volSlider.value,10)/100); });
   volSlider.addEventListener("pointerdown",(e)=>e.stopPropagation());
 }
-if(volDownBtn){
-  volDownBtn.addEventListener("click",(e)=>{
-    e.stopPropagation();
-    setMusicVol(musicVol - 0.1);
-  });
-}
-if(volUpBtn){
-  volUpBtn.addEventListener("click",(e)=>{
-    e.stopPropagation();
-    setMusicVol(musicVol + 0.1);
-  });
-}
-function unlockAudioOnce(){
-  ensureAudio();
-  if(musicOn && musicVol>0.001) startMusic();
-}
-["pointerdown","keydown","touchstart"].forEach(ev=>{
-  document.addEventListener(ev, unlockAudioOnce, {once:true, passive:true});
-});
+if(volDownBtn) volDownBtn.addEventListener("click",(e)=>{ e.stopPropagation(); setMusicVol(musicVol - 0.1); sfx.click(); });
+if(volUpBtn) volUpBtn.addEventListener("click",(e)=>{ e.stopPropagation(); setMusicVol(musicVol + 0.1); sfx.click(); });
+function unlockAudioOnce(){ ensureAudio(); if(audioCtx && audioCtx.state==="suspended") audioCtx.resume(); if(musicOn && musicVol>0.001 && !musicNodes) startMusic(); }
+["pointerdown","keydown","touchstart"].forEach(ev=>{ document.addEventListener(ev, unlockAudioOnce, {once:true, passive:true}); });
 
+/* ================= Audio: sound effects ================= */
+function tone(f,t,dur,type,vol,fEnd){
+  const ctx=audioCtx; const o=ctx.createOscillator(), g=ctx.createGain();
+  o.type=type; o.frequency.setValueAtTime(f,t); if(fEnd) o.frequency.exponentialRampToValueAtTime(fEnd,t+dur);
+  o.connect(g); g.connect(sfxGain);
+  g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(vol,t+0.008); g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+  o.start(t); o.stop(t+dur+0.02);
+}
+function noiseHit(t,dur,vol,freq,type){
+  const ctx=audioCtx; const s=ctx.createBufferSource(), f=ctx.createBiquadFilter(), g=ctx.createGain();
+  s.buffer=noiseBuf; f.type=type||"bandpass"; f.frequency.value=freq||1200; s.connect(f); f.connect(g); g.connect(sfxGain);
+  g.gain.setValueAtTime(vol,t); g.gain.exponentialRampToValueAtTime(0.0001,t+dur); s.start(t); s.stop(t+dur+0.02);
+}
+function withSfx(fn){ return (...a)=>{ if(!sfxOn) return; const ctx=ensureAudio(); if(!ctx) return; try{ fn(ctx.currentTime+0.005,...a); }catch(_){} }; }
+const PENTA=[0,2,4,7,9,12,14,16,19,21,24,26,28];
+const sfx={
+  click: withSfx((t)=>{ tone(900,t,.05,"triangle",.25,1300); }),
+  pickup: withSfx((t)=>{ tone(520,t,.07,"triangle",.3,880); }),
+  place: withSfx((t)=>{ tone(260,t,.12,"sine",.6,110); noiseHit(t,.05,.25,2400); }),
+  bad: withSfx((t)=>{ tone(150,t,.14,"square",.12,110); }),
+  clear: withSfx((t,lines,streak)=>{
+    const base=523.25*Math.pow(2,Math.min(8,streak)/12);
+    const n=2+Math.min(4,lines);
+    for(let i=0;i<n;i++){ const f=base*Math.pow(2,PENTA[i*2%PENTA.length]/12); tone(f,t+i*.055,.22,"triangle",.32); tone(f*2,t+i*.055,.12,"sine",.12); }
+    noiseHit(t,.35,.35,3000,"highpass");
+  }),
+  power: withSfx((t)=>{ tone(300,t,.28,"sawtooth",.12,1200); tone(600,t+.05,.25,"triangle",.2,1800); }),
+  boom: withSfx((t)=>{ tone(160,t,.45,"sine",.9,35); noiseHit(t,.5,.8,500,"lowpass"); }),
+  level: withSfx((t)=>{ [0,4,7,12,16].forEach((s,i)=>{ const f=523.25*Math.pow(2,s/12); tone(f,t+i*.09,.3,"square",.12); tone(f,t+i*.09,.35,"triangle",.3); }); tone(1046.5*1.5,t+.5,.6,"triangle",.25); }),
+  ready: withSfx((t)=>{ tone(660,t,.14,"triangle",.35); }),
+  go: withSfx((t)=>{ tone(990,t,.28,"triangle",.4); tone(1320,t+.04,.25,"sine",.2); }),
+  over: withSfx((t)=>{ tone(880,t,.12,"sine",.3); tone(880,t+.22,.12,"sine",.3); tone(880,t+.5,1.2,"sine",.28); tone(392,t+.1,.9,"triangle",.25,98); }),
+  best: withSfx((t)=>{ [0,4,7,12,7,12,16,19].forEach((s,i)=>tone(659.25*Math.pow(2,s/12),t+i*.08,.18,"triangle",.3)); })
+};
 
+/* ================= Haptics ================= */
+function hap(kind){
+  if(!hapticsOn) return;
+  try{
+    const H = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Haptics;
+    if(H){
+      if(kind==="success"||kind==="error") H.notification({type:kind==="success"?"SUCCESS":"ERROR"}).catch(()=>{});
+      else H.impact({style:kind==="heavy"?"HEAVY":kind==="medium"?"MEDIUM":"LIGHT"}).catch(()=>{});
+      return;
+    }
+  }catch(_){}
+  const pats={light:10,medium:[18,30,18],heavy:[30,40,30,40,50],success:[20,40,20,40,60],error:[40,60,40,80,120]};
+  try{ if(navigator.vibrate) navigator.vibrate(pats[kind]||10); }catch(_){}
+}
+function buzz(p){
+  const k = Array.isArray(p) ? (p.length>=5?"heavy":"medium") : "light";
+  hap(k);
+}
 
-/* --- AdMob (Capacitor) --- */
-// Production units; fall back to Google SAMPLE rewarded/interstitial if no fill
-// (common while AdMob account is still "Requires review").
+/* ================= AdMob (Capacitor) — unchanged ================= */
 const PROD_REWARDED = "ca-app-pub-3600954472890613/8958393072";
 const PROD_INTERSTITIAL = "ca-app-pub-3600954472890613/9791399496";
 const TEST_REWARDED = "ca-app-pub-3940256099942544/5224354917";
@@ -582,20 +947,13 @@ let admobReady = false;
 let continueUsedThisRun = false;
 let levelsSinceInterstitial = 0;
 let rewardedReady = false;
-const watchContinueBtn = document.getElementById("watchContinue");
+const watchContinueBtn = $("watchContinue");
 
-/* Freeze drain/input while fullscreen ads are up (WebView often stays "visible"). */
 let pausedForAd = false;
-function pauseForAd(){
-  if(pausedForAd) return;
-  pausedForAd = true;
-  stopDrain();
-}
-function resumeAfterAd(){
-  if(!pausedForAd) return;
-  pausedForAd = false;
-  if(!gameOver && inGame && !document.hidden) startDrain();
-}
+function pauseForAd(){ if(pausedForAd) return; pausedForAd = true; stopDrain(); stopMusicForAd(); }
+function resumeAfterAd(){ if(!pausedForAd) return; pausedForAd = false; resumeMusicAfterAd(); if(!gameOver && inGame && !document.hidden) startDrain(); }
+function stopMusicForAd(){ try{ if(audioCtx && audioCtx.state==="running") audioCtx.suspend(); }catch(_){} }
+function resumeMusicAfterAd(){ try{ if(audioCtx && audioCtx.state==="suspended") audioCtx.resume(); }catch(_){} }
 let adPauseListenersWired = false;
 function wireAdPauseListeners(AdMob){
   if(!AdMob || adPauseListenersWired || typeof AdMob.addListener !== "function") return;
@@ -611,30 +969,22 @@ function wireAdPauseListeners(AdMob){
     AdMob.addListener("onRewardedVideoAdFailedToShow", onEnd);
   }catch(e){ console.warn("ad pause listeners", e); }
 }
-
-
 function nativeAdMob(){
   try{
     const Cap = window.Capacitor;
     if(!Cap) return null;
-    const native = (typeof Cap.isNativePlatform === "function")
-      ? Cap.isNativePlatform()
-      : !!(Cap.getPlatform && Cap.getPlatform() !== "web");
+    const native = (typeof Cap.isNativePlatform === "function") ? Cap.isNativePlatform() : !!(Cap.getPlatform && Cap.getPlatform() !== "web");
     if(!native) return null;
     if(Cap.Plugins && Cap.Plugins.AdMob) return Cap.Plugins.AdMob;
-    if(typeof Cap.getPlugin === "function"){
-      try{ return Cap.getPlugin("AdMob"); }catch(_){}
-    }
+    if(typeof Cap.getPlugin === "function"){ try{ return Cap.getPlugin("AdMob"); }catch(_){} }
   }catch(_){}
   return null;
 }
-
 function setContinueLabel(text, disabled){
   if(!watchContinueBtn) return;
   watchContinueBtn.textContent = text;
   watchContinueBtn.disabled = !!disabled;
 }
-
 async function initAds(){
   const AdMob = nativeAdMob();
   if(!AdMob){
@@ -643,16 +993,9 @@ async function initAds(){
     return;
   }
   try{
-    await AdMob.initialize({
-      initializeForTesting: true,
-      testingDevices: []
-    });
-    // UMP consent — required in many regions before ads fill
+    await AdMob.initialize({ initializeForTesting: true, testingDevices: [] });
     try{
-      const info = await AdMob.requestConsentInfo({
-        debugGeography: 0,
-        timeout: 10000
-      });
+      const info = await AdMob.requestConsentInfo({ debugGeography: 0, timeout: 10000 });
       if(info && (info.isConsentFormAvailable || info.status === "REQUIRED")){
         try{ await AdMob.showConsentForm(); }catch(ce){ console.warn("consent form", ce); }
       }
@@ -660,71 +1003,47 @@ async function initAds(){
     admobReady = true;
     wireAdPauseListeners(AdMob);
     preloadRewarded();
-  }catch(err){
-    console.warn("AdMob init failed", err);
-    admobReady = false;
-  }
+  }catch(err){ console.warn("AdMob init failed", err); admobReady = false; }
 }
-
 async function prepareRewarded(adId, isTesting){
   const AdMob = nativeAdMob();
   if(!AdMob) throw new Error("no_plugin");
   await AdMob.prepareRewardVideoAd({ adId: adId, isTesting: !!isTesting });
   rewardedReady = true;
 }
-
 async function preloadRewarded(){
   if(!admobReady) return;
   rewardedReady = false;
-  try{
-    await prepareRewarded(PROD_REWARDED, false);
-  }catch(e1){
+  try{ await prepareRewarded(PROD_REWARDED, false); }
+  catch(e1){
     console.warn("prod rewarded preload failed", e1);
-    try{
-      await prepareRewarded(TEST_REWARDED, true);
-    }catch(e2){
-      console.warn("test rewarded preload failed", e2);
-      rewardedReady = false;
-    }
+    try{ await prepareRewarded(TEST_REWARDED, true); }
+    catch(e2){ console.warn("test rewarded preload failed", e2); rewardedReady = false; }
   }
 }
-
 async function showRewardedContinue(){
   const AdMob = nativeAdMob();
-  if(!AdMob){
-    placeTip.textContent = "Ads only work in the Android app install.";
-    return false;
-  }
+  if(!AdMob){ endReason.textContent = "Ads only work in the installed app."; return false; }
   if(!admobReady){
-    placeTip.textContent = "Ads still starting — tap again in a second.";
+    endReason.textContent = "Ads still starting — tap again in a second.";
     try{ await initAds(); }catch(_){}
     if(!admobReady) return false;
   }
-
   setContinueLabel("Loading ad…", true);
-  placeTip.textContent = "Loading rewarded ad…";
-
+  endReason.textContent = "Loading rewarded ad…";
   async function showPrepared(){
     pauseForAd();
     try{
       const reward = await AdMob.showRewardVideoAd();
       rewardedReady = false;
-      // preload next for later runs
       setTimeout(preloadRewarded, 500);
-      return !!reward || true; // shown + completed path
-    }finally{
-      resumeAfterAd();
-    }
+      return !!reward || true;
+    }finally{ resumeAfterAd(); }
   }
-
   try{
     if(!rewardedReady){
-      try{
-        await prepareRewarded(PROD_REWARDED, false);
-      }catch(_){
-        await prepareRewarded(TEST_REWARDED, true);
-        placeTip.textContent = "Using test ad (AdMob still under review)…";
-      }
+      try{ await prepareRewarded(PROD_REWARDED, false); }
+      catch(_){ await prepareRewarded(TEST_REWARDED, true); endReason.textContent = "Using test ad (AdMob still under review)…"; }
     }
     await showPrepared();
     placeTip.textContent = "Thanks — Pulse restored!";
@@ -734,14 +1053,14 @@ async function showRewardedContinue(){
     rewardedReady = false;
     try{
       await prepareRewarded(TEST_REWARDED, true);
-      placeTip.textContent = "Using test ad…";
+      endReason.textContent = "Using test ad…";
       await showPrepared();
       placeTip.textContent = "Thanks — Pulse restored!";
       return true;
     }catch(err2){
       console.warn("rewarded failed", err2);
       const msg = (err2 && (err2.message || err2.errorMessage)) || "Ad unavailable";
-      placeTip.textContent = "No ad available yet (" + String(msg).slice(0,60) + "). Tap to retry.";
+      endReason.textContent = "No ad available yet (" + String(msg).slice(0,60) + "). Tap to retry.";
       setContinueLabel("Retry ad · continue", false);
       setTimeout(preloadRewarded, 1200);
       return false;
@@ -752,7 +1071,6 @@ async function showRewardedContinue(){
     }
   }
 }
-
 async function maybeShowInterstitial(){
   const AdMob = nativeAdMob();
   if(!AdMob || !admobReady) return;
@@ -760,51 +1078,39 @@ async function maybeShowInterstitial(){
   levelsSinceInterstitial = 0;
   pauseForAd();
   try{
-    try{
-      await AdMob.prepareInterstitial({ adId: PROD_INTERSTITIAL, isTesting: false });
-    }catch(_){
-      await AdMob.prepareInterstitial({ adId: TEST_INTERSTITIAL, isTesting: true });
-    }
+    try{ await AdMob.prepareInterstitial({ adId: PROD_INTERSTITIAL, isTesting: false }); }
+    catch(_){ await AdMob.prepareInterstitial({ adId: TEST_INTERSTITIAL, isTesting: true }); }
     await AdMob.showInterstitial();
-  }catch(err){
-    console.warn("Interstitial failed", err);
-  }finally{
-    resumeAfterAd();
-  }
+  }catch(err){ console.warn("Interstitial failed", err); }
+  finally{ resumeAfterAd(); }
 }
-
 function continueFromFlatline(){
   if(!gameOver || continueUsedThisRun) return;
   continueUsedThisRun = true;
   gameOver = false;
   gameOverEl.classList.remove("show");
-  pulse = CONTINUE_PULSE;
-  pulseEl.textContent = Math.round(pulse);
-  pulseFill.style.width = pulse + "%";
-  pulseFill.classList.remove("low","critical");
-  pulseFill.classList.add("pump");
+  paintBoard();
+  // If the board was locked, hand the player small pieces that are guaranteed to fit.
+  if(!hasAnyMove()){
+    const small=["mono","domH","domV","mono"];
+    tray=[0,1,2].map(i=>{const n=small[i];return{name:n,shape:cloneShape(n),color:randColor()}});
+    renderTray(true);
+  }
+  setPulse(CONTINUE_PULSE,{silent:true});
   placeTip.textContent = "Back in — Pulse restored. Clear to stay alive!";
   updatePowers();
   startDrain();
-  buzz([20,40,20]);
-  if(watchContinueBtn){
-    watchContinueBtn.disabled = true;
-    watchContinueBtn.textContent = "Continue used";
-  }
+  hap("success"); sfx.go();
+  if(watchContinueBtn){ watchContinueBtn.disabled = true; watchContinueBtn.textContent = "Continue used"; }
+  showCombo("REVIVED!","Keep it pumping");
 }
 
-
-try{bestEl.textContent=localStorage.getItem("pulseGridBest")||"0"}catch(_){bestEl.textContent="0"}
-
-function buzz(p){try{if(navigator.vibrate)navigator.vibrate(p)}catch(_){}}
+/* ================= Core helpers ================= */
+bestEl.textContent = lsGet("pulseGridBest","0");
 function cloneShape(n){return SHAPES[n].map(([r,c])=>[r,c])}
 function shapeBounds(sh){let mr=0,mc=0;for(const[r,c]of sh){mr=Math.max(mr,r);mc=Math.max(mc,c)}return{rows:mr+1,cols:mc+1}}
-function poolForLevel(){
-  const k=Math.min(6,Math.max(1,level));
-  return POOLS[k];
-}
+function poolForLevel(){ return POOLS[Math.min(6,Math.max(1,level))]; }
 function drainPerSecond(){
-  // Softer drain so players climb many Levels before intensity ramps
   if(level<=1) return 1.35;
   if(level===2) return 1.55;
   if(level===3) return 1.8;
@@ -815,9 +1121,42 @@ function drainPerSecond(){
   if(level===8) return 3.8;
   return 4.2 + Math.min(2.5,(level-9)*0.25);
 }
-function randomPiece(){const pool=poolForLevel();const name=pool[(Math.random()*pool.length)|0];return{name,shape:cloneShape(name)}}
-function fillTray(){tray=[randomPiece(),randomPiece(),randomPiece()]}
-function refillIfEmpty(){if(tray.every(p=>!p))fillTray()}
+function randColor(){ return 1 + ((Math.random()*8)|0); }
+function randomPiece(){
+  const pool=poolForLevel(); const name=pool[(Math.random()*pool.length)|0];
+  return {name, shape:cloneShape(name), color:randColor()};
+}
+function fillTray(){
+  tray=[randomPiece(),randomPiece(),randomPiece()];
+  // keep the three colours distinct for a nicer tray
+  const used=new Set();
+  tray.forEach(p=>{ let tries=0; while(used.has(p.color)&&tries++<10) p.color=randColor(); used.add(p.color); });
+  trayJustFilled=true;
+}
+let trayJustFilled=false;
+function refillIfEmpty(){ if(tray.every(p=>!p)) fillTray(); }
+
+/* ================= Layout ================= */
+function layout(){
+  if(!boardArea) return;
+  const isPad = document.documentElement.classList.contains("device-ipad");
+  const w = boardArea.clientWidth, h = boardArea.clientHeight;
+  if(!w || !h) return;
+  let size = Math.floor(Math.min(w, h - 4, isPad ? 720 : 560));
+  size = Math.max(200, size);
+  const pad = Math.max(5, Math.round(size*0.022));
+  const gap = Math.max(2, Math.round(size*0.008));
+  const cell = (size - pad*2 - gap*7)/8;
+  boardEl.style.width = size+"px"; boardEl.style.height = size+"px";
+  boardEl.style.setProperty("--pad", pad+"px");
+  boardEl.style.setProperty("--gap", gap+"px");
+  boardEl.style.setProperty("--bevel", Math.max(2, Math.round(cell*0.085))+"px");
+  const tr = trayEl.getBoundingClientRect();
+  const tcs = Math.max(10, Math.floor(Math.min((tr.width/3 - 18)/4.2, (tr.height - 18)/4.2, cell*0.62)));
+  trayEl.style.setProperty("--tcs", tcs+"px");
+  M = {size, pad, gap, cell, tcs};
+}
+window.addEventListener("resize", ()=>{ layout(); fxResize(); bgResize(); });
 
 function buildBoard(){
   boardEl.innerHTML=""; cells=[];
@@ -826,13 +1165,13 @@ function buildBoard(){
     boardEl.appendChild(d); cells[r][c]=d;
   }}
 }
-function paintBoard(){
-  for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++){
-    const el=cells[r][c];
-    el.classList.remove("preview","preview-bad","clearing");
-    el.classList.toggle("filled",!!grid[r][c]);
-  }
+function paintCell(r,c){
+  const el=cells[r][c], v=grid[r][c];
+  el.className = v ? "cell blk" : "cell";
+  if(v) el.setAttribute("data-c", v); else el.removeAttribute("data-c");
+  el.removeAttribute("data-pc"); el.style.animationDelay="";
 }
+function paintBoard(){ for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++) paintCell(r,c); }
 function canPlace(shape,row,col,g){
   const board=g||grid;
   for(const[dr,dc]of shape){const r=row+dr,c=col+dc;if(r<0||c<0||r>=SIZE||c>=SIZE||board[r][c])return false}
@@ -865,53 +1204,53 @@ function findFullLines(g){
   return{fullRows,fullCols};
 }
 
+/* ================= Pulse / level ================= */
+function renderPulse(){
+  pulseEl.textContent=Math.round(pulse);
+  pulseFill.style.width=pulse+"%";
+  pulseFill.classList.toggle("mid", pulse>30 && pulse<=55);
+  pulseFill.classList.toggle("low", pulse<=30);
+  pulseFill.classList.toggle("critical", pulse<=15);
+  document.body.classList.toggle("danger", inGame && !gameOver && pulse<=18);
+  const bpm = 70 + drainPerSecond()*16 + (pulse<=30?40:0);
+  document.documentElement.style.setProperty("--beat", (60/bpm).toFixed(3)+"s");
+}
 function setPulse(v, opts){
   const prev=pulse;
   pulse=Math.max(0,Math.min(100,v));
-  pulseEl.textContent=Math.round(pulse);
-  pulseFill.style.width=pulse+"%";
-  pulseFill.classList.toggle("low", pulse<=30);
-  pulseFill.classList.toggle("critical", pulse<=15);
-  pulseFill.classList.toggle("pump", pulse>30);
+  renderPulse();
   updatePowers();
   if(pulse<=0 && !gameOver && !(opts&&opts.silent)){
-    endGame("Pulse flatlined — keep clearing to stay alive");
+    endGame("Your Pulse flatlined. Clear lines faster to keep it pumping!", "flat");
     return;
   }
-  // Level up when reaching the top
-  if(prev<100 && pulse>=100 && !gameOver){
-    levelUp();
-  }
+  if(prev<100 && pulse>=100 && !gameOver){ levelUp(); }
 }
 function levelUp(){
   level+=1;
   levelEl.textContent=level;
-  // Keep momentum after level-up so Levels chain feel rewarding
+  const badge=$("levelBadge"); badge.classList.remove("pop"); void badge.offsetWidth; badge.classList.add("pop");
   pulse=58;
-  pulseEl.textContent=Math.round(pulse);
-  pulseFill.style.width=pulse+"%";
-  pulseFill.classList.remove("low","critical");
-  pulseFill.classList.add("pump");
-  showCombo("LEVEL "+level+"!");
-  buzz([20,40,20,40,60]);
+  renderPulse();
+  hap("success"); sfx.level();
   placeTip.textContent="Level "+level+" — Pulse drains faster. Stay intense.";
-  // Refresh tray with new difficulty pieces
   fillTray(); renderTray();
   updatePowers();
-  checkGameOver();
+  if(!clearing) checkGameOver();
   levelsSinceInterstitial += 1;
-  maybeShowInterstitial();
+  showLevelSplash();
 }
 function updatePowers(){
+  const nameEl=insightBtn.querySelector(".pw-name");
   if(insightActive){
     insightBtn.disabled=false; insightBtn.classList.add("ready","active");
-    insightBtn.childNodes[0].nodeValue="Insight ON"; insightHint.classList.add("show");
+    nameEl.textContent="Insight ON"; insightHint.classList.add("show");
   }else if(pulse>=55 && !gameOver){
     insightBtn.disabled=false; insightBtn.classList.add("ready"); insightBtn.classList.remove("active");
-    insightBtn.childNodes[0].nodeValue="Insight"; insightHint.classList.remove("show");
+    nameEl.textContent="Insight"; insightHint.classList.remove("show");
   }else{
     insightBtn.disabled=true; insightBtn.classList.remove("ready","active");
-    insightBtn.childNodes[0].nodeValue="Insight"; insightHint.classList.remove("show");
+    nameEl.textContent="Insight"; insightHint.classList.remove("show");
     if(pulse<55) insightActive=false;
   }
   if(surgeArmed){surgeBtn.disabled=false;surgeBtn.classList.add("ready","active")}
@@ -920,60 +1259,81 @@ function updatePowers(){
   if(blastMode){blastBtn.disabled=false;blastBtn.classList.add("ready","active")}
   else if(pulse>=BLAST_COST+15 && !gameOver){blastBtn.disabled=false;blastBtn.classList.add("ready");blastBtn.classList.remove("active")}
   else{blastBtn.disabled=true;blastBtn.classList.remove("ready","active")}
+  boardEl.classList.toggle("insight-on", insightActive);
+  boardEl.classList.toggle("surge-on", surgeArmed);
+  boardEl.classList.toggle("blast-mode", blastMode);
 }
-function updateScore(n){score=n;scoreEl.textContent=score}
-function setStreak(s){clearStreak=s;streakEl.textContent=clearStreak}
-function getBest(){try{return parseInt(localStorage.getItem("pulseGridBest")||"0",10)}catch(_){return 0}}
+function updateScore(n){
+  const up = n>score;
+  score=n;
+  cancelAnimationFrame(scoreRaf);
+  if(!up){ shownScore=n; scoreEl.textContent=n; return; }
+  const from=shownScore, to=n, t0=performance.now();
+  scoreEl.classList.add("bump"); setTimeout(()=>scoreEl.classList.remove("bump"),140);
+  const step=(t)=>{ const k=Math.min(1,(t-t0)/450); shownScore=Math.round(from+(to-from)*(1-Math.pow(1-k,3))); scoreEl.textContent=shownScore; if(k<1) scoreRaf=requestAnimationFrame(step); };
+  scoreRaf=requestAnimationFrame(step);
+}
+function setStreak(s){
+  clearStreak=s; streakEl.textContent=clearStreak; bestCombo=Math.max(bestCombo,s);
+  $("streakChip").classList.toggle("on", s>=2);
+}
+function getBest(){ return parseInt(lsGet("pulseGridBest","0"),10)||0; }
 function saveBest(){
   const best=getBest();
-  if(score>best){
-    try{localStorage.setItem("pulseGridBest",String(score))}catch(_){}
-    bestEl.textContent=String(score);
-    return true;
-  }
+  if(score>best){ lsSet("pulseGridBest",score); bestEl.textContent=String(score); return true; }
   return false;
 }
-function showCombo(text){
-  comboToast.textContent=text; comboToast.classList.add("show");
-  setTimeout(()=>comboToast.classList.remove("show"),800);
+let comboTimer=0;
+function showCombo(text, sub){
+  comboToast.innerHTML = '<span class="grad"></span>' + (sub?'<small></small>':'');
+  comboToast.querySelector(".grad").textContent=text;
+  if(sub) comboToast.querySelector("small").textContent=sub;
+  comboToast.classList.remove("show"); void comboToast.offsetWidth; comboToast.classList.add("show");
+  clearTimeout(comboTimer); comboTimer=setTimeout(()=>comboToast.classList.remove("show"),1000);
 }
+function floatScore(x,y,text){
+  const w=boardWrap.getBoundingClientRect();
+  const el=document.createElement("div"); el.className="float-score"; el.textContent=text;
+  el.style.left=(x-w.left)+"px"; el.style.top=(y-w.top)+"px";
+  boardWrap.appendChild(el); setTimeout(()=>el.remove(),1000);
+}
+function shake(n){ appEl.classList.remove("shake-1","shake-2"); void appEl.offsetWidth; appEl.classList.add(n>=2?"shake-2":"shake-1"); setTimeout(()=>appEl.classList.remove("shake-1","shake-2"),420); }
 
-function startDrain(){
-  stopDrain();
-  lastTick=performance.now();
-  tickTimer=requestAnimationFrame(drainTick);
-}
-function stopDrain(){
-  if(tickTimer){cancelAnimationFrame(tickTimer);tickTimer=null}
-}
+/* ================= Drain loop ================= */
+function startDrain(){ stopDrain(); lastTick=performance.now(); tickTimer=requestAnimationFrame(drainTick); }
+function stopDrain(){ if(tickTimer){cancelAnimationFrame(tickTimer);tickTimer=null} }
 function drainTick(now){
   tickTimer=requestAnimationFrame(drainTick);
-  if(gameOver||clearing||pausedForAd){lastTick=now;return}
+  if(gameOver||clearing||pausedForAd||uiPaused()){lastTick=now;return}
   const dt=(now-lastTick)/1000; lastTick=now;
   if(dt<=0||dt>0.25)return;
   setPulse(pulse - drainPerSecond()*dt, {silent:false});
 }
 
-function renderTray(){
+/* ================= Tray ================= */
+function pieceGridHTML(piece){
+  const{rows,cols}=shapeBounds(piece.shape);
+  const map=Array.from({length:rows},()=>Array(cols).fill(false));
+  for(const[r,c]of piece.shape)map[r][c]=true;
+  let h="";
+  for(let r=0;r<rows;r++)for(let c=0;c<cols;c++) h+= map[r][c] ? '<div class="blk" data-c="'+piece.color+'"></div>' : '<div></div>';
+  return {h, rows, cols};
+}
+function renderTray(spawn){
+  const doSpawn = spawn || trayJustFilled; trayJustFilled=false;
   trayEl.innerHTML="";
   tray.forEach((piece,idx)=>{
     const slot=document.createElement("div");
-    slot.className="piece-slot"+(piece?"":" empty")+(selectedIdx===idx?" selected":"");
+    slot.className="piece-slot"+(piece?"":" empty")+(selectedIdx===idx?" selected":"")+(doSpawn&&piece?" spawn":"");
     slot.dataset.idx=idx;
     if(piece){
-      const{rows,cols}=shapeBounds(piece.shape);
+      const {h,rows,cols}=pieceGridHTML(piece);
       const pg=document.createElement("div"); pg.className="piece-grid";
-      pg.style.gridTemplateColumns=`repeat(${cols},16px)`; pg.style.gridTemplateRows=`repeat(${rows},16px)`;
-      const map=Array.from({length:rows},()=>Array(cols).fill(false));
-      for(const[r,c]of piece.shape)map[r][c]=true;
-      for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
-        const cell=document.createElement("div");
-        if(map[r][c])cell.className="piece-cell"; else{cell.style.width=cell.style.height="16px"}
-        pg.appendChild(cell);
-      }
+      pg.style.gridTemplateColumns=`repeat(${cols},var(--tcs))`; pg.style.gridTemplateRows=`repeat(${rows},var(--tcs))`;
+      pg.innerHTML=h;
       slot.appendChild(pg);
+      if(!gameOver && !anyPlacement(piece.shape)) slot.classList.add("nofit");
       slot.addEventListener("pointerdown",onPiecePointerDown);
-      slot.addEventListener("click",onPieceClick);
     }
     trayEl.appendChild(slot);
   });
@@ -982,161 +1342,231 @@ function selectPiece(idx){
   if(!tray[idx]||blastMode||gameOver)return;
   selectedIdx=selectedIdx===idx?null:idx;
   renderTray(); clearPreview();
-  placeTip.textContent=selectedIdx!=null?"Selected — tap the board to place":"Tap a tray piece, then tap the board.";
+  if(selectedIdx!=null) sfx.pickup();
+  placeTip.textContent=selectedIdx!=null?"Tap the board to drop it — or drag it there.":"Drag a block onto the board.";
 }
-function onPieceClick(e){
-  if(gameOver||clearing||blastMode)return;
-  e.preventDefault(); e.stopPropagation();
-  if(e.currentTarget._didDrag){e.currentTarget._didDrag=false;return}
-  selectPiece(+e.currentTarget.dataset.idx);
-}
+function isTouchLike(e){ return e.pointerType==="touch" || e.pointerType==="pen"; }
 function onPiecePointerDown(e){
-  if(gameOver||clearing||blastMode)return;
+  if(gameOver||clearing||blastMode||uiPaused())return;
   if(e.button!=null&&e.button!==0)return;
-  const idx=+e.currentTarget.dataset.idx; if(!tray[idx])return;
-  const isCoarse=window.matchMedia&&window.matchMedia("(pointer: coarse)").matches;
-  const dragThreshold=isCoarse?22:10;
-  dragIdx=idx; dragPointerId=e.pointerId; e.currentTarget._didDrag=false;
-  const startX=e.clientX,startY=e.clientY; let moved=false; const target=e.currentTarget;
-  try{target.setPointerCapture(e.pointerId)}catch(_){}
+  const target=e.currentTarget, idx=+target.dataset.idx; if(!tray[idx])return;
+  const pid=e.pointerId, startX=e.clientX, startY=e.clientY;
+  const touch=isTouchLike(e);
+  const threshold=touch?8:5;
+  let moved=false;
+  try{target.setPointerCapture(pid)}catch(_){}
   const onMove=(ev)=>{
-    if(ev.pointerId!==dragPointerId)return;
-    const dx=ev.clientX-startX,dy=ev.clientY-startY;
-    if(!moved&&Math.hypot(dx,dy)<dragThreshold)return;
-    moved=true; target._didDrag=true; selectedIdx=idx;
-    showGhost(tray[idx],ev.clientX,ev.clientY); updateHoverFromPoint(ev.clientX,ev.clientY);
-    document.querySelector(`.piece-slot[data-idx="${idx}"]`)?.classList.add("dragging");
+    if(ev.pointerId!==pid)return;
+    if(!moved && Math.hypot(ev.clientX-startX, ev.clientY-startY)<threshold) return;
+    if(!moved){
+      moved=true; dragIdx=idx; selectedIdx=idx;
+      target.classList.add("dragging"); sfx.pickup(); hap("light");
+      showGhost(tray[idx]);
+    }
+    positionGhost(ev.clientX, ev.clientY, touch);
     if(ev.cancelable)ev.preventDefault();
   };
   const onUp=(ev)=>{
-    if(ev.pointerId!==dragPointerId)return;
-    try{target.releasePointerCapture(ev.pointerId)}catch(_){}
+    if(ev.pointerId!==pid)return;
+    try{target.releasePointerCapture(pid)}catch(_){}
     target.removeEventListener("pointermove",onMove); target.removeEventListener("pointerup",onUp); target.removeEventListener("pointercancel",onUp);
-    hideGhost(); document.querySelectorAll(".piece-slot.dragging").forEach(el=>el.classList.remove("dragging"));
-    if(moved&&hoverRC&&tray[dragIdx]){tryPlace(dragIdx,hoverRC.r,hoverRC.c);selectedIdx=null;renderTray()}
-    else if(!moved){selectPiece(idx);target._didDrag=true;setTimeout(()=>{target._didDrag=false},400)}
-    dragIdx=null; dragPointerId=null; hoverRC=null; clearPreview();
+    if(moved){
+      const rc=hoverRC, piece=tray[idx];
+      if(rc && piece && canPlace(piece.shape,rc.r,rc.c) && !gameOver){
+        hideGhost(); tryPlace(idx,rc.r,rc.c); selectedIdx=null;
+      }else{
+        if(rc) sfx.bad();
+        flyGhostBack(target); selectedIdx=null; target.classList.remove("dragging");
+      }
+      renderTray();
+    }else{
+      selectPiece(idx);
+    }
+    dragIdx=null; hoverRC=null; clearPreview();
   };
   target.addEventListener("pointermove",onMove,{passive:false});
   target.addEventListener("pointerup",onUp); target.addEventListener("pointercancel",onUp);
 }
-function showGhost(piece,x,y){
-  const{rows,cols}=shapeBounds(piece.shape);
-  const map=Array.from({length:rows},()=>Array(cols).fill(false));
-  for(const[r,c]of piece.shape)map[r][c]=true;
-  let h=`<div class="piece-grid" style="grid-template-columns:repeat(${cols},auto);grid-template-rows:repeat(${rows},auto)">`;
-  for(let r=0;r<rows;r++)for(let c=0;c<cols;c++)h+=map[r][c]?'<div class="piece-cell"></div>':'<div style="width:28px;height:28px"></div>';
-  h+="</div>"; dragGhost.innerHTML=h; dragGhost.style.display="block"; positionGhost(x,y,piece);
+let ghostDims={w:0,h:0,rows:1,cols:1};
+function showGhost(piece){
+  const {h,rows,cols}=pieceGridHTML(piece);
+  const pitch=M.cell+M.gap;
+  dragGhost.innerHTML='<div class="piece-grid" style="gap:'+M.gap+'px;--bevel:'+Math.max(2,Math.round(M.cell*0.085))+'px;--tcs:'+M.cell+'px;grid-template-columns:repeat('+cols+','+M.cell+'px);grid-template-rows:repeat('+rows+','+M.cell+'px)">'+h+'</div>';
+  dragGhost.classList.remove("back"); dragGhost.style.opacity="1";
+  dragGhost.style.display="block";
+  ghostDims={w:cols*pitch-M.gap, h:rows*pitch-M.gap, rows, cols};
 }
-function positionGhost(x,y,piece){
-  const{cols,rows}=shapeBounds(piece.shape); const cellSize=getBoardCellSize();
-  dragGhost.style.left=(x-cols*cellSize/2)+"px"; dragGhost.style.top=(y-rows*cellSize/2)+"px";
-  dragGhost.querySelectorAll(".piece-cell").forEach(el=>{el.style.width=cellSize-3+"px";el.style.height=cellSize-3+"px"});
-}
-function hideGhost(){dragGhost.style.display="none";dragGhost.innerHTML=""}
-function getBoardCellSize(){const rect=boardEl.getBoundingClientRect();return(rect.width-12-21)/8}
-function pointToCell(x,y,shape){
-  const rect=boardEl.getBoundingClientRect(),gap=3,pad=6,cellSize=(rect.width-pad*2-gap*7)/8;
-  const{rows,cols}=shapeBounds(shape);
-  const localX=x-rect.left-pad-(cols*(cellSize+gap)-gap)/2;
-  const localY=y-rect.top-pad-(rows*(cellSize+gap)-gap)/2;
-  let c=Math.round(localX/(cellSize+gap)), r=Math.round(localY/(cellSize+gap));
+function positionGhost(x,y,touch){
+  const lift = touch ? (ghostDims.h/2 + Math.max(40, M.cell*1.1)) : 0;
+  const left = x - ghostDims.w/2, top = y - lift - ghostDims.h/2;
+  dragGhost.style.transform = `translate(${left}px,${top}px)`;
+  // Snap target from the ghost's top-left corner
+  const b=boardEl.getBoundingClientRect(), pitch=M.cell+M.gap;
+  const gx=(left-(b.left+M.pad))/pitch, gy=(top-(b.top+M.pad))/pitch;
+  let c=Math.round(gx), r=Math.round(gy);
+  const {rows,cols}=ghostDims;
+  if(c<-1||r<-1||c>SIZE-cols+1||r>SIZE-rows+1){ hoverRC=null; clearPreview(); return; }
   r=Math.max(0,Math.min(SIZE-rows,r)); c=Math.max(0,Math.min(SIZE-cols,c));
-  return{r,c};
+  if(!hoverRC || hoverRC.r!==r || hoverRC.c!==c){ hoverRC={r,c}; showPreview(dragIdx,r,c); }
 }
-function updateHoverFromPoint(x,y){
-  const idx=dragIdx!=null?dragIdx:selectedIdx;
-  if(idx==null||!tray[idx]){clearPreview();return}
-  const rect=boardEl.getBoundingClientRect();
-  if(x<rect.left||x>rect.right||y<rect.top||y>rect.bottom){hoverRC=null;clearPreview();return}
-  const rc=pointToCell(x,y,tray[idx].shape); hoverRC=rc; showPreview(idx,rc.r,rc.c);
+function flyGhostBack(slot){
+  const s=slot.getBoundingClientRect();
+  dragGhost.classList.add("back");
+  dragGhost.style.transform=`translate(${s.left+s.width/2-ghostDims.w/2}px,${s.top+s.height/2-ghostDims.h/2}px) scale(.5)`;
+  dragGhost.style.opacity="0";
+  setTimeout(hideGhost,170);
 }
-function clearPreview(){for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++)cells[r][c].classList.remove("preview","preview-bad")}
+function hideGhost(){ dragGhost.style.display="none"; dragGhost.innerHTML=""; dragGhost.classList.remove("back"); }
+
+/* ================= Board pointer mapping ================= */
+function cellFromPoint(x,y){
+  const b=boardEl.getBoundingClientRect(), pitch=M.cell+M.gap;
+  if(x<b.left||x>b.right||y<b.top||y>b.bottom) return null;
+  const c=Math.max(0,Math.min(SIZE-1,Math.floor((x-b.left-M.pad+M.gap/2)/pitch)));
+  const r=Math.max(0,Math.min(SIZE-1,Math.floor((y-b.top-M.pad+M.gap/2)/pitch)));
+  return {r,c};
+}
+function clearPreview(){
+  for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++){
+    const el=cells[r]&&cells[r][c]; if(!el) continue;
+    if(el.classList.contains("preview")||el.classList.contains("preview-bad")||el.classList.contains("wc")||el.classList.contains("blast-target")) paintCell(r,c);
+  }
+}
 function showPreview(trayIdx,row,col){
   clearPreview(); const piece=tray[trayIdx]; if(!piece||!canPlace(piece.shape,row,col))return;
   const bad=insightActive&&isDeadEndPlacement(trayIdx,row,col);
-  for(const[dr,dc]of piece.shape)cells[row+dr][col+dc].classList.add(bad?"preview-bad":"preview");
+  const g=grid.map(r=>r.slice());
+  for(const[dr,dc]of piece.shape){
+    const el=cells[row+dr][col+dc]; g[row+dr][col+dc]=piece.color;
+    el.className="cell blk "+(bad?"preview-bad":"preview"); el.setAttribute("data-c",piece.color);
+  }
+  if(bad) return;
+  const {fullRows,fullCols}=findFullLines(g);
+  const mark=(r,c)=>{ const el=cells[r][c]; el.classList.add("wc"); el.setAttribute("data-pc",piece.color); };
+  fullRows.forEach(r=>{for(let c=0;c<SIZE;c++)mark(r,c)});
+  fullCols.forEach(c=>{for(let r=0;r<SIZE;r++)mark(r,c)});
+}
+function anchorFor(shape,cell){
+  const{rows,cols}=shapeBounds(shape);
+  let r=cell.r-Math.floor((rows-1)/2), c=cell.c-Math.floor((cols-1)/2);
+  r=Math.max(0,Math.min(SIZE-rows,r)); c=Math.max(0,Math.min(SIZE-cols,c));
+  if(canPlace(shape,r,c)) return {r,c};
+  for(let d=1; d<=1; d++) for(let dr=-d;dr<=d;dr++)for(let dc=-d;dc<=d;dc++){
+    const rr=Math.max(0,Math.min(SIZE-rows,r+dr)), cc=Math.max(0,Math.min(SIZE-cols,c+dc));
+    if(canPlace(shape,rr,cc)) return {r:rr,c:cc};
+  }
+  // try treating the tapped cell as top-left (original behaviour)
+  const r2=Math.max(0,Math.min(SIZE-rows,cell.r)), c2=Math.max(0,Math.min(SIZE-cols,cell.c));
+  if(canPlace(shape,r2,c2)) return {r:r2,c:c2};
+  return null;
 }
 function placeFromPoint(clientX,clientY){
-  if(gameOver||clearing||dragIdx!=null)return;
-  if(Date.now()-lastPlaceAt<350)return;
+  if(gameOver||clearing||dragIdx!=null||uiPaused())return;
   if(blastMode){doBlastAt(clientX,clientY);return}
   if(selectedIdx==null||!tray[selectedIdx])return;
-  const{rows,cols}=shapeBounds(tray[selectedIdx].shape);
-  const rect=boardEl.getBoundingClientRect();
-  if(clientX<rect.left||clientX>rect.right||clientY<rect.top||clientY>rect.bottom)return;
-  const gap=3,pad=6,cellSize=(rect.width-pad*2-gap*7)/8;
-  let c=Math.floor((clientX-rect.left-pad)/(cellSize+gap));
-  let r=Math.floor((clientY-rect.top-pad)/(cellSize+gap));
-  r=Math.max(0,Math.min(SIZE-rows,r)); c=Math.max(0,Math.min(SIZE-cols,c));
-  if(!canPlace(tray[selectedIdx].shape,r,c)){
-    let ok=false;
-    for(let dr=-1;dr<=1&&!ok;dr++)for(let dc=-1;dc<=1&&!ok;dc++){
-      const rr=Math.max(0,Math.min(SIZE-rows,r+dr)), cc=Math.max(0,Math.min(SIZE-cols,c+dc));
-      if(canPlace(tray[selectedIdx].shape,rr,cc)){r=rr;c=cc;ok=true}
-    }
-    if(!ok)return;
-  }
-  lastPlaceAt=Date.now(); tryPlace(selectedIdx,r,c);
+  const cell=cellFromPoint(clientX,clientY); if(!cell) return;
+  const a=anchorFor(tray[selectedIdx].shape,cell);
+  if(!a){ sfx.bad(); hap("light"); return; }
+  tryPlace(selectedIdx,a.r,a.c);
 }
 function doBlastAt(clientX,clientY){
-  const rect=boardEl.getBoundingClientRect();
-  if(clientX<rect.left||clientX>rect.right||clientY<rect.top||clientY>rect.bottom)return;
-  const gap=3,pad=6,cellSize=(rect.width-pad*2-gap*7)/8;
-  let c=Math.floor((clientX-rect.left-pad)/(cellSize+gap));
-  let r=Math.floor((clientY-rect.top-pad)/(cellSize+gap));
-  r=Math.max(0,Math.min(SIZE-1,r)); c=Math.max(0,Math.min(SIZE-1,c));
-  if(!grid[r][c]){placeTip.textContent="Tap a filled cell for Blast";return}
+  const cell=cellFromPoint(clientX,clientY); if(!cell) return;
+  const {r,c}=cell;
+  if(!grid[r][c]){placeTip.textContent="Tap a filled block to Blast it";sfx.bad();return}
   const toClear=new Set();
   for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){
     const rr=r+dr,cc=c+dc; if(rr>=0&&cc>=0&&rr<SIZE&&cc<SIZE&&grid[rr][cc])toClear.add(rr+","+cc);
   }
   if(!toClear.size)return;
-  blastMode=false; clearing=true; buzz([25,40,25]);
-  toClear.forEach(key=>{const[rr,cc]=key.split(",").map(Number);cells[rr][cc].classList.add("clearing");cells[rr][cc].classList.remove("filled")});
+  blastMode=false; clearing=true; hap("heavy"); sfx.boom(); shake(2);
+  const center=cells[r][c].getBoundingClientRect();
+  burst(center.left+center.width/2, center.top+center.height/2, "#ffd23f", 40, {speed:9, spark:true});
+  toClear.forEach(key=>{const[rr,cc]=key.split(",").map(Number);const el=cells[rr][cc];
+    el.style.animationDelay=(Math.abs(rr-r)+Math.abs(cc-c))*40+"ms"; el.classList.add("clearing");
+    const b=el.getBoundingClientRect(); burst(b.left+b.width/2,b.top+b.height/2,COLORS[grid[rr][cc]]||"#fff",10,{});});
   const points=toClear.size*8+level*5; updateScore(score+points);
-  setPulse(pulse-BLAST_COST); // spend life carefully
-  // Blast also pumps a little life from the clear
+  floatScore(center.left+center.width/2, center.top, "+"+points);
+  setPulse(pulse-BLAST_COST);
   setPulse(pulse+Math.min(20,toClear.size*3));
-  showCombo("BLAST!");
+  showCombo("BOOM!");
   setTimeout(()=>{
     toClear.forEach(key=>{const[rr,cc]=key.split(",").map(Number);grid[rr][cc]=0});
-    clearing=false; paintBoard(); updatePowers(); checkGameOver();
+    clearing=false; paintBoard(); updatePowers(); checkGameOver(); renderTray();
     placeTip.textContent="Keep the heartbeat alive — clear lines to refill Pulse.";
-  },380);
+  },420);
+}
+
+/* ================= Place + clear ================= */
+function praiseFor(lines){
+  if(lines>=5) return "UNBELIEVABLE!";
+  if(lines===4) return "AMAZING!";
+  if(lines===3) return "EXCELLENT!";
+  if(lines===2) return "GREAT!";
+  return null;
 }
 function tryPlace(trayIdx,row,col){
   if(gameOver||clearing)return;
   const piece=tray[trayIdx]; if(!piece||!canPlace(piece.shape,row,col))return;
-  for(const[dr,dc]of piece.shape)grid[row+dr][col+dc]=1;
-  tray[trayIdx]=null; selectedIdx=null; paintBoard(); renderTray();
+  for(const[dr,dc]of piece.shape)grid[row+dr][col+dc]=piece.color;
+  tray[trayIdx]=null; selectedIdx=null;
+  for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++) paintCell(r,c);
+  for(const[dr,dc]of piece.shape) cells[row+dr][col+dc].classList.add("pop");
+  renderTray();
+  sfx.place();
   const{fullRows,fullCols}=findFullLines(grid);
   const lineCount=fullRows.length+fullCols.length;
   if(lineCount>0){
     clearing=true; const toClear=new Set();
     for(const r of fullRows)for(let c=0;c<SIZE;c++)toClear.add(r+","+c);
     for(const c of fullCols)for(let r=0;r<SIZE;r++)toClear.add(r+","+c);
-    toClear.forEach(key=>{const[r,c]=key.split(",").map(Number);cells[r][c].classList.add("clearing");cells[r][c].classList.remove("filled")});
+    // origin of the wave = centre of the placed piece
+    const {rows,cols}=shapeBounds(piece.shape);
+    const oR=row+(rows-1)/2, oC=col+(cols-1)/2;
+    let sx=0, sy=0;
+    toClear.forEach(key=>{
+      const[r,c]=key.split(",").map(Number); const el=cells[r][c];
+      const d=Math.abs(r-oR)+Math.abs(c-oC);
+      el.style.animationDelay=Math.round(d*22)+"ms"; el.classList.remove("pop"); el.classList.add("clearing");
+      const b=el.getBoundingClientRect(); sx+=b.left+b.width/2; sy+=b.top+b.height/2;
+      setTimeout(()=>burst(b.left+b.width/2,b.top+b.height/2,COLORS[grid[r][c]]||COLORS[piece.color],7,{}), d*22+60);
+    });
+    sweepLines(fullRows,fullCols,piece.color);
     setStreak(clearStreak+1);
+    linesCleared+=lineCount;
     let mult=lineCount*(surgeArmed?2:1);
-    if(surgeArmed){surgeArmed=false;showCombo(lineCount+"× SURGE!");buzz([20,30,20,30,40])}
-    else if(lineCount>=2){showCombo(lineCount+"× COMBO!");buzz([20,40,30])}
-    else buzz(18);
+    const praise=praiseFor(lineCount);
+    const streakTxt = clearStreak>=2 ? ("Combo x"+clearStreak) : "";
+    if(surgeArmed){surgeArmed=false;showCombo("SURGE ×2!", praise||streakTxt||lineCount+" line"+(lineCount>1?"s":""));hap("heavy")}
+    else if(praise){showCombo(praise, streakTxt||(lineCount+" lines"));hap("medium")}
+    else if(clearStreak>=2){showCombo("COMBO x"+clearStreak);hap("light")}
+    else hap("light");
+    sfx.clear(lineCount, clearStreak);
+    if(lineCount>=2) shake(lineCount>=3?2:1);
     const points=lineCount*12*mult+toClear.size*2+clearStreak*3+level*4;
     updateScore(score+points);
-    // Add TIME / pulse — this is the pump
+    floatScore(sx/toClear.size, sy/toClear.size, "+"+points);
     const gain=CLEAR_PULSE_BASE*lineCount + Math.min(20,clearStreak*3) + (lineCount>=2?14:0) + Math.min(10,level);
     setPulse(pulse+gain);
     setTimeout(()=>{
       toClear.forEach(key=>{const[r,c]=key.split(",").map(Number);grid[r][c]=0});
-      clearing=false; paintBoard(); afterPlace();
-    },420);
+      clearing=false; paintBoard();
+      if(grid.every(r=>r.every(v=>!v))){ showCombo("PERFECT CLEAR!","Board wiped"); confetti(60); }
+      afterPlace();
+    },460);
   }else{
-    // Dry place: small panic drain (not the confusing big swing)
-    setStreak(0); buzz(8); setPulse(pulse-1.5); afterPlace();
+    setStreak(0); hap("light"); setPulse(pulse-1.5); afterPlace();
   }
 }
-function afterPlace(){refillIfEmpty();renderTray();paintBoard();updatePowers();checkGameOver()}
+function sweepLines(rows,cols,color){
+  const pitch=M.cell+M.gap;
+  rows.forEach(r=>{ const s=document.createElement("div"); s.className="sweep";
+    s.style.left=(M.pad-4)+"px"; s.style.width=(M.size-2*M.pad+8)+"px"; s.style.top=(M.pad+r*pitch-3)+"px"; s.style.height=(M.cell+6)+"px";
+    s.style.boxShadow="0 0 24px "+COLORS[color]; boardWrap.appendChild(s); setTimeout(()=>s.remove(),420); });
+  cols.forEach(c=>{ const s=document.createElement("div"); s.className="sweep v";
+    s.style.top=(M.pad-4)+"px"; s.style.height=(M.size-2*M.pad+8)+"px"; s.style.left=(M.pad+c*pitch-3)+"px"; s.style.width=(M.cell+6)+"px";
+    s.style.boxShadow="0 0 24px "+COLORS[color]; boardWrap.appendChild(s); setTimeout(()=>s.remove(),420); });
+}
+function afterPlace(){refillIfEmpty();renderTray();updatePowers();checkGameOver()}
 function hasAnyMove(){
   const rem=tray.filter(Boolean);
   if(!rem.length)return true;
@@ -1147,156 +1577,361 @@ function checkGameOver(){
   refillIfEmpty();
   const rem=tray.filter(Boolean);
   if(!rem.length){fillTray();renderTray()}
-  if(!hasAnyMove()){
-    endGame("No moves left — board is locked");
-  }
+  if(!hasAnyMove()){ endGame("No room left for any of your blocks.", "moves"); }
 }
-function endGame(reason){
+function endGame(reason, kind){
   if(gameOver)return;
   gameOver=true; stopDrain();
   const isNew=saveBest();
-  endReason.textContent=reason||"Game over";
-  finalScoreEl.textContent=score;
-  finalLevelEl.textContent=level;
-  overlayBest.textContent=bestEl.textContent;
-  newBestEl.textContent=isNew?"★ NEW HIGH SCORE ★":"";
-  gameOverEl.classList.add("show");
+  const games=(parseInt(lsGet("pulseGames","0"),10)||0)+1; lsSet("pulseGames",games);
+  if(level>(parseInt(lsGet("pulseBestLevel","1"),10)||1)) lsSet("pulseBestLevel",level);
   hideGhost(); clearPreview(); blastMode=false; insightActive=false; surgeArmed=false;
-  updatePowers();
-  buzz([40,60,40,80,120]);
+  selectedIdx=null; renderTray(); updatePowers();
+  document.body.classList.remove("danger");
+  hap("error"); sfx.over();
+  // grey-out wave across the board, then the results card
+  for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++) if(grid[r][c]) setTimeout(()=>cells[r][c].classList.add("dead"), (r+c)*35);
+  const flat = kind==="flat" || /flatline/i.test(reason||"");
+  $("goTitle").textContent = flat ? "FLATLINE" : "OUT OF MOVES";
+  const icon=$("goIcon"); icon.classList.toggle("moves", !flat);
+  icon.innerHTML = '<svg class="i"><use href="#'+(flat?"i-heart":"i-grid")+'"/></svg>';
+  $("goEcg").style.display = flat ? "block" : "none";
+  endReason.textContent=reason||"Game over";
+  finalScoreEl.textContent="0";
+  finalLevelEl.textContent=level;
+  $("finalLines").textContent=linesCleared;
+  $("finalCombo").textContent=bestCombo;
+  overlayBest.textContent=bestEl.textContent;
+  newBestEl.textContent=isNew?"★ NEW BEST! ★":"";
   if(watchContinueBtn){
-    if(continueUsedThisRun){
-      setContinueLabel("Continue used", true);
-    }else{
-      setContinueLabel("Watch ad · continue", false);
-      preloadRewarded();
-    }
+    if(continueUsedThisRun) setContinueLabel("Continue used", true);
+    else { setContinueLabel("Watch ad · continue", false); preloadRewarded(); }
   }
+  setTimeout(()=>{
+    if(!gameOver || !inGame) return;
+    gameOverEl.classList.add("show");
+    countUp(finalScoreEl, score, 900);
+    if(isNew){ setTimeout(()=>{ confetti(120); sfx.best(); hap("success"); }, 900); }
+  }, 950);
+}
+function countUp(el,to,dur){
+  const t0=performance.now();
+  const step=(t)=>{ const k=Math.min(1,(t-t0)/dur); el.textContent=Math.round(to*(1-Math.pow(1-k,3))); if(k<1) requestAnimationFrame(step); };
+  requestAnimationFrame(step);
 }
 function startGame(){
   stopDrain();
+  holds.clear();
   grid=Array.from({length:SIZE},()=>Array(SIZE).fill(0));
-  score=0; pulse=START_PULSE; level=1; clearStreak=0;
+  score=0; pulse=START_PULSE; level=1; clearStreak=0; linesCleared=0; bestCombo=0;
   insightActive=false; surgeArmed=false; blastMode=false;
   continueUsedThisRun=false; levelsSinceInterstitial=0;
   selectedIdx=null; clearing=false; gameOver=false; hoverRC=null; dragIdx=null;
   updateScore(0); setStreak(0); levelEl.textContent=level;
-  pulseEl.textContent=Math.round(pulse); pulseFill.style.width=pulse+"%";
-  pulseFill.classList.remove("low","critical"); pulseFill.classList.add("pump");
-  fillTray(); buildBoard(); paintBoard(); renderTray();
+  bestEl.textContent=lsGet("pulseGridBest","0");
   gameOverEl.classList.remove("show"); hideGhost(); newBestEl.textContent="";
-  placeTip.textContent="Pulse drains like a heartbeat. Clear lines to pump it up — fill it to reach the next Level.";
+  $("levelUp").classList.add("hide"); $("sheet").classList.add("hide");
+  buildBoard(); layout(); fillTray(); paintBoard(); renderTray();
+  renderPulse();
+  placeTip.textContent="Drag blocks onto the board. Fill a row or column to clear it!";
   updatePowers();
   startDrain();
+  runReady();
 }
 
+/* ================= Splash moments ================= */
+function runReady(){
+  const rd=$("ready"), w=$("readyWord");
+  holds.add("ready"); rd.classList.remove("hide");
+  w.textContent="READY?"; w.className="word anim"; sfx.ready();
+  setTimeout(()=>{ w.textContent="GO!"; w.className="word go"; void w.offsetWidth; w.classList.add("anim"); sfx.go(); hap("medium"); }, 800);
+  setTimeout(()=>{ rd.classList.add("hide"); holds.delete("ready"); lastTick=performance.now(); }, 1350);
+}
+let luTimer=0;
+function showLevelSplash(){
+  const lu=$("levelUp");
+  $("luNum").textContent=level;
+  const subs=["Pulse drains faster. Stay sharp!","Bigger blocks incoming!","You're on fire — keep it going!","Heartbeat rising. Don't flatline!"];
+  $("luSub").textContent = subs[(level-2)%subs.length];
+  holds.add("level"); lu.classList.remove("hide");
+  confetti(90);
+  clearTimeout(luTimer); luTimer=setTimeout(closeLevelSplash, 1900);
+}
+function closeLevelSplash(){
+  const lu=$("levelUp"); if(lu.classList.contains("hide")) return;
+  clearTimeout(luTimer); lu.classList.add("hide"); holds.delete("level"); lastTick=performance.now();
+  maybeShowInterstitial();
+}
+$("levelUp").addEventListener("pointerup", closeLevelSplash);
+
+/* ================= Powers ================= */
 insightBtn.addEventListener("click",()=>{
-  if(gameOver)return;
-  if(!insightActive && pulse>=55){insightActive=true;setPulse(pulse-INSIGHT_COST);buzz(12);placeTip.textContent="Insight ON — avoid red dead-end placements"}
-  else if(insightActive){insightActive=false;updatePowers();clearPreview();placeTip.textContent="Insight off"}
+  if(gameOver||uiPaused())return;
+  if(!insightActive && pulse>=55){insightActive=true;setPulse(pulse-INSIGHT_COST);hap("light");sfx.power();placeTip.textContent="Insight ON — red placements lead to a dead end"}
+  else if(insightActive){insightActive=false;updatePowers();clearPreview();sfx.click();placeTip.textContent="Insight off"}
 });
 surgeBtn.addEventListener("click",()=>{
-  if(surgeArmed||gameOver||pulse<SURGE_COST+15)return;
-  surgeArmed=true; setPulse(pulse-SURGE_COST); buzz(15);
-  placeTip.textContent="Surge armed — next clear scores 2×"; updatePowers();
+  if(surgeArmed||gameOver||uiPaused()||pulse<SURGE_COST+15)return;
+  surgeArmed=true; setPulse(pulse-SURGE_COST); hap("light"); sfx.power();
+  placeTip.textContent="Surge armed — your next clear scores 2×"; updatePowers();
 });
 blastBtn.addEventListener("click",()=>{
-  if(gameOver||clearing)return;
-  if(blastMode){blastMode=false;placeTip.textContent="Blast cancelled";updatePowers();return}
+  if(gameOver||clearing||uiPaused())return;
+  if(blastMode){blastMode=false;placeTip.textContent="Blast cancelled";updatePowers();clearPreview();sfx.click();return}
   if(pulse<BLAST_COST+15)return;
-  blastMode=true; selectedIdx=null; renderTray(); clearPreview(); updatePowers(); buzz(15);
-  placeTip.textContent="Blast armed — tap a filled cell";
+  blastMode=true; selectedIdx=null; renderTray(); clearPreview(); updatePowers(); hap("light"); sfx.power();
+  placeTip.textContent="Blast armed — tap any block to blow up a 3×3 area";
 });
 
+/* ================= Board input ================= */
 boardEl.addEventListener("pointermove",(e)=>{
-  if(dragIdx!=null||blastMode)return;
-  if(selectedIdx==null||!tray[selectedIdx]||gameOver||clearing)return;
-  updateHoverFromPoint(e.clientX,e.clientY);
+  if(dragIdx!=null||gameOver||clearing)return;
+  if(blastMode){
+    const cell=cellFromPoint(e.clientX,e.clientY); clearPreview(); if(!cell) return;
+    for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){const rr=cell.r+dr,cc=cell.c+dc; if(rr>=0&&cc>=0&&rr<SIZE&&cc<SIZE&&grid[rr][cc]) cells[rr][cc].classList.add("blast-target");}
+    return;
+  }
+  if(selectedIdx==null||!tray[selectedIdx])return;
+  const cell=cellFromPoint(e.clientX,e.clientY); if(!cell){clearPreview();return}
+  const a=anchorFor(tray[selectedIdx].shape,cell);
+  if(a){ hoverRC=a; showPreview(selectedIdx,a.r,a.c); } else clearPreview();
 });
 boardEl.addEventListener("pointerleave",()=>{if(dragIdx!=null)return;hoverRC=null;clearPreview()});
 boardEl.addEventListener("pointerup",(e)=>{if(e.button!=null&&e.button!==0)return;placeFromPoint(e.clientX,e.clientY)});
-boardEl.addEventListener("click",(e)=>{if(gameOver||clearing||dragIdx!=null)return;placeFromPoint(e.clientX,e.clientY)});
 document.body.addEventListener("touchmove",(e)=>{
-  // Always cancel browser/WebView overscroll & edge history gestures during the app shell.
+  if(e.target && e.target.closest && e.target.closest("input[type=range]")) return;
   if(e.cancelable) e.preventDefault();
 },{passive:false});
 
-restartBtn.addEventListener("click",startGame);
-playAgainBtn.addEventListener("click",startGame);
+/* ================= Particles ================= */
+const fxC=$("fx"), fxX=fxC.getContext("2d");
+let parts=[], fxRun=false, DPR=Math.min(2, window.devicePixelRatio||1);
+function fxResize(){ DPR=Math.min(2, window.devicePixelRatio||1); fxC.width=innerWidth*DPR; fxC.height=innerHeight*DPR; }
+fxResize();
+function burst(x,y,color,n,o){
+  o=o||{}; const sp=o.speed||5;
+  for(let i=0;i<n;i++){
+    const a=Math.random()*Math.PI*2, v=(0.4+Math.random())*sp;
+    parts.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-2.2,g:0.28,life:1,decay:0.018+Math.random()*0.02,
+      s:4+Math.random()*7,rot:Math.random()*6,vr:(Math.random()-.5)*0.4,color,type:(o.spark&&i%2)?"spark":"sq"});
+  }
+  if(!fxRun){fxRun=true;requestAnimationFrame(fxLoop)}
+}
+function confetti(n){
+  const cols=COLORS.slice(1);
+  for(let i=0;i<n;i++){
+    parts.push({x:Math.random()*innerWidth,y:-20-Math.random()*innerHeight*0.4,vx:(Math.random()-.5)*2.5,vy:2+Math.random()*3,g:0.05,life:1,decay:0.004+Math.random()*0.004,
+      s:6+Math.random()*6,rot:Math.random()*6,vr:(Math.random()-.5)*0.3,color:cols[i%cols.length],type:"conf",ph:Math.random()*6});
+  }
+  if(!fxRun){fxRun=true;requestAnimationFrame(fxLoop)}
+}
+function fxLoop(){
+  fxX.setTransform(DPR,0,0,DPR,0,0);
+  fxX.clearRect(0,0,innerWidth,innerHeight);
+  parts=parts.filter(p=>p.life>0 && p.y<innerHeight+40);
+  for(const p of parts){
+    p.vy+=p.g; p.x+=p.vx; p.y+=p.vy; p.rot+=p.vr; p.life-=p.decay;
+    if(p.type==="conf"){ p.ph+=0.12; p.x+=Math.sin(p.ph)*0.8; p.vx*=0.99; }
+    fxX.save(); fxX.globalAlpha=Math.max(0,Math.min(1,p.life*1.4)); fxX.translate(p.x,p.y); fxX.rotate(p.rot);
+    if(p.type==="spark"){ fxX.globalCompositeOperation="lighter"; fxX.fillStyle=p.color; fxX.beginPath(); fxX.arc(0,0,p.s*0.5,0,7); fxX.fill(); }
+    else if(p.type==="conf"){ fxX.fillStyle=p.color; fxX.fillRect(-p.s/2,-p.s/4,p.s,p.s/2*Math.abs(Math.cos(p.ph))+1); }
+    else { const s=p.s*(0.5+p.life*0.5); fxX.fillStyle=p.color; fxX.fillRect(-s/2,-s/2,s,s); fxX.fillStyle="rgba(255,255,255,.55)"; fxX.fillRect(-s/2,-s/2,s,s*0.3); }
+    fxX.restore();
+  }
+  if(parts.length) requestAnimationFrame(fxLoop); else { fxRun=false; fxX.clearRect(0,0,innerWidth,innerHeight); }
+}
+
+/* ================= Floating-blocks background (menus) ================= */
+const bgC=$("bgfx"), bgX=bgC.getContext("2d");
+let bgBlocks=[], bgRun=false;
+function bgResize(){ bgC.width=innerWidth*DPR; bgC.height=innerHeight*DPR; }
+bgResize();
+function seedBg(){
+  bgBlocks=[]; const n=Math.round(innerWidth*innerHeight/26000)+8;
+  for(let i=0;i<n;i++) bgBlocks.push(newBg(true));
+}
+function newBg(anyY){
+  const s=16+Math.random()*34;
+  return {x:Math.random()*innerWidth,y:anyY?Math.random()*innerHeight:innerHeight+s,s,v:0.15+Math.random()*0.45,rot:Math.random()*6,vr:(Math.random()-.5)*0.006,
+    c:1+((Math.random()*8)|0),a:0.14+Math.random()*0.22};
+}
+function roundRect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
+function bgLoop(){
+  if(!bgRun){ bgX.clearRect(0,0,bgC.width,bgC.height); return; }
+  bgX.setTransform(DPR,0,0,DPR,0,0); bgX.clearRect(0,0,innerWidth,innerHeight);
+  for(const b of bgBlocks){
+    b.y-=b.v; b.rot+=b.vr; if(b.y<-b.s*2) Object.assign(b,newBg(false));
+    bgX.save(); bgX.globalAlpha=b.a; bgX.translate(b.x,b.y); bgX.rotate(b.rot);
+    bgX.fillStyle=COLORS[b.c]; roundRect(bgX,-b.s/2,-b.s/2,b.s,b.s,b.s*0.2); bgX.fill();
+    bgX.fillStyle=LIGHTS[b.c]; roundRect(bgX,-b.s/2+b.s*.1,-b.s/2+b.s*.1,b.s*.8,b.s*.22,b.s*.1); bgX.fill();
+    bgX.restore();
+  }
+  requestAnimationFrame(bgLoop);
+}
+function setBg(on){ if(on && !bgRun){ bgRun=true; if(!bgBlocks.length) seedBg(); requestAnimationFrame(bgLoop); } else if(!on){ bgRun=false; } }
+
+/* ================= Logo emblem (heart of blocks) ================= */
+const HEART=[".XX.XX.","XXXXXXX","XXXXXXX",".XXXXX.","..XXX..","...X..."];
+const HEART_C=[[0,1,1,0,8,8,0],[1,1,1,8,8,8,8],[1,1,8,8,8,7,7],[0,2,8,8,7,7,0],[0,0,2,8,7,0,0],[0,0,0,2,0,0,0]];
+function buildEmblem(el){
+  let h="", k=0;
+  HEART.forEach((row,r)=>[...row].forEach((ch,c)=>{
+    if(ch==="X") h+='<i class="blk" data-c="'+HEART_C[r][c]+'" style="--k:'+(k++)+'"></i>'; else h+='<i class="x"></i>';
+  }));
+  h+='<svg class="ecg" viewBox="0 0 140 40" preserveAspectRatio="none"><polyline points="0,20 38,20 48,20 56,4 66,36 76,8 84,24 90,20 140,20"/></svg>';
+  el.innerHTML=h;
+}
+buildEmblem($("bootEmblem")); buildEmblem($("titleEmblem"));
+
+/* ================= Tutorial ================= */
+const TUT=[
+  {t:"Drag & drop blocks",b:"Drag any of the three blocks from the tray onto the board. You can also tap a block, then tap the board.",stage:()=>{
+    let m='<div class="mini" style="grid-template-columns:repeat(5,22px)">';
+    const f=[0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 6,6,0,0,5, 6,6,4,4,5];
+    f.forEach(v=>m+= v?'<i class="blk" data-c="'+v+'"></i>':'<i></i>'); m+='</div>';
+    return '<div class="t1" style="position:relative">'+m+'<div class="tut-piece" style="left:25px;top:25px"><i class="blk" data-c="3"></i><i class="blk" data-c="3"></i><i class="blk" data-c="3"></i><i></i></div><svg class="tut-hand" style="left:25px;top:25px"><use href="#i-hand"/></svg></div>'; }},
+  {t:"Fill lines to clear",b:"Complete a full row or column and it blasts away. Clear several at once for huge combos!",stage:()=>{
+    return '<div class="t2" style="position:relative"><div class="rowdemo"><i class="blk" data-c="1"></i><i class="blk" data-c="2"></i><i class="gap"></i><i class="gap"></i><i class="blk" data-c="5"></i><i class="blk" data-c="6"></i></div>'+
+      '<div class="rowdemo drop" style="position:absolute;left:54px;top:0;grid-template-columns:repeat(2,24px)"><i class="blk" data-c="4"></i><i class="blk" data-c="4"></i></div></div>'; }},
+  {t:"Keep your Pulse alive",b:"Your Pulse drains every second. Clearing lines pumps it back up. Fill it to the top to LEVEL UP!",stage:()=>{
+    return '<div class="t3" style="width:100%;display:grid;place-items:center"><div class="demo-meter"><div class="heart"><svg class="i"><use href="#i-heart"/></svg></div><div class="pulse-track"><div class="pulse-fill"></div><div class="pulse-goal"></div></div></div><div class="lvl-pop">LEVEL UP!</div></div>'; }},
+  {t:"Power-ups",b:"Powers cost a little Pulse. Use them wisely to escape tight spots!",stage:()=>{
+    return '<div class="t4" style="width:100%;display:grid;place-items:center"><div class="plist">'+
+      '<div><span class="pw-ic" style="background:linear-gradient(180deg,#b98bff,#7b3cf0)"><svg class="i"><use href="#i-eye"/></svg></span><span><b>Insight</b>Shows placements that trap you</span></div>'+
+      '<div><span class="pw-ic" style="background:linear-gradient(180deg,#ffe066,#ffae00);color:#7a3d00"><svg class="i"><use href="#i-bolt"/></svg></span><span><b>Surge</b>Your next clear scores double</span></div>'+
+      '<div><span class="pw-ic" style="background:linear-gradient(180deg,#ff8a7a,#ff3d4f)"><svg class="i"><use href="#i-bomb"/></svg></span><span><b>Blast</b>Tap a block to destroy a 3×3 area</span></div>'+
+      '</div></div>'; }}
+];
+let tutIdx=0, tutDone=null;
+function renderTut(){
+  const s=TUT[tutIdx];
+  $("tutStage").innerHTML=s.stage(); $("tutTitle").textContent=s.t; $("tutBody").textContent=s.b;
+  $("tutDots").innerHTML=TUT.map((_,i)=>'<i class="'+(i===tutIdx?"on":"")+'"></i>').join("");
+  $("tutNext").textContent = tutIdx===TUT.length-1 ? (tutDone?"LET'S GO!":"GOT IT") : "NEXT";
+}
+function openTutorial(onDone){
+  tutIdx=0; tutDone=onDone||null; holds.add("tutorial");
+  $("tutorial").classList.remove("hide"); renderTut();
+}
+function closeTutorial(){
+  $("tutorial").classList.add("hide"); holds.delete("tutorial"); lsSet("pulseTutorialSeen","1");
+  const cb=tutDone; tutDone=null; if(cb) cb();
+}
+$("tutNext").addEventListener("click",()=>{ sfx.click(); if(tutIdx<TUT.length-1){tutIdx++;renderTut()} else closeTutorial(); });
+$("tutClose").addEventListener("click",()=>{ sfx.click(); closeTutorial(); });
+
+/* ================= Pause / Settings sheet ================= */
+const sheet=$("sheet");
+function syncToggles(){ $("sfxToggle").classList.toggle("on",sfxOn); $("hapToggle").classList.toggle("on",hapticsOn); }
+syncToggles();
+function openSheet(mode){
+  sheet.classList.remove("mode-pause","mode-settings"); sheet.classList.add("mode-"+mode);
+  sheet.classList.remove("hide"); if(mode==="pause") holds.add("menu");
+  syncMuteUi(); syncToggles();
+}
+function closeSheet(){ sheet.classList.add("hide"); holds.delete("menu"); lastTick=performance.now(); }
+function openPause(){ if(!inGame||gameOver||!sheet.classList.contains("hide")) return; hideGhost(); openSheet("pause"); }
+$("pauseBtn").addEventListener("click",()=>{ sfx.click(); openPause(); });
+$("resumeBtn").addEventListener("click",()=>{ sfx.click(); closeSheet(); });
+$("sheetClose").addEventListener("click",()=>{ sfx.click(); closeSheet(); });
+$("pauseHomeBtn").addEventListener("click",()=>{ sfx.click(); closeSheet(); showTitleScreen(); });
+$("sfxToggle").addEventListener("click",()=>{ sfxOn=!sfxOn; lsSet("pulseSfxOn",sfxOn?"1":"0"); syncToggles(); sfx.click(); });
+$("hapToggle").addEventListener("click",()=>{ hapticsOn=!hapticsOn; lsSet("pulseHapticsOn",hapticsOn?"1":"0"); syncToggles(); hap("medium"); sfx.click(); });
+$("replayTutBtn").addEventListener("click",()=>{ sfx.click(); closeSheet(); openTutorial(); });
+
+restartBtn.addEventListener("click",()=>{ sfx.click(); closeSheet(); startGame(); });
+playAgainBtn.addEventListener("click",()=>{ sfx.click(); startGame(); });
 if(watchContinueBtn){
   watchContinueBtn.addEventListener("click", async ()=>{
     if(!gameOver || continueUsedThisRun) return;
+    sfx.click();
     const ok = await showRewardedContinue();
     if(ok) continueFromFlatline();
   });
 }
-document.addEventListener("visibilitychange",()=>{if(document.hidden)stopDrain();else if(!gameOver&&inGame&&!pausedForAd)startDrain()});
-const titleScreen=document.getElementById("titleScreen");
-const playBtn=document.getElementById("playBtn");
-const menuBtn=document.getElementById("menuBtn");
-const titleBest=document.getElementById("titleBest");
-let inGame=false;
+document.addEventListener("visibilitychange",()=>{
+  if(document.hidden){ stopDrain(); if(inGame && !gameOver) openPause(); }
+  else if(!gameOver&&inGame&&!pausedForAd) startDrain();
+});
 
+/* ================= Title & boot ================= */
+const titleScreen=$("titleScreen"), playBtn=$("playBtn"), menuBtn=$("menuBtn"), titleBest=$("titleBest");
 function refreshTitleBest(){
-  try{
-    const b=localStorage.getItem("pulseGridBest")||"0";
-    if(titleBest) titleBest.textContent=b;
-    if(bestEl) bestEl.textContent=b;
-  }catch(_){}
+  const b=lsGet("pulseGridBest","0");
+  if(titleBest) titleBest.textContent=b;
+  if(bestEl) bestEl.textContent=b;
+  const g=parseInt(lsGet("pulseGames","0"),10)||0, bl=parseInt(lsGet("pulseBestLevel","1"),10)||1;
+  $("titleStats").textContent = g ? (g+" game"+(g===1?"":"s")+" played · best level "+bl) : "";
 }
-
 function showTitleScreen(){
   inGame=false;
   stopDrain();
-  gameOver=true; // block input while on title
+  gameOver=true;
+  holds.clear();
   if(gameOverEl) gameOverEl.classList.remove("show");
-  document.body.classList.add("title-locked");
+  ["levelUp","ready","tutorial","sheet"].forEach(id=>$(id).classList.add("hide"));
+  document.body.classList.add("title-locked"); document.body.classList.remove("danger");
   if(titleScreen) titleScreen.classList.remove("hide");
-  refreshTitleBest();
+  refreshTitleBest(); setBg(true);
 }
-
 function beginFromTitle(){
   document.body.classList.remove("title-locked");
   if(titleScreen) titleScreen.classList.add("hide");
+  setBg(false);
   inGame=true;
-  // unlock audio + music on intentional Play tap
   try{ unlockAudioOnce(); }catch(_){}
-  try{ if(typeof setMusicOn==="function" && musicOn) startMusic(); }catch(_){}
-  startGame();
-}
-
-if(playBtn){
-  playBtn.addEventListener("click",(e)=>{
-    e.preventDefault();
-    beginFromTitle();
+  requestAnimationFrame(()=>{
+    if(lsGet("pulseTutorialSeen","0")!=="1"){
+      gameOver=true; buildBoard(); layout();
+      openTutorial(()=>startGame());
+    } else startGame();
   });
 }
-if(menuBtn){
-  menuBtn.addEventListener("click",(e)=>{
-    e.preventDefault();
-    showTitleScreen();
-  });
-}
+if(playBtn) playBtn.addEventListener("click",(e)=>{ e.preventDefault(); sfx.go(); hap("medium"); beginFromTitle(); });
+if(menuBtn) menuBtn.addEventListener("click",(e)=>{ e.preventDefault(); sfx.click(); showTitleScreen(); });
+$("howBtn").addEventListener("click",()=>{ sfx.click(); openTutorial(); });
+$("titleSettingsBtn").addEventListener("click",()=>{ sfx.click(); openSheet("settings"); });
+$("titleMusicBtn").addEventListener("click",()=>{ ensureAudio(); setMusicOn(!(musicOn && musicVol>0.001)); sfx.click(); });
 
-refreshTitleBest();
 try{
   const Cap = window.Capacitor;
   const AppPlugin = Cap && Cap.Plugins && Cap.Plugins.App;
   if(AppPlugin && typeof AppPlugin.addListener === "function"){
     AppPlugin.addListener("backButton", ()=>{
-      // Consume system/WebView back so edge gestures don't navigate or exit mid-play.
-      if(inGame && gameOverEl && gameOverEl.classList.contains("show")){
-        showTitleScreen();
-        return;
-      }
-      if(inGame) return;
-      // On title: ignore (stay in app) — player can use Home/Recents to leave.
+      if(!$("tutorial").classList.contains("hide")){ closeTutorial(); return; }
+      if(!sheet.classList.contains("hide")){ closeSheet(); return; }
+      if(!$("levelUp").classList.contains("hide")){ closeLevelSplash(); return; }
+      if(inGame && gameOverEl && gameOverEl.classList.contains("show")){ showTitleScreen(); return; }
+      if(inGame && !gameOver){ openPause(); return; }
+      // On title: stay in app.
     });
   }
 }catch(_){}
-initAds(); // preload ads while on title — do NOT auto-start game
-showTitleScreen();
 
+function runBoot(){
+  const boot=$("boot");
+  setBg(true);
+  requestAnimationFrame(()=>boot.classList.add("go"));
+  let done=false;
+  const finish=()=>{ if(done) return; done=true; showTitleScreen(); boot.classList.add("out"); setTimeout(()=>boot.remove(),520); };
+  setTimeout(finish, 2600);
+  boot.addEventListener("pointerup", ()=>{ if(boot.classList.contains("go")) setTimeout(finish, 60); });
+}
+
+buildBoard(); grid=Array.from({length:SIZE},()=>Array(SIZE).fill(0)); tray=[];
+refreshTitleBest();
+initAds();
+runBoot();
+requestAnimationFrame(layout);
+
+if(/[?&]debug/.test(location.search)){
+  window.__pulse={
+    get grid(){return grid}, get tray(){return tray}, get pulse(){return pulse}, get level(){return level}, get score(){return score},
+    get gameOver(){return gameOver}, get M(){return M},
+    setGrid(g){grid=g;paintBoard()}, setTray(names){tray=names.map((n,i)=>n?{name:n,shape:cloneShape(n),color:(i*3)%8+1}:null);renderTray()},
+    tryPlace, setPulse, endGame, levelUp, cellRect(r,c){const b=cells[r][c].getBoundingClientRect();return{x:b.left+b.width/2,y:b.top+b.height/2}}
+  };
+}
 if("serviceWorker" in navigator)navigator.serviceWorker.register("./sw.js").catch(()=>{});
 })();
 </script>

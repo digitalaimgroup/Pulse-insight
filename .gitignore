@@ -16,3 +16,5 @@ ios/App/Pods/
 node_modules/
 secrets/
 vendor/bundle
+
+android/local.properties

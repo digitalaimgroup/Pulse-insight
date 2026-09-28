@@ -1,12 +1,12 @@
 {
   "name": "PULSE Insight",
   "short_name": "PULSE",
-  "description": "Place blocks, clear lines, charge Pulse, unlock Insight.",
+  "description": "Drop blocks, blast lines and keep your Pulse alive in this colorful block puzzle.",
   "start_url": "./index.html",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#0d1117",
-  "theme_color": "#0d1117",
+  "background_color": "#1b1a5c",
+  "theme_color": "#1b1a5c",
   "icons": [
     {
       "src": "icon.svg",
