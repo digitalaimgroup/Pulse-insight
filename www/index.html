@@ -936,11 +936,22 @@ function buzz(p){
   hap(k);
 }
 
-/* ================= AdMob (Capacitor) — unchanged ================= */
-const PROD_REWARDED = "ca-app-pub-3600954472890613/8958393072";
-const PROD_INTERSTITIAL = "ca-app-pub-3600954472890613/9791399496";
+/* ================= AdMob (Capacitor) — platform unit IDs ================= */
+const ANDROID_REWARDED = "ca-app-pub-3600954472890613/8958393072";
+const ANDROID_INTERSTITIAL = "ca-app-pub-3600954472890613/9791399496";
+const IOS_REWARDED = "ca-app-pub-3600954472890613/9220452229";
+const IOS_INTERSTITIAL = "ca-app-pub-3600954472890613/2846615560";
 const TEST_REWARDED = "ca-app-pub-3940256099942544/5224354917";
 const TEST_INTERSTITIAL = "ca-app-pub-3940256099942544/1033173712";
+function isIosPlatform(){
+  try{
+    const Cap = window.Capacitor;
+    return !!(Cap && typeof Cap.getPlatform === "function" && Cap.getPlatform() === "ios");
+  }catch(_){ return false; }
+}
+const PROD_REWARDED = isIosPlatform() ? IOS_REWARDED : ANDROID_REWARDED;
+const PROD_INTERSTITIAL = isIosPlatform() ? IOS_INTERSTITIAL : ANDROID_INTERSTITIAL;
+const ADMOB_TESTING = false; // production: real units; flip only for local debug builds
 
 const CONTINUE_PULSE = 55;
 let admobReady = false;
@@ -993,7 +1004,7 @@ async function initAds(){
     return;
   }
   try{
-    await AdMob.initialize({ initializeForTesting: true, testingDevices: [] });
+    await AdMob.initialize({ initializeForTesting: ADMOB_TESTING, testingDevices: [] });
     try{
       const info = await AdMob.requestConsentInfo({ debugGeography: 0, timeout: 10000 });
       if(info && (info.isConsentFormAvailable || info.status === "REQUIRED")){

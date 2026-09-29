@@ -20,4 +20,4 @@ The macOS runner:
 
 After processing finishes in App Store Connect → TestFlight, add yourself as an Internal Tester and install via the TestFlight app.
 
-AdMob iOS currently uses Google’s **test** App ID in `Info.plist` until a real iOS AdMob app ID is set.
+AdMob iOS uses production App ID `ca-app-pub-3600954472890613~4116762378` in `Info.plist`, with iOS rewarded/interstitial unit IDs selected at runtime when `Capacitor.getPlatform()==='ios'`.
