@@ -1,5 +1,7 @@
 import UIKit
 import Capacitor
+import AppTrackingTransparency
+import FBAudienceNetwork
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -7,7 +9,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
+        // Meta Audience Network requires ATE before Google Mobile Ads SDK init (AdMob mediation).
+        updateMetaAdvertiserTrackingEnabled()
         return true
     }
 
@@ -26,7 +29,19 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func applicationDidBecomeActive(_ application: UIApplication) {
-        // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
+        // ATT may resolve while inactive; keep Meta ATE in sync.
+        updateMetaAdvertiserTrackingEnabled()
+    }
+
+    /// Google AdMob Meta mediation: set FBAdSettings ATE from ATT status before ads load.
+    private func updateMetaAdvertiserTrackingEnabled() {
+        if #available(iOS 14, *) {
+            FBAdSettings.setAdvertiserTrackingEnabled(
+                ATTrackingManager.trackingAuthorizationStatus == .authorized
+            )
+        } else {
+            FBAdSettings.setAdvertiserTrackingEnabled(true)
+        }
     }
 
     func applicationWillTerminate(_ application: UIApplication) {

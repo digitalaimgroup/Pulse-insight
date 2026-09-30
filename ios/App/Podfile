@@ -21,6 +21,11 @@ target 'App' do
   # Pin UMP v2 — GoogleUserMessagingPlatform 3 renames APIs that AdMob 6.x still uses
   pod 'GoogleUserMessagingPlatform', '~> 2.7.0'
   capacitor_pods
+  # Meta Audience Network AdMob bidding adapter.
+  # Pinned to 6.16.0.0: last adapter that supports Google-Mobile-Ads-SDK ~> 11.x
+  # (CapacitorCommunityAdmob 6.2.0 pins GMA 11.3.0 / GAD* APIs). Newer Meta
+  # adapters need GMA 12+/13+ (Cap AdMob 7+/8+). Skip AppLovin.
+  pod 'GoogleMobileAdsMediationFacebook', '6.16.0.0'
 end
 
 post_install do |installer|
