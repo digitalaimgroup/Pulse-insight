@@ -352,7 +352,7 @@ body.danger .vignette{opacity:1;animation:dangerPulse .7s ease-in-out infinite}
 #playBtn{animation:breathe 1.6s ease-in-out infinite}
 @keyframes breathe{50%{transform:scale(1.05)}}
 #playBtn:active{animation:none}
-.icon-row{display:flex;gap:16px}
+.icon-row{display:flex;gap:12px;align-items:center}
 .icon-row .round-btn{width:56px;height:56px;border-radius:18px;font-size:26px;font-family:var(--display)}
 .icon-row .round-btn.off{background:linear-gradient(180deg,#6d70a8,#4a4c80);box-shadow:0 4px 0 #2b2d5c,inset 0 2px 0 rgba(255,255,255,.25)}
 .credit{font:800 .64rem var(--ui);letter-spacing:.28em;text-transform:uppercase;color:rgba(255,255,255,.35)}
@@ -468,6 +468,130 @@ body.danger .vignette{opacity:1;animation:dangerPulse .7s ease-in-out infinite}
 .go-stats span{font:900 .56rem var(--ui);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
 .go-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 
+
+/* ===== v1.4: Daily, rating, feedback, toasts, settings tabs ===== */
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:14px;padding:5px;border-radius:16px;background:rgba(0,0,0,.25)}
+.tabs.two{grid-template-columns:1fr 1fr}
+.tab{padding:9px 4px;border-radius:12px;font:900 .82rem var(--ui);letter-spacing:.04em;color:var(--muted)}
+.tab.on{background:linear-gradient(180deg,#6d74ff,#4a4fd6);color:#fff;box-shadow:0 3px 0 #23259a}
+.tabpane{min-height:196px}
+.set-row.col{flex-direction:column;align-items:stretch;gap:10px}
+button.set-row{width:100%;font:inherit;color:#fff}
+button.set-row .go{font:400 1.4rem var(--display);color:var(--gold)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{flex:1;min-width:64px;padding:8px 6px;border-radius:12px;font:900 .78rem var(--ui);background:rgba(255,255,255,.1);color:#dfe2ff;box-shadow:inset 0 0 0 2px rgba(255,255,255,.08)}
+.chip.on{background:linear-gradient(180deg,#ffe680,#ffbe1a);color:#6b3b00;box-shadow:0 3px 0 #b06d00}
+.chip small{display:block;font-size:.6rem;opacity:.75;font-weight:800}
+.ver{margin-top:12px;font:800 .7rem var(--ui);letter-spacing:.1em;color:var(--muted);text-transform:uppercase}
+.textbtn{margin-top:4px;padding:10px;font:900 .9rem var(--ui);color:var(--muted);text-decoration:underline;text-underline-offset:3px}
+[hidden]{display:none!important}
+.toast{position:fixed;left:50%;top:calc(var(--sat) + 10px);z-index:3900;transform:translate(-50%,-220%);visibility:hidden;display:flex;align-items:center;gap:10px;
+  width:min(92vw,400px);padding:10px 14px;border-radius:18px;text-align:left;pointer-events:none;
+  background:linear-gradient(180deg,#3ddc6a,#1fae4c);color:#fff;box-shadow:0 5px 0 #0f7a33,0 12px 26px rgba(0,0,0,.4);transition:transform .35s cubic-bezier(.2,1.4,.4,1)}
+.toast.info{background:linear-gradient(180deg,#5a63ff,#3b3fd4);box-shadow:0 5px 0 #23259a,0 12px 26px rgba(0,0,0,.4)}
+.toast.show{transform:translate(-50%,0);visibility:visible}
+.toast .ti{flex:0 0 36px;height:36px;border-radius:12px;display:grid;place-items:center;font-size:20px;background:rgba(255,255,255,.22)}
+.toast b{display:block;font:400 1rem var(--display);letter-spacing:.02em}
+.toast span{font:800 .78rem var(--ui);opacity:.95}
+/* Title extras */
+.title-chips{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:8px}
+.title-chips .best-pill{margin-top:0}
+.boost-pill{display:inline-flex;align-items:center;gap:6px;padding:8px 14px 8px 10px;border-radius:99px;background:rgba(0,0,0,.28);box-shadow:inset 0 0 0 2px rgba(255,210,63,.35);font:800 .9rem var(--ui);color:#fff}
+.boost-pill svg{width:20px;height:20px;color:var(--gold)}
+.boost-pill b{font-family:var(--display);font-weight:400;font-size:1.2rem;color:var(--gold)}
+.daily-btn{position:relative;height:56px;padding:0 16px 0 12px;border-radius:18px;display:inline-flex;align-items:center;gap:8px;
+  font:400 1.15rem var(--display);letter-spacing:.04em;color:#6b3b00;background:linear-gradient(180deg,#ffe680,#ffbe1a);
+  box-shadow:0 4px 0 #b06d00,0 6px 14px rgba(0,0,0,.35),inset 0 2px 0 rgba(255,255,255,.5);transition:transform .08s}
+.daily-btn:active{transform:translateY(3px);box-shadow:0 1px 0 #b06d00}
+.daily-btn svg{width:24px;height:24px}
+.dbadge{min-width:34px;padding:2px 7px;border-radius:99px;background:#6b3b00;color:#ffe680;font:900 .75rem var(--ui);text-align:center}
+.dbadge.done{background:#1fae4c;color:#fff}
+.daily-btn .dot{position:absolute;top:-6px;right:-6px;width:16px;height:16px;border-radius:50%;background:#ff3d52;box-shadow:0 0 0 3px #fff}
+/* Daily card */
+.daily-card{padding:22px 16px 18px}
+.daily-head h2{font-size:2rem}
+.daily-sub{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:8px;font:800 .74rem var(--ui);color:var(--muted)}
+.daily-sub .pill{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:99px;background:rgba(0,0,0,.25)}
+.daily-sub .pill svg{width:14px;height:14px;color:#ff8a2e}
+.daily-sub .pill b{color:#fff}
+.dlist{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.dch{display:grid;grid-template-columns:40px 1fr auto;align-items:center;gap:10px;padding:9px 10px;border-radius:16px;background:rgba(0,0,0,.22);text-align:left}
+.dch .di{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-size:22px;color:#fff;box-shadow:inset 0 -3px 0 rgba(0,0,0,.25),inset 0 2px 0 rgba(255,255,255,.35)}
+.dch .dt{font:800 .86rem var(--ui);line-height:1.2}
+.dch .dt small{display:block;font:900 .62rem var(--ui);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:2px}
+.dbar{height:8px;border-radius:99px;background:rgba(0,0,0,.35);margin-top:6px;overflow:hidden}
+.dbar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#29d3f5,#3ddc6a)}
+.dch .dr{font:900 .7rem var(--ui);color:#ffe680;text-align:center;line-height:1.1;font-variant-numeric:tabular-nums}
+.dch .dr svg{width:18px;height:18px;margin:0 auto 2px;color:var(--gold)}
+.dch.done{background:rgba(61,220,106,.18);box-shadow:inset 0 0 0 2px rgba(61,220,106,.55)}
+.dch.done .dr{color:#7dffa0}
+.boost-box{display:flex;align-items:center;gap:10px;margin-top:10px;padding:9px 12px;border-radius:16px;background:rgba(255,210,63,.12);box-shadow:inset 0 0 0 2px rgba(255,210,63,.3);text-align:left}
+.boost-box > svg{flex:0 0 30px;width:30px;height:30px;color:var(--gold)}
+.boost-box b{font:400 1rem var(--display)}
+.boost-box small{display:block;font:700 .72rem var(--ui);color:#e8e2c0;line-height:1.25}
+.boost-box .toggle{margin-left:auto;transform:scale(.85)}
+.best-tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px}
+.best-tiles div{border-radius:12px;background:rgba(0,0,0,.22);padding:7px 2px 6px}
+.best-tiles b{display:block;font:400 1.05rem var(--display);font-variant-numeric:tabular-nums}
+.best-tiles span{font:900 .52rem var(--ui);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.week{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;align-items:end;height:74px;margin-top:10px;padding:0 4px}
+.week .col{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:3px}
+.week .v{font:900 .55rem var(--ui);color:var(--muted);font-variant-numeric:tabular-nums}
+.week .b{width:100%;border-radius:6px 6px 3px 3px;background:linear-gradient(180deg,#8b93ff,#4a4fd6);min-height:3px}
+.week .col.today .b{background:linear-gradient(180deg,#ffe680,#ffbe1a)}
+.week .col.today .v{color:var(--gold)}
+.week .d{font:900 .6rem var(--ui);color:var(--muted)}
+.dnote{margin-top:8px;font:700 .66rem var(--ui);color:var(--muted)}
+.daily-card .go-row{margin-top:12px}
+@media (max-height:700px){.daily-card,.sheet-card{zoom:.86}}
+/* Rate + feedback */
+.big-stars{display:flex;justify-content:center;gap:4px;margin:-4px 0 10px;color:var(--gold);filter:drop-shadow(0 3px 0 #b06d00)}
+.big-stars svg{width:38px;height:38px;animation:starIn .5s cubic-bezier(.2,1.7,.4,1) backwards}
+.big-stars svg:nth-child(2){animation-delay:.06s}.big-stars svg:nth-child(3){animation-delay:.12s}.big-stars svg:nth-child(4){animation-delay:.18s}.big-stars svg:nth-child(5){animation-delay:.24s}
+@keyframes starIn{from{transform:scale(0) rotate(-60deg)}}
+.card p.body{font:700 .95rem var(--ui);color:#dfe2ff;line-height:1.4;margin-top:8px}
+#fbText{width:100%;height:120px;margin-top:12px;padding:12px;border:none;border-radius:16px;resize:none;background:#171553;color:#fff;
+  font:700 .95rem var(--ui);box-shadow:inset 0 3px 6px rgba(0,0,0,.45);-webkit-user-select:text;user-select:text;touch-action:auto}
+#fbText:focus{outline:3px solid #ffd23f}
+.fb-mail{margin-top:8px;font:700 .72rem var(--ui);color:var(--muted)}
+.fb-mail span{color:#fff;-webkit-user-select:text;user-select:text}
+.go-row.three{grid-template-columns:1fr 1fr 58px}
+.go-row .share-btn{padding:0;display:grid;place-items:center;font-size:24px}
+:focus-visible{outline:3px solid #ffd23f;outline-offset:2px}
+/* Accessibility: colorblind symbols */
+body.cb .blk::before{content:"";position:absolute;inset:27%;z-index:1;background:center/contain no-repeat;pointer-events:none}
+body.cb [data-c="1"]::before,body.cb [data-pc="1"]::before{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Ccircle cx='5' cy='5' r='4.2' fill='%2314123a' fill-opacity='.6'/%3E%3C/svg%3E")}
+body.cb [data-c="2"]::before,body.cb [data-pc="2"]::before{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M5 .6L9.6 9H.4z' fill='%2314123a' fill-opacity='.6'/%3E%3C/svg%3E")}
+body.cb [data-c="3"]::before,body.cb [data-pc="3"]::before{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Crect x='1' y='1' width='8' height='8' fill='%2314123a' fill-opacity='.6'/%3E%3C/svg%3E")}
+body.cb [data-c="4"]::before,body.cb [data-pc="4"]::before{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M5 .3L9.7 5 5 9.7.3 5z' fill='%2314123a' fill-opacity='.6'/%3E%3C/svg%3E")}
+body.cb [data-c="5"]::before,body.cb [data-pc="5"]::before{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M5 .3l1.4 3.1 3.3.3-2.5 2.2.8 3.3L5 7.5 2 9.2l.8-3.3L.3 3.7l3.3-.3z' fill='%2314123a' fill-opacity='.6'/%3E%3C/svg%3E")}
+body.cb [data-c="6"]::before,body.cb [data-pc="6"]::before{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M3.6.6h2.8v3h3v2.8h-3v3H3.6v-3h-3V3.6h3z' fill='%2314123a' fill-opacity='.6'/%3E%3C/svg%3E")}
+body.cb [data-c="7"]::before,body.cb [data-pc="7"]::before{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Ccircle cx='5' cy='5' r='3.6' fill='none' stroke='%2314123a' stroke-opacity='.6' stroke-width='1.8'/%3E%3C/svg%3E")}
+body.cb [data-c="8"]::before,body.cb [data-pc="8"]::before{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M1.5 1.5l7 7M8.5 1.5l-7 7' stroke='%2314123a' stroke-opacity='.6' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E")}
+/* Accessibility: reduce motion */
+body.rm *,body.rm *::before,body.rm *::after{animation-iteration-count:1!important;transition-duration:.01ms!important}
+body.rm #playBtn,body.rm #titleScreen .logo,body.rm .power.ready,body.rm .hi,body.rm #levelUp .rays,body.rm #levelUp .star svg,body.rm .wcGlow{animation:none!important}
+body.rm .heart{animation-iteration-count:infinite!important}
+/* Themes */
+body.theme-neon{background:radial-gradient(90% 50% at 50% 0%,rgba(0,240,255,.28),transparent 60%),radial-gradient(80% 45% at 50% 105%,rgba(255,0,200,.3),transparent 60%),#05040f}
+body.theme-neon #board{background:#07071a;box-shadow:0 0 0 2px #00e5ff,0 0 22px rgba(0,229,255,.55),0 0 0 6px #120a2c,inset 0 0 30px rgba(0,229,255,.12)}
+body.theme-neon .cell:not(.blk){background:#0c0c26;box-shadow:inset 0 0 0 1px rgba(0,229,255,.12)}
+body.theme-neon .cell.blk{box-shadow:inset 0 calc(var(--bv)*-1) 0 var(--d),inset 0 var(--bv) 0 rgba(255,255,255,.45),0 0 10px var(--b)}
+body.theme-neon .card{background:linear-gradient(180deg,#1b1640,#0d0a24);box-shadow:0 0 0 3px #ff2bd6,0 0 26px rgba(255,43,214,.55),0 24px 50px rgba(0,0,0,.6)}
+body.theme-neon #tray{box-shadow:inset 0 0 0 2px rgba(0,229,255,.35),0 0 16px rgba(0,229,255,.2)}
+body.theme-neon #boot{background:radial-gradient(90% 55% at 50% 30%,rgba(0,240,255,.25),transparent 70%),#05040f}
+body.theme-halloween{background:radial-gradient(110% 55% at 50% -6%,rgba(255,138,30,.45),transparent 60%),radial-gradient(90% 45% at 50% 108%,rgba(140,40,200,.55),transparent 60%),linear-gradient(180deg,#2a1240,#140820 60%,#0b0612)}
+body.theme-halloween #board{background:linear-gradient(180deg,#2b1638,#170b22);box-shadow:0 0 0 3px #ff8a1e,0 0 0 6px #3a1206,0 0 28px rgba(255,138,30,.4)}
+body.theme-halloween .cell:not(.blk){background:#1c0e28}
+body.theme-halloween .card{background:linear-gradient(180deg,#5a2a84,#33174f 60%,#26103c);box-shadow:0 0 0 4px #ff8a1e,0 0 0 8px #2a0e14,0 24px 50px rgba(0,0,0,.55),inset 0 3px 0 rgba(255,255,255,.2)}
+body.theme-halloween .round-btn{background:linear-gradient(180deg,#ff9f3a,#e06a00);box-shadow:0 4px 0 #8a3a00,0 6px 14px rgba(0,0,0,.35),inset 0 2px 0 rgba(255,255,255,.3)}
+body.theme-halloween .ribbon{background:linear-gradient(180deg,#ff9f3a,#e06a00);box-shadow:0 4px 0 #8a3a00,0 8px 16px rgba(0,0,0,.35)}
+body.theme-halloween #boot{background:radial-gradient(100% 60% at 50% 30%,#6a2a9a 0%,transparent 70%),linear-gradient(180deg,#2a1240,#0b0612)}
+.season-tag{display:none;margin-top:6px;padding:4px 12px;border-radius:99px;font:900 .7rem var(--ui);letter-spacing:.14em;text-transform:uppercase;background:rgba(255,138,30,.2);color:#ffb46a;box-shadow:inset 0 0 0 2px rgba(255,138,30,.5)}
+body.theme-halloween .season-tag{display:inline-block}
+@media (max-height:700px){#titleScreen .emblem{width:clamp(96px,28vw,130px)}#titleScreen .wordmark{font-size:clamp(3rem,15vw,4.4rem)}.tag{font-size:.88rem}}
+@media (max-width:370px){.icon-row{gap:10px}.icon-row .round-btn{width:50px;height:50px}.daily-btn{height:50px;font-size:1rem}}
+
 /* iPad / large screens */
 html.device-ipad{--col:min(94vw,700px)}
 .device-ipad #tray{height:clamp(120px,16vh,190px)}
@@ -477,7 +601,7 @@ html.device-ipad #app > .topbar,html.device-ipad #app > .pulse-wrap,html.device-
 .device-ipad .card{zoom:1.2}
 @media (min-width:700px) and (min-height:800px){:root{--col:min(92vw,620px)}}
 @media (max-height:640px){.tip{display:none}.pulse-cap{display:none}#scoreEl{font-size:2.1rem}.powers{margin-bottom:6px}}
-@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important}}
+
 </style>
 </head>
 <body class="title-locked">
@@ -501,6 +625,10 @@ html.device-ipad #app > .topbar,html.device-ipad #app > .pulse-wrap,html.device-
     <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.5v15a1 1 0 001.5.86l12-7.5a1 1 0 000-1.72l-12-7.5A1 1 0 007 4.5z"/></symbol>
     <symbol id="i-flame" viewBox="0 0 24 24"><path d="M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z"/></symbol>
     <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2" opacity=".45"/></symbol>
+    <symbol id="i-cal" viewBox="0 0 24 24"><path d="M7 2.5a1.2 1.2 0 012.4 0V4h5.2V2.5a1.2 1.2 0 012.4 0V4H19a2.5 2.5 0 012.5 2.5v12.5A2.5 2.5 0 0119 21.5H5A2.5 2.5 0 012.5 19V6.5A2.5 2.5 0 015 4h2zM5 9.5V19h14V9.5z"/><path d="M12 10.8l1.2 2.4 2.6.4-1.9 1.8.5 2.6-2.4-1.2-2.4 1.2.5-2.6-1.9-1.8 2.6-.4z"/></symbol>
+    <symbol id="i-share" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 10.7l6.8-4M8.6 13.3l6.8 4" stroke="currentColor" stroke-width="2.2"/></symbol>
+    <symbol id="i-mail" viewBox="0 0 24 24"><path d="M3 5h18a1 1 0 011 1v12a1 1 0 01-1 1H3a1 1 0 01-1-1V6a1 1 0 011-1zm1.6 2.2v.3L12 12.6l7.4-5.1v-.3z"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M9.2 16.6L4.6 12l-1.8 1.8 6.4 6.4L21.4 8l-1.8-1.8z"/></symbol>
     <symbol id="i-hand" viewBox="0 0 24 24"><path d="M9 11.2V4.5a1.6 1.6 0 013.2 0v5.2l.3-.1V8.3a1.6 1.6 0 013.2 0v1.8a1.6 1.6 0 013.1.5v1.1a1.5 1.5 0 012.8.8v3.6c0 3.6-2.7 6.4-6.3 6.4h-1.7c-2 0-3.6-.9-4.8-2.4L4.5 15a1.6 1.6 0 012.4-2.1z" stroke="#1a0f55" stroke-width="1.2"/></symbol>
   </defs>
 </svg>
@@ -528,12 +656,17 @@ html.device-ipad #app > .topbar,html.device-ipad #app > .pulse-wrap,html.device-
       <div class="ribbon">INSIGHT</div>
     </div>
     <p class="tag">Drop blocks. Blast lines.<br>Keep the beat alive!</p>
-    <div class="best-pill"><svg class="i"><use href="#i-crown"/></svg>BEST <b id="titleBest">0</b></div>
+    <div class="season-tag">Halloween event</div>
+    <div class="title-chips">
+      <div class="best-pill"><svg class="i"><use href="#i-crown"/></svg>BEST <b id="titleBest">0</b></div>
+      <div class="boost-pill" id="titleBoost" hidden><svg class="i"><use href="#i-bolt"/></svg><b id="titleBoostN">0</b> BOOST</div>
+    </div>
     <div class="stat-line" id="titleStats"></div>
   </div>
   <div class="bottom">
     <button type="button" class="candy-btn" id="playBtn"><span class="row"><svg class="i"><use href="#i-play"/></svg>PLAY</span></button>
     <div class="icon-row">
+      <button type="button" class="daily-btn" id="dailyBtn" aria-label="Daily challenges"><svg class="i"><use href="#i-cal"/></svg>DAILY <span class="dbadge" id="dailyBadge">0/3</span><span class="dot" id="dailyDot" hidden></span></button>
       <button type="button" class="round-btn" id="howBtn" aria-label="How to play">?</button>
       <button type="button" class="round-btn" id="titleSettingsBtn" aria-label="Settings"><svg class="i"><use href="#i-gear"/></svg></button>
       <button type="button" class="round-btn" id="titleMusicBtn" aria-label="Toggle music"><svg class="i"><use href="#i-music"/></svg></button>
@@ -612,21 +745,47 @@ html.device-ipad #app > .topbar,html.device-ipad #app > .pulse-wrap,html.device-
 
 <!-- ===== Pause / Settings ===== -->
 <div id="sheet" class="modal hide mode-pause" role="dialog" aria-label="Pause">
-  <div class="card">
+  <div class="card sheet-card">
     <button type="button" class="close settings-only" id="sheetClose" aria-label="Close">✕</button>
     <h2 class="pause-only">PAUSED</h2>
     <h2 class="settings-only">SETTINGS</h2>
-    <div class="set-row">
-      <div class="lbl"><svg class="i"><use href="#i-music"/></svg>Music</div>
-      <div class="vol">
-        <button type="button" id="volDownBtn" class="mute-btn" aria-label="Volume down">−</button>
-        <input type="range" id="volSlider" min="0" max="100" value="45" aria-label="Music volume">
-        <button type="button" id="volUpBtn" class="mute-btn" aria-label="Volume up">+</button>
-        <button type="button" id="muteBtn" class="mute-btn" aria-label="Mute music">♪</button>
-      </div>
+    <div class="tabs" role="tablist" id="setTabs">
+      <button type="button" class="tab on" data-tab="audio" role="tab">Sound</button>
+      <button type="button" class="tab" data-tab="display" role="tab">Display</button>
+      <button type="button" class="tab" data-tab="support" role="tab">Support</button>
     </div>
-    <div class="set-row"><div class="lbl"><svg class="i"><use href="#i-sfx"/></svg>Sound FX</div><button type="button" class="toggle" id="sfxToggle" aria-label="Sound effects"></button></div>
-    <div class="set-row"><div class="lbl"><svg class="i"><use href="#i-vib"/></svg>Vibration</div><button type="button" class="toggle" id="hapToggle" aria-label="Vibration"></button></div>
+    <div class="tabpane" data-pane="audio">
+      <div class="set-row">
+        <div class="lbl"><svg class="i"><use href="#i-music"/></svg>Music</div>
+        <div class="vol">
+          <button type="button" id="volDownBtn" class="mute-btn" aria-label="Volume down">−</button>
+          <input type="range" id="volSlider" min="0" max="100" value="45" aria-label="Music volume">
+          <button type="button" id="volUpBtn" class="mute-btn" aria-label="Volume up">+</button>
+          <button type="button" id="muteBtn" class="mute-btn" aria-label="Mute music">♪</button>
+        </div>
+      </div>
+      <div class="set-row"><div class="lbl"><svg class="i"><use href="#i-sfx"/></svg>Sound FX</div><button type="button" class="toggle" id="sfxToggle" aria-label="Sound effects"></button></div>
+      <div class="set-row"><div class="lbl"><svg class="i"><use href="#i-vib"/></svg>Vibration</div><button type="button" class="toggle" id="hapToggle" aria-label="Vibration"></button></div>
+    </div>
+    <div class="tabpane hide" data-pane="display">
+      <div class="set-row col"><div class="lbl">Theme</div>
+        <div class="chips" id="themeChips">
+          <button type="button" class="chip" data-th="auto">Auto<small>seasonal</small></button>
+          <button type="button" class="chip" data-th="classic">Classic<small>candy</small></button>
+          <button type="button" class="chip" data-th="neon">Neon<small>night</small></button>
+          <button type="button" class="chip" data-th="halloween">Spooky<small>event</small></button>
+        </div>
+      </div>
+      <div class="set-row"><div class="lbl">Colorblind symbols</div><button type="button" class="toggle" id="cbToggle" aria-label="Colorblind symbols on blocks"></button></div>
+      <div class="set-row"><div class="lbl">Reduce motion</div><button type="button" class="toggle" id="rmToggle" aria-label="Reduce motion"></button></div>
+    </div>
+    <div class="tabpane hide" data-pane="support">
+      <button type="button" class="set-row" id="rateBtn"><span class="lbl"><svg class="i"><use href="#i-star"/></svg>Rate PULSE Insight</span><span class="go">›</span></button>
+      <button type="button" class="set-row" id="feedbackBtn"><span class="lbl"><svg class="i"><use href="#i-mail"/></svg>Send feedback / report a bug</span><span class="go">›</span></button>
+      <button type="button" class="set-row" id="shareAppBtn"><span class="lbl"><svg class="i"><use href="#i-share"/></svg>Share with friends</span><span class="go">›</span></button>
+      <button type="button" class="set-row" id="replayTutBtn"><span class="lbl"><span style="width:22px;text-align:center;font:400 1.2rem var(--display);color:var(--gold)">?</span>How to play</span><span class="go">›</span></button>
+      <p class="ver">Version <span id="verEl"></span> · Digital AIM</p>
+    </div>
     <div class="sheet-actions pause-only">
       <button type="button" class="candy-btn sm" id="resumeBtn"><span class="row"><svg class="i"><use href="#i-play"/></svg>RESUME</span></button>
       <div class="go-row">
@@ -634,11 +793,72 @@ html.device-ipad #app > .topbar,html.device-ipad #app > .pulse-wrap,html.device-
         <button type="button" class="candy-btn sm purple" id="pauseHomeBtn"><span class="row"><svg class="i"><use href="#i-home"/></svg>HOME</span></button>
       </div>
     </div>
-    <div class="sheet-actions settings-only">
-      <button type="button" class="candy-btn sm blue" id="replayTutBtn">HOW TO PLAY</button>
+  </div>
+</div>
+
+<!-- ===== Daily challenges ===== -->
+<div id="daily" class="modal hide" role="dialog" aria-label="Daily challenges">
+  <div class="card daily-card">
+    <button type="button" class="close" id="dailyClose" aria-label="Close">✕</button>
+    <div class="daily-head">
+      <h2>DAILY CHALLENGES</h2>
+      <div class="daily-sub">
+        <span class="pill"><svg class="i"><use href="#i-flame"/></svg><span><b id="dStreak">0</b>-day streak</span></span>
+        <span class="pill">New in <b id="dReset">—</b></span>
+      </div>
+    </div>
+    <div class="dlist" id="dList"></div>
+    <div class="boost-box">
+      <svg class="i"><use href="#i-bolt"/></svg>
+      <div><b><span id="dBoosts">0</span> Boosts</b><small>Each challenge earns a Boost. A Boost starts your next game with +15 Pulse and a free Surge.</small></div>
+      <button type="button" class="toggle on" id="boostToggle" aria-label="Use Boosts automatically"></button>
+    </div>
+    <div class="best-tiles">
+      <div><b id="bToday">0</b><span>Today</span></div>
+      <div><b id="bWeek">0</b><span>7 days</span></div>
+      <div><b id="bAll">0</b><span>All-time</span></div>
+      <div><b id="bGames">0</b><span>Games today</span></div>
+    </div>
+    <div class="week" id="dWeek" aria-label="Best score each of the last 7 days"></div>
+    <p class="dnote">Your daily bests board. Scores are saved on this device.</p>
+    <div class="go-row">
+      <button type="button" class="candy-btn sm" id="dPlay"><span class="row"><svg class="i"><use href="#i-play"/></svg>PLAY</span></button>
+      <button type="button" class="candy-btn sm purple" id="dShare"><span class="row"><svg class="i"><use href="#i-share"/></svg>SHARE</span></button>
     </div>
   </div>
 </div>
+
+<!-- ===== Rate prompt ===== -->
+<div id="ratePrompt" class="modal hide" role="dialog" aria-label="Rate PULSE Insight">
+  <div class="card">
+    <div class="big-stars"><svg class="i"><use href="#i-star"/></svg><svg class="i"><use href="#i-star"/></svg><svg class="i"><use href="#i-star"/></svg><svg class="i"><use href="#i-star"/></svg><svg class="i"><use href="#i-star"/></svg></div>
+    <h2>Having fun?</h2>
+    <p class="body">A quick rating helps other players find PULSE Insight. It only takes a few seconds.</p>
+    <div class="btn-col">
+      <button type="button" class="candy-btn sm gold" id="rateYes">RATE THE GAME</button>
+      <button type="button" class="textbtn" id="rateLater">Not now</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Feedback ===== -->
+<div id="feedback" class="modal hide" role="dialog" aria-label="Send feedback">
+  <div class="card">
+    <button type="button" class="close" id="fbClose" aria-label="Close">✕</button>
+    <h2>FEEDBACK</h2>
+    <p class="body">Found a bug or have an idea? We read every message.</p>
+    <div class="chips" id="fbType" style="margin-top:12px">
+      <button type="button" class="chip on" data-v="Bug">Bug</button>
+      <button type="button" class="chip" data-v="Idea">Idea</button>
+      <button type="button" class="chip" data-v="Other">Other</button>
+    </div>
+    <textarea id="fbText" maxlength="1500" placeholder="What happened, or what would you love to see?"></textarea>
+    <p class="fb-mail">Opens your email app, addressed to <span id="fbAddr"></span></p>
+    <div class="btn-col"><button type="button" class="candy-btn sm" id="fbSend"><span class="row"><svg class="i"><use href="#i-mail"/></svg>SEND</span></button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <!-- ===== Game over ===== -->
 <div class="modal" id="gameOver" role="dialog" aria-label="Game over">
@@ -658,9 +878,10 @@ html.device-ipad #app > .topbar,html.device-ipad #app > .pulse-wrap,html.device-
     </div>
     <div class="btn-col">
       <button type="button" class="candy-btn sm gold" id="watchContinue">Watch ad · continue</button>
-      <div class="go-row">
+      <div class="go-row three">
         <button type="button" class="candy-btn sm" id="playAgain"><span class="row"><svg class="i"><use href="#i-restart"/></svg>AGAIN</span></button>
         <button type="button" class="candy-btn sm purple" id="menuBtn"><span class="row"><svg class="i"><use href="#i-home"/></svg>HOME</span></button>
+        <button type="button" class="candy-btn sm blue share-btn" id="goShare" aria-label="Share score"><svg class="i"><use href="#i-share"/></svg></button>
       </div>
     </div>
   </div>
@@ -936,22 +1157,11 @@ function buzz(p){
   hap(k);
 }
 
-/* ================= AdMob (Capacitor) — platform unit IDs ================= */
-const ANDROID_REWARDED = "ca-app-pub-3600954472890613/8958393072";
-const ANDROID_INTERSTITIAL = "ca-app-pub-3600954472890613/9791399496";
-const IOS_REWARDED = "ca-app-pub-3600954472890613/9220452229";
-const IOS_INTERSTITIAL = "ca-app-pub-3600954472890613/2846615560";
+/* ================= AdMob (Capacitor) — unchanged ================= */
+const PROD_REWARDED = "ca-app-pub-3600954472890613/8958393072";
+const PROD_INTERSTITIAL = "ca-app-pub-3600954472890613/9791399496";
 const TEST_REWARDED = "ca-app-pub-3940256099942544/5224354917";
 const TEST_INTERSTITIAL = "ca-app-pub-3940256099942544/1033173712";
-function isIosPlatform(){
-  try{
-    const Cap = window.Capacitor;
-    return !!(Cap && typeof Cap.getPlatform === "function" && Cap.getPlatform() === "ios");
-  }catch(_){ return false; }
-}
-const PROD_REWARDED = isIosPlatform() ? IOS_REWARDED : ANDROID_REWARDED;
-const PROD_INTERSTITIAL = isIosPlatform() ? IOS_INTERSTITIAL : ANDROID_INTERSTITIAL;
-const ADMOB_TESTING = false; // production: real units; flip only for local debug builds
 
 const CONTINUE_PULSE = 55;
 let admobReady = false;
@@ -1004,7 +1214,7 @@ async function initAds(){
     return;
   }
   try{
-    await AdMob.initialize({ initializeForTesting: ADMOB_TESTING, testingDevices: [] });
+    await AdMob.initialize({ initializeForTesting: true, testingDevices: [] });
     try{
       const info = await AdMob.requestConsentInfo({ debugGeography: 0, timeout: 10000 });
       if(info && (info.isConsentFormAvailable || info.status === "REQUIRED")){
@@ -1239,6 +1449,7 @@ function setPulse(v, opts){
 }
 function levelUp(){
   level+=1;
+  dailyEvent("level",level,"max");
   levelEl.textContent=level;
   const badge=$("levelBadge"); badge.classList.remove("pop"); void badge.offsetWidth; badge.classList.add("pop");
   pulse=58;
@@ -1277,6 +1488,7 @@ function updatePowers(){
 function updateScore(n){
   const up = n>score;
   score=n;
+  if(up && inGame) dailyEvent("score",n,"max");
   cancelAnimationFrame(scoreRaf);
   if(!up){ shownScore=n; scoreEl.textContent=n; return; }
   const from=shownScore, to=n, t0=performance.now();
@@ -1308,7 +1520,7 @@ function floatScore(x,y,text){
   el.style.left=(x-w.left)+"px"; el.style.top=(y-w.top)+"px";
   boardWrap.appendChild(el); setTimeout(()=>el.remove(),1000);
 }
-function shake(n){ appEl.classList.remove("shake-1","shake-2"); void appEl.offsetWidth; appEl.classList.add(n>=2?"shake-2":"shake-1"); setTimeout(()=>appEl.classList.remove("shake-1","shake-2"),420); }
+function shake(n){ if(reduceMotion) return; appEl.classList.remove("shake-1","shake-2"); void appEl.offsetWidth; appEl.classList.add(n>=2?"shake-2":"shake-1"); setTimeout(()=>appEl.classList.remove("shake-1","shake-2"),420); }
 
 /* ================= Drain loop ================= */
 function startDrain(){ stopDrain(); lastTick=performance.now(); tickTimer=requestAnimationFrame(drainTick); }
@@ -1489,7 +1701,7 @@ function doBlastAt(clientX,clientY){
     const rr=r+dr,cc=c+dc; if(rr>=0&&cc>=0&&rr<SIZE&&cc<SIZE&&grid[rr][cc])toClear.add(rr+","+cc);
   }
   if(!toClear.size)return;
-  blastMode=false; clearing=true; hap("heavy"); sfx.boom(); shake(2);
+  blastMode=false; clearing=true; hap("heavy"); sfx.boom(); shake(2); dailyEvent("blast",1);
   const center=cells[r][c].getBoundingClientRect();
   burst(center.left+center.width/2, center.top+center.height/2, "#ffd23f", 40, {speed:9, spark:true});
   toClear.forEach(key=>{const[rr,cc]=key.split(",").map(Number);const el=cells[rr][cc];
@@ -1520,6 +1732,7 @@ function tryPlace(trayIdx,row,col){
   const piece=tray[trayIdx]; if(!piece||!canPlace(piece.shape,row,col))return;
   for(const[dr,dc]of piece.shape)grid[row+dr][col+dc]=piece.color;
   tray[trayIdx]=null; selectedIdx=null;
+  dailyEvent("blocks",1);
   for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++) paintCell(r,c);
   for(const[dr,dc]of piece.shape) cells[row+dr][col+dc].classList.add("pop");
   renderTray();
@@ -1543,6 +1756,7 @@ function tryPlace(trayIdx,row,col){
     });
     sweepLines(fullRows,fullCols,piece.color);
     setStreak(clearStreak+1);
+    dailyEvent("lines",lineCount); if(lineCount>=2) dailyEvent("multi",1); dailyEvent("streak",clearStreak,"max"); if(surgeArmed) dailyEvent("surge",1);
     linesCleared+=lineCount;
     let mult=lineCount*(surgeArmed?2:1);
     const praise=praiseFor(lineCount);
@@ -1594,7 +1808,7 @@ function endGame(reason, kind){
   if(gameOver)return;
   gameOver=true; stopDrain();
   const isNew=saveBest();
-  const games=(parseInt(lsGet("pulseGames","0"),10)||0)+1; lsSet("pulseGames",games);
+  recordRunScore();
   if(level>(parseInt(lsGet("pulseBestLevel","1"),10)||1)) lsSet("pulseBestLevel",level);
   hideGhost(); clearPreview(); blastMode=false; insightActive=false; surgeArmed=false;
   selectedIdx=null; renderTray(); updatePowers();
@@ -1645,18 +1859,20 @@ function startGame(){
   buildBoard(); layout(); fillTray(); paintBoard(); renderTray();
   renderPulse();
   placeTip.textContent="Drag blocks onto the board. Fill a row or column to clear it!";
+  runId++; lsSet("pulseGames",(parseInt(lsGet("pulseGames","0"),10)||0)+1); dailyEvent("games",1);
+  const boosted=consumeBoost();
   updatePowers();
   startDrain();
-  runReady();
+  runReady(boosted);
 }
 
 /* ================= Splash moments ================= */
-function runReady(){
+function runReady(boosted){
   const rd=$("ready"), w=$("readyWord");
   holds.add("ready"); rd.classList.remove("hide");
   w.textContent="READY?"; w.className="word anim"; sfx.ready();
   setTimeout(()=>{ w.textContent="GO!"; w.className="word go"; void w.offsetWidth; w.classList.add("anim"); sfx.go(); hap("medium"); }, 800);
-  setTimeout(()=>{ rd.classList.add("hide"); holds.delete("ready"); lastTick=performance.now(); }, 1350);
+  setTimeout(()=>{ rd.classList.add("hide"); holds.delete("ready"); lastTick=performance.now(); if(boosted){ showCombo("BOOST ON!","+15 Pulse · free Surge"); sfx.power(); } }, 1350);
 }
 let luTimer=0;
 function showLevelSplash(){
@@ -1678,7 +1894,7 @@ $("levelUp").addEventListener("pointerup", closeLevelSplash);
 /* ================= Powers ================= */
 insightBtn.addEventListener("click",()=>{
   if(gameOver||uiPaused())return;
-  if(!insightActive && pulse>=55){insightActive=true;setPulse(pulse-INSIGHT_COST);hap("light");sfx.power();placeTip.textContent="Insight ON — red placements lead to a dead end"}
+  if(!insightActive && pulse>=55){insightActive=true;dailyEvent("insight",1);setPulse(pulse-INSIGHT_COST);hap("light");sfx.power();placeTip.textContent="Insight ON — red placements lead to a dead end"}
   else if(insightActive){insightActive=false;updatePowers();clearPreview();sfx.click();placeTip.textContent="Insight off"}
 });
 surgeBtn.addEventListener("click",()=>{
@@ -1710,7 +1926,7 @@ boardEl.addEventListener("pointermove",(e)=>{
 boardEl.addEventListener("pointerleave",()=>{if(dragIdx!=null)return;hoverRC=null;clearPreview()});
 boardEl.addEventListener("pointerup",(e)=>{if(e.button!=null&&e.button!==0)return;placeFromPoint(e.clientX,e.clientY)});
 document.body.addEventListener("touchmove",(e)=>{
-  if(e.target && e.target.closest && e.target.closest("input[type=range]")) return;
+  if(e.target && e.target.closest && e.target.closest("input[type=range],textarea")) return;
   if(e.cancelable) e.preventDefault();
 },{passive:false});
 
@@ -1720,6 +1936,7 @@ let parts=[], fxRun=false, DPR=Math.min(2, window.devicePixelRatio||1);
 function fxResize(){ DPR=Math.min(2, window.devicePixelRatio||1); fxC.width=innerWidth*DPR; fxC.height=innerHeight*DPR; }
 fxResize();
 function burst(x,y,color,n,o){
+  if(reduceMotion) return;
   o=o||{}; const sp=o.speed||5;
   for(let i=0;i<n;i++){
     const a=Math.random()*Math.PI*2, v=(0.4+Math.random())*sp;
@@ -1729,6 +1946,7 @@ function burst(x,y,color,n,o){
   if(!fxRun){fxRun=true;requestAnimationFrame(fxLoop)}
 }
 function confetti(n){
+  if(reduceMotion) return;
   const cols=COLORS.slice(1);
   for(let i=0;i<n;i++){
     parts.push({x:Math.random()*innerWidth,y:-20-Math.random()*innerHeight*0.4,vx:(Math.random()-.5)*2.5,vy:2+Math.random()*3,g:0.05,life:1,decay:0.004+Math.random()*0.004,
@@ -1773,13 +1991,13 @@ function bgLoop(){
   for(const b of bgBlocks){
     b.y-=b.v; b.rot+=b.vr; if(b.y<-b.s*2) Object.assign(b,newBg(false));
     bgX.save(); bgX.globalAlpha=b.a; bgX.translate(b.x,b.y); bgX.rotate(b.rot);
-    bgX.fillStyle=COLORS[b.c]; roundRect(bgX,-b.s/2,-b.s/2,b.s,b.s,b.s*0.2); bgX.fill();
-    bgX.fillStyle=LIGHTS[b.c]; roundRect(bgX,-b.s/2+b.s*.1,-b.s/2+b.s*.1,b.s*.8,b.s*.22,b.s*.1); bgX.fill();
+    bgX.fillStyle=COLORS[bgPal()[b.c%bgPal().length]]; roundRect(bgX,-b.s/2,-b.s/2,b.s,b.s,b.s*0.2); bgX.fill();
+    bgX.fillStyle=LIGHTS[bgPal()[b.c%bgPal().length]]; roundRect(bgX,-b.s/2+b.s*.1,-b.s/2+b.s*.1,b.s*.8,b.s*.22,b.s*.1); bgX.fill();
     bgX.restore();
   }
   requestAnimationFrame(bgLoop);
 }
-function setBg(on){ if(on && !bgRun){ bgRun=true; if(!bgBlocks.length) seedBg(); requestAnimationFrame(bgLoop); } else if(!on){ bgRun=false; } }
+function setBg(on){ if(on && reduceMotion){ bgRun=false; return; } if(on && !bgRun){ bgRun=true; if(!bgBlocks.length) seedBg(); requestAnimationFrame(bgLoop); } else if(!on){ bgRun=false; } }
 
 /* ================= Logo emblem (heart of blocks) ================= */
 const HEART=[".XX.XX.","XXXXXXX","XXXXXXX",".XXXXX.","..XXX..","...X..."];
@@ -1811,7 +2029,10 @@ const TUT=[
       '<div><span class="pw-ic" style="background:linear-gradient(180deg,#b98bff,#7b3cf0)"><svg class="i"><use href="#i-eye"/></svg></span><span><b>Insight</b>Shows placements that trap you</span></div>'+
       '<div><span class="pw-ic" style="background:linear-gradient(180deg,#ffe066,#ffae00);color:#7a3d00"><svg class="i"><use href="#i-bolt"/></svg></span><span><b>Surge</b>Your next clear scores double</span></div>'+
       '<div><span class="pw-ic" style="background:linear-gradient(180deg,#ff8a7a,#ff3d4f)"><svg class="i"><use href="#i-bomb"/></svg></span><span><b>Blast</b>Tap a block to destroy a 3×3 area</span></div>'+
-      '</div></div>'; }}
+      '</div></div>'; }},
+  {t:"Daily challenges",b:"Three new challenges every day. Finish them to earn Boosts and build your daily streak!",stage:()=>{
+    return '<div style="display:grid;place-items:center;gap:10px"><svg class="i" style="width:64px;height:64px;color:#ffd23f;filter:drop-shadow(0 4px 0 #b06d00)"><use href="#i-cal"/></svg>'+
+      '<div class="boost-pill"><svg class="i"><use href="#i-bolt"/></svg><b>+1</b> BOOST</div></div>'; }}
 ];
 let tutIdx=0, tutDone=null;
 function renderTut(){
@@ -1836,6 +2057,7 @@ const sheet=$("sheet");
 function syncToggles(){ $("sfxToggle").classList.toggle("on",sfxOn); $("hapToggle").classList.toggle("on",hapticsOn); }
 syncToggles();
 function openSheet(mode){
+  setTab(mode==="support"?"support":"audio");
   sheet.classList.remove("mode-pause","mode-settings"); sheet.classList.add("mode-"+mode);
   sheet.classList.remove("hide"); if(mode==="pause") holds.add("menu");
   syncMuteUi(); syncToggles();
@@ -1865,6 +2087,252 @@ document.addEventListener("visibilitychange",()=>{
   else if(!gameOver&&inGame&&!pausedForAd) startDrain();
 });
 
+/* ================= v1.4: app info, links ================= */
+const APP_VERSION="1.4.0";
+const SUPPORT_EMAIL="digitalaimgroup@gmail.com";
+const LINKS={
+  ios:"https://apps.apple.com/app/id6811510320",
+  iosReview:"itms-apps://apps.apple.com/app/id6811510320?action=write-review",
+  iosReviewWeb:"https://apps.apple.com/app/id6811510320?action=write-review",
+  play:"https://play.google.com/store/apps/details?id=com.digitalaimgroup.pulseinsight",
+  playMarket:"market://details?id=com.digitalaimgroup.pulseinsight"
+};
+$("verEl").textContent=APP_VERSION;
+$("fbAddr").textContent=SUPPORT_EMAIL;
+function platform(){ try{ const C=window.Capacitor; if(C&&C.getPlatform) return C.getPlatform(); }catch(_){} return "web"; }
+function isNative(){ const p=platform(); return p==="ios"||p==="android"; }
+function nativePlugin(){ try{ return (window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.PulseNative)||null; }catch(_){ return null; } }
+/* In the native shell, navigating to an outside URL hands it to the OS (store app, mail app, browser). */
+function openExternal(url){
+  if(isNative()){ window.location.href=url; return; }
+  try{ const w=window.open(url,"_blank","noopener"); if(!w) window.location.href=url; }catch(_){ window.location.href=url; }
+}
+function fmtN(n){ return Number(n||0).toLocaleString("en-US"); }
+
+/* ================= Toasts ================= */
+const toastEl=$("toast"); let toastQ=[], toastBusy=false;
+function toast(title,sub,opts){ toastQ.push({title,sub,opts:opts||{}}); if(!toastBusy) nextToast(); }
+function nextToast(){
+  const t=toastQ.shift(); if(!t){ toastBusy=false; return; } toastBusy=true;
+  toastEl.className="toast"+(t.opts.info?" info":"");
+  toastEl.innerHTML='<div class="ti"><svg class="i"><use href="#'+(t.opts.icon||"i-check")+'"/></svg></div><div><b></b><span></span></div>';
+  toastEl.querySelector("b").textContent=t.title; toastEl.querySelector("span").textContent=t.sub||"";
+  requestAnimationFrame(()=>toastEl.classList.add("show"));
+  setTimeout(()=>{ toastEl.classList.remove("show"); setTimeout(nextToast,380); }, t.opts.ms||2600);
+}
+
+/* ================= Accessibility + themes ================= */
+let reduceMotion = lsGet("pulseReduceMotion", (window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches)?"1":"0")==="1";
+let cbSymbols = lsGet("pulseColorblind","0")==="1";
+let themePref = lsGet("pulseTheme","auto");
+const SEASONS=[ {theme:"halloween", month:9} ];           // October (0-based month). Add more seasonal themes here.
+function resolveTheme(){
+  if(themePref!=="auto") return themePref;
+  const m=new Date().getMonth(); const s=SEASONS.find(x=>x.month===m);
+  return s ? s.theme : "classic";
+}
+function bgPal(){ const t=resolveTheme(); return t==="neon"?[5,8,7,6,5]:t==="halloween"?[2,7,2,3,7,8]:[1,2,3,4,5,6,7,8]; }
+function applyA11yTheme(){
+  document.body.classList.toggle("rm",reduceMotion);
+  document.body.classList.toggle("cb",cbSymbols);
+  document.body.classList.remove("theme-classic","theme-neon","theme-halloween");
+  const t=resolveTheme(); document.body.classList.add("theme-"+t);
+  const tag=document.querySelector("#titleScreen .tag");
+  if(tag) tag.innerHTML = t==="halloween" ? "Spooky season is here.<br>Drop blocks and keep the beat alive!" : "Drop blocks. Blast lines.<br>Keep the beat alive!";
+  document.querySelectorAll("#themeChips .chip").forEach(c=>c.classList.toggle("on",c.dataset.th===themePref));
+  $("cbToggle").classList.toggle("on",cbSymbols); $("rmToggle").classList.toggle("on",reduceMotion);
+  const meta=document.querySelector('meta[name="theme-color"]'); if(meta) meta.setAttribute("content", t==="neon"?"#05040f":t==="halloween"?"#2a1240":"#1b1a5c");
+  if(reduceMotion){ bgRun=false; } else if(!inGame && $("titleScreen") && !$("titleScreen").classList.contains("hide")){ setBg(true); }
+}
+document.querySelectorAll("#themeChips .chip").forEach(c=>c.addEventListener("click",()=>{ themePref=c.dataset.th; lsSet("pulseTheme",themePref); applyA11yTheme(); sfx.click(); }));
+$("cbToggle").addEventListener("click",()=>{ cbSymbols=!cbSymbols; lsSet("pulseColorblind",cbSymbols?"1":"0"); applyA11yTheme(); sfx.click(); });
+$("rmToggle").addEventListener("click",()=>{ reduceMotion=!reduceMotion; lsSet("pulseReduceMotion",reduceMotion?"1":"0"); applyA11yTheme(); sfx.click(); });
+document.querySelectorAll("#setTabs .tab").forEach(t=>t.addEventListener("click",()=>{ setTab(t.dataset.tab); sfx.click(); }));
+function setTab(name){
+  document.querySelectorAll("#setTabs .tab").forEach(x=>x.classList.toggle("on",x.dataset.tab===name));
+  document.querySelectorAll("#sheet .tabpane").forEach(p=>p.classList.toggle("hide",p.dataset.pane!==name));
+}
+applyA11yTheme();
+
+/* ================= Daily challenges ================= */
+const CH_POOL=[
+  {id:"lines",  icon:"i-grid",  bg:"linear-gradient(180deg,#5ad1ff,#1f8fe0)", text:n=>"Clear "+n+" lines",            ns:[12,22,35]},
+  {id:"score",  icon:"i-star",  bg:"linear-gradient(180deg,#ffe066,#ffae00)", text:n=>"Score "+fmtN(n)+" in one game", ns:[500,1100,2000], perGame:true},
+  {id:"level",  icon:"i-crown", bg:"linear-gradient(180deg,#ffe066,#e09000)", text:n=>"Reach Level "+n,               ns:[3,4,6], perGame:true},
+  {id:"streak", icon:"i-flame", bg:"linear-gradient(180deg,#ff9a4a,#ff4d2e)", text:n=>"Hit a x"+n+" combo streak",    ns:[3,4,6], perGame:true},
+  {id:"multi",  icon:"i-grid",  bg:"linear-gradient(180deg,#8bf59a,#22b14c)", text:n=>"Clear 2+ lines at once "+n+(n>1?" times":" time"), ns:[2,4,7]},
+  {id:"blast",  icon:"i-bomb",  bg:"linear-gradient(180deg,#ff8a7a,#ff3d4f)", text:n=>"Use Blast "+n+(n>1?" times":" time"), ns:[1,2,4]},
+  {id:"surge",  icon:"i-bolt",  bg:"linear-gradient(180deg,#ffe066,#ffae00)", text:n=>"Land "+n+" Surge clear"+(n>1?"s":""), ns:[1,2,3]},
+  {id:"insight",icon:"i-eye",   bg:"linear-gradient(180deg,#b98bff,#7b3cf0)", text:n=>"Turn on Insight "+n+(n>1?" times":" time"), ns:[1,2,3]},
+  {id:"games",  icon:"i-play",  bg:"linear-gradient(180deg,#7fb2ff,#3d7bff)", text:n=>"Play "+n+" games",              ns:[2,3,5]},
+  {id:"blocks", icon:"i-grid",  bg:"linear-gradient(180deg,#ff9fe0,#e0359f)", text:n=>"Place "+n+" blocks",            ns:[40,70,110]}
+];
+const TIER_NAMES=["Easy","Medium","Hard"];
+function dayKey(d){ d=d||new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+function seeded(str){ let h=1779033703^str.length; for(let i=0;i<str.length;i++){ h=Math.imul(h^str.charCodeAt(i),3432918353); h=h<<13|h>>>19; }
+  return function(){ h=Math.imul(h^(h>>>16),2246822507); h=Math.imul(h^(h>>>13),3266489909); h^=h>>>16; return (h>>>0)/4294967296; }; }
+function challengesFor(day){
+  const rnd=seeded("pulse-daily-"+day); const ids=CH_POOL.map(c=>c.id); const picked=[];
+  while(picked.length<3){ const id=ids.splice(Math.floor(rnd()*ids.length),1)[0]; picked.push(id); }
+  return picked.map((id,tier)=>{ const c=CH_POOL.find(x=>x.id===id); return {id, tier, target:c.ns[Math.min(tier,c.ns.length-1)]}; });
+}
+function lsJSON(k,d){ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):d; }catch(_){ return d; } }
+function lsSetJSON(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(_){} }
+function getDaily(){
+  const day=dayKey(); let d=lsJSON("pulseDaily",null);
+  if(!d || d.day!==day){ d={day, list:challengesFor(day), prog:{}, done:{}, all:false}; lsSetJSON("pulseDaily",d); }
+  return d;
+}
+function getBoosts(){ return parseInt(lsGet("pulseBoosts","0"),10)||0; }
+function addBoosts(n){ lsSet("pulseBoosts", Math.max(0,getBoosts()+n)); }
+let useBoosts = lsGet("pulseUseBoosts","1")!=="0";
+function dailyEvent(id,val,mode){
+  const d=getDaily(); const ch=d.list.find(c=>c.id===id); if(!ch || d.done[id]) return;
+  const cur=d.prog[id]||0;
+  d.prog[id] = mode==="max" ? Math.max(cur,val) : cur+val;
+  if(d.prog[id]>=ch.target){
+    d.prog[id]=ch.target; d.done[id]=true; addBoosts(1);
+    const def=CH_POOL.find(x=>x.id===id);
+    toast("Challenge complete!", def.text(ch.target)+" · +1 Boost");
+    sfx.best(); hap("success");
+    if(d.list.every(c=>d.done[c.id]) && !d.all){
+      d.all=true; addBoosts(1);
+      const st=lsJSON("pulseDailyStreak",{count:0,last:""});
+      const y=new Date(); y.setDate(y.getDate()-1);
+      st.count = st.last===dayKey(y) ? st.count+1 : (st.last===d.day ? st.count : 1); st.last=d.day; lsSetJSON("pulseDailyStreak",st);
+      toast("All 3 done!", st.count+"-day streak · bonus Boost", {icon:"i-flame", ms:3200});
+      confetti(80);
+    }
+  }
+  lsSetJSON("pulseDaily",d);
+}
+function getStreak(){
+  const st=lsJSON("pulseDailyStreak",{count:0,last:""});
+  const y=new Date(); y.setDate(y.getDate()-1);
+  return (st.last===dayKey() || st.last===dayKey(y)) ? st.count : 0;
+}
+function consumeBoost(){
+  if(!useBoosts || getBoosts()<=0) return false;
+  addBoosts(-1);
+  pulse=Math.min(100,START_PULSE+15); surgeArmed=true; renderPulse();
+  return true;
+}
+let runId=0;
+function recordRunScore(){
+  const day=dayKey();
+  const t=lsJSON("pulseToday",{day,runs:{}}); if(t.day!==day){ t.day=day; t.runs={}; }
+  t.runs[runId]=Math.max(t.runs[runId]||0,score); lsSetJSON("pulseToday",t);
+  const bests=lsJSON("pulseDayBests",{}); bests[day]=Math.max(bests[day]||0,score);
+  const keys=Object.keys(bests).sort(); while(keys.length>21){ delete bests[keys.shift()]; }
+  lsSetJSON("pulseDayBests",bests);
+  if(level>(parseInt(lsGet("pulseBestLevel","1"),10)||1)){ lsSet("pulseBestLevel",level); lsSet("pulseRateTrigger","1"); }
+}
+function timeToReset(){
+  const n=new Date(), m=new Date(n); m.setHours(24,0,0,0);
+  const mins=Math.max(1,Math.round((m-n)/60000)); const h=Math.floor(mins/60);
+  return h ? (h+"h "+(mins%60)+"m") : (mins+"m");
+}
+function refreshDailyUi(){
+  const d=getDaily(); const done=d.list.filter(c=>d.done[c.id]).length;
+  const badge=$("dailyBadge"); badge.textContent=done+"/3"; badge.classList.toggle("done",done===3);
+  $("dailyDot").hidden = done===3 || lsGet("pulseDailySeen","")===d.day;
+  const b=getBoosts(); $("titleBoost").hidden = b<=0; $("titleBoostN").textContent=b;
+}
+let dailyTimer=0;
+function renderDaily(){
+  const d=getDaily();
+  $("dStreak").textContent=getStreak(); $("dReset").textContent=timeToReset(); $("dBoosts").textContent=getBoosts();
+  $("boostToggle").classList.toggle("on",useBoosts);
+  $("dList").innerHTML=d.list.map(c=>{
+    const def=CH_POOL.find(x=>x.id===c.id); const p=Math.min(c.target,d.prog[c.id]||0); const ok=!!d.done[c.id];
+    const pct=Math.round(p/c.target*100);
+    return '<div class="dch'+(ok?" done":"")+'"><div class="di" style="background:'+def.bg+'"><svg class="i"><use href="#'+def.icon+'"/></svg></div>'+
+      '<div class="dt">'+def.text(c.target)+'<small>'+TIER_NAMES[c.tier]+(def.perGame?" · single game":"")+'</small><div class="dbar"><i style="width:'+pct+'%"></i></div></div>'+
+      '<div class="dr">'+(ok?'<svg class="i"><use href="#i-check"/></svg>DONE':'<svg class="i"><use href="#i-bolt"/></svg>'+fmtN(p)+'/'+fmtN(c.target))+'</div></div>';
+  }).join("");
+  const t=lsJSON("pulseToday",{day:"",runs:{}}); const runs=t.day===d.day?Object.values(t.runs):[];
+  const bests=lsJSON("pulseDayBests",{});
+  const days=[]; for(let i=6;i>=0;i--){ const x=new Date(); x.setDate(x.getDate()-i); days.push(x); }
+  const vals=days.map(x=>bests[dayKey(x)]||0); const mx=Math.max(1,...vals);
+  $("bToday").textContent=fmtN(bests[d.day]||0); $("bWeek").textContent=fmtN(Math.max(0,...vals));
+  $("bAll").textContent=fmtN(getBest()); $("bGames").textContent=runs.length;
+  $("dWeek").innerHTML=days.map((x,i)=>'<div class="col'+(i===6?" today":"")+'"><span class="v">'+(vals[i]?fmtN(vals[i]):"")+'</span><div class="b" style="height:'+Math.round(vals[i]/mx*44)+'px"></div><span class="d">'+"SMTWTFS"[x.getDay()]+'</span></div>').join("");
+}
+function openDaily(){
+  const d=getDaily(); lsSet("pulseDailySeen",d.day);
+  renderDaily(); $("daily").classList.remove("hide"); refreshDailyUi();
+  clearInterval(dailyTimer); dailyTimer=setInterval(()=>{ $("dReset").textContent=timeToReset(); if(getDaily().day!==d.day) renderDaily(); },30000);
+}
+function closeDaily(){ $("daily").classList.add("hide"); clearInterval(dailyTimer); refreshDailyUi(); }
+$("dailyBtn").addEventListener("click",()=>{ sfx.click(); openDaily(); });
+$("dailyClose").addEventListener("click",()=>{ sfx.click(); closeDaily(); });
+$("dPlay").addEventListener("click",()=>{ sfx.go(); closeDaily(); beginFromTitle(); });
+$("boostToggle").addEventListener("click",()=>{ useBoosts=!useBoosts; lsSet("pulseUseBoosts",useBoosts?"1":"0"); $("boostToggle").classList.toggle("on",useBoosts); sfx.click(); });
+$("dShare").addEventListener("click",()=>{
+  sfx.click(); const d=getDaily(); const done=d.list.filter(c=>d.done[c.id]).length; const st=getStreak();
+  const best=lsJSON("pulseDayBests",{})[d.day]||0;
+  shareText("PULSE Insight daily challenges: "+done+"/3 done today"+(st>1?" ("+st+"-day streak)":"")+(best?", best score "+fmtN(best):"")+". Can you keep your Pulse alive longer than me?");
+});
+
+/* ================= Sharing ================= */
+function storeLine(){ return "\niPhone: "+LINKS.ios+"\nAndroid: "+LINKS.play; }
+async function shareText(msg){
+  const text=msg+storeLine();
+  const P=nativePlugin();
+  if(P && P.share){ try{ await P.share({title:"PULSE Insight", text}); return; }catch(_){} }
+  if(navigator.share){ try{ await navigator.share({title:"PULSE Insight", text}); return; }catch(e){ if(e && e.name==="AbortError") return; } }
+  try{ await navigator.clipboard.writeText(text); toast("Copied to clipboard","Paste it in a message or post",{info:true,icon:"i-share"}); }
+  catch(_){ toast("Sharing isn't available here","Try again from the app",{info:true,icon:"i-share"}); }
+}
+$("goShare").addEventListener("click",()=>{ sfx.click(); shareText("I scored "+fmtN(score)+" and reached Level "+level+" in PULSE Insight! Can you beat it?"); });
+$("shareAppBtn").addEventListener("click",()=>{ sfx.click(); shareText("I'm hooked on PULSE Insight, a block puzzle where you keep a heartbeat alive by clearing lines. Try it:"); });
+
+/* ================= Rating ================= */
+function storeReviewUrl(){ const p=platform(); return p==="android" ? LINKS.playMarket : p==="ios" ? LINKS.iosReview : (/Android/i.test(navigator.userAgent)?LINKS.play:LINKS.iosReviewWeb); }
+async function inAppReview(){
+  const P=nativePlugin();
+  if(P && P.requestReview){ try{ await P.requestReview(); return true; }catch(_){} }
+  return false;
+}
+function markRated(){ lsSet("pulseRated","1"); }
+$("rateBtn").addEventListener("click",()=>{ sfx.click(); markRated(); openExternal(storeReviewUrl()); });
+function maybeAskRate(){
+  if(lsGet("pulseRated","0")==="1") return;
+  const asks=parseInt(lsGet("pulseRateAsks","0"),10)||0; if(asks>=3) return;
+  const last=parseInt(lsGet("pulseRateLast","0"),10)||0; if(Date.now()-last < 4*86400000) return;
+  const games=parseInt(lsGet("pulseGames","0"),10)||0;
+  const trigger = lsGet("pulseRateTrigger","0")==="1" && (parseInt(lsGet("pulseBestLevel","1"),10)||1)>=4;
+  if(!(trigger || games>=5)) return;
+  if(!$("titleScreen") || $("titleScreen").classList.contains("hide")) return;
+  lsSet("pulseRateAsks",asks+1); lsSet("pulseRateLast",Date.now()); lsSet("pulseRateTrigger","0");
+  $("ratePrompt").classList.remove("hide"); sfx.ready();
+}
+$("rateYes").addEventListener("click",async ()=>{
+  sfx.click(); $("ratePrompt").classList.add("hide"); markRated();
+  const shown = platform()==="android" ? await inAppReview() : false;
+  if(!shown) openExternal(storeReviewUrl());
+});
+$("rateLater").addEventListener("click",()=>{ sfx.click(); $("ratePrompt").classList.add("hide"); });
+
+/* ================= Feedback ================= */
+let fbType="Bug";
+document.querySelectorAll("#fbType .chip").forEach(c=>c.addEventListener("click",()=>{ fbType=c.dataset.v; document.querySelectorAll("#fbType .chip").forEach(x=>x.classList.toggle("on",x===c)); sfx.click(); }));
+function openFeedback(){ $("feedback").classList.remove("hide"); }
+$("feedbackBtn").addEventListener("click",()=>{ sfx.click(); openFeedback(); });
+$("fbClose").addEventListener("click",()=>{ sfx.click(); $("feedback").classList.add("hide"); });
+$("fbSend").addEventListener("click",()=>{
+  const msg=$("fbText").value.trim();
+  if(!msg){ toast("Add a few words first","Tell us what happened or what you'd like",{info:true,icon:"i-mail"}); $("fbText").focus(); return; }
+  sfx.click();
+  const info="\n\n---\nApp: PULSE Insight "+APP_VERSION+"\nPlatform: "+platform()+" ("+(window.PULSE_DEVICE?window.PULSE_DEVICE.form:"?")+")\nScreen: "+innerWidth+"x"+innerHeight+"\nBest score: "+getBest()+" · Best level: "+lsGet("pulseBestLevel","1")+"\nDevice: "+navigator.userAgent;
+  const url="mailto:"+SUPPORT_EMAIL+"?subject="+encodeURIComponent("PULSE Insight "+fbType+" ("+APP_VERSION+")")+"&body="+encodeURIComponent(msg+info);
+  openExternal(url);
+  $("feedback").classList.add("hide"); $("fbText").value="";
+  toast("Thanks for the feedback!","Your email app should open with the message ready",{info:true,icon:"i-mail",ms:3200});
+});
+
+refreshDailyUi();
+
 /* ================= Title & boot ================= */
 const titleScreen=$("titleScreen"), playBtn=$("playBtn"), menuBtn=$("menuBtn"), titleBest=$("titleBest");
 function refreshTitleBest(){
@@ -1875,15 +2343,17 @@ function refreshTitleBest(){
   $("titleStats").textContent = g ? (g+" game"+(g===1?"":"s")+" played · best level "+bl) : "";
 }
 function showTitleScreen(){
+  const fromGame=inGame;
   inGame=false;
   stopDrain();
   gameOver=true;
   holds.clear();
   if(gameOverEl) gameOverEl.classList.remove("show");
-  ["levelUp","ready","tutorial","sheet"].forEach(id=>$(id).classList.add("hide"));
+  ["levelUp","ready","tutorial","sheet","daily","feedback","ratePrompt"].forEach(id=>$(id).classList.add("hide"));
   document.body.classList.add("title-locked"); document.body.classList.remove("danger");
   if(titleScreen) titleScreen.classList.remove("hide");
-  refreshTitleBest(); setBg(true);
+  refreshTitleBest(); setBg(true); refreshDailyUi();
+  if(fromGame) setTimeout(maybeAskRate, 700);
 }
 function beginFromTitle(){
   document.body.classList.remove("title-locked");
@@ -1909,6 +2379,9 @@ try{
   const AppPlugin = Cap && Cap.Plugins && Cap.Plugins.App;
   if(AppPlugin && typeof AppPlugin.addListener === "function"){
     AppPlugin.addListener("backButton", ()=>{
+      if(!$("ratePrompt").classList.contains("hide")){ $("ratePrompt").classList.add("hide"); return; }
+      if(!$("feedback").classList.contains("hide")){ $("feedback").classList.add("hide"); return; }
+      if(!$("daily").classList.contains("hide")){ closeDaily(); return; }
       if(!$("tutorial").classList.contains("hide")){ closeTutorial(); return; }
       if(!sheet.classList.contains("hide")){ closeSheet(); return; }
       if(!$("levelUp").classList.contains("hide")){ closeLevelSplash(); return; }
@@ -1940,7 +2413,7 @@ if(/[?&]debug/.test(location.search)){
     get grid(){return grid}, get tray(){return tray}, get pulse(){return pulse}, get level(){return level}, get score(){return score},
     get gameOver(){return gameOver}, get M(){return M},
     setGrid(g){grid=g;paintBoard()}, setTray(names){tray=names.map((n,i)=>n?{name:n,shape:cloneShape(n),color:(i*3)%8+1}:null);renderTray()},
-    tryPlace, setPulse, endGame, levelUp, cellRect(r,c){const b=cells[r][c].getBoundingClientRect();return{x:b.left+b.width/2,y:b.top+b.height/2}}
+    tryPlace, setPulse, endGame, levelUp, dailyEvent, cellRect(r,c){const b=cells[r][c].getBoundingClientRect();return{x:b.left+b.width/2,y:b.top+b.height/2}}
   };
 }
 if("serviceWorker" in navigator)navigator.serviceWorker.register("./sw.js").catch(()=>{});

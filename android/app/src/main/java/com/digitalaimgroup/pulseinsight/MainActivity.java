@@ -21,6 +21,7 @@ public class MainActivity extends BridgeActivity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        registerPlugin(PulseNativePlugin.class);
         super.onCreate(savedInstanceState);
     }
 
