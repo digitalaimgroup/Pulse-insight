@@ -1157,7 +1157,7 @@ function buzz(p){
   hap(k);
 }
 
-/* ================= AdMob (Capacitor) — unchanged ================= */
+/* ================= AdMob (Capacitor) — ATT before init (Guideline 2.1) ================= */
 const PROD_REWARDED = "ca-app-pub-3600954472890613/8958393072";
 const PROD_INTERSTITIAL = "ca-app-pub-3600954472890613/9791399496";
 const TEST_REWARDED = "ca-app-pub-3940256099942544/5224354917";
@@ -1206,6 +1206,21 @@ function setContinueLabel(text, disabled){
   watchContinueBtn.textContent = text;
   watchContinueBtn.disabled = !!disabled;
 }
+/* ATT order (Guideline 2.1): request tracking when notDetermined BEFORE AdMob/UMP/IDFA. */
+let adsInitInFlight = null;
+async function ensureTrackingAuthorization(AdMob){
+  try{
+    const Cap = window.Capacitor;
+    const platform = Cap && typeof Cap.getPlatform === "function" ? Cap.getPlatform() : "";
+    if(platform !== "ios") return;
+    if(typeof AdMob.trackingAuthorizationStatus !== "function") return;
+    const info = await AdMob.trackingAuthorizationStatus();
+    const status = String(info && info.status != null ? info.status : "");
+    if(status === "notDetermined" && typeof AdMob.requestTrackingAuthorization === "function"){
+      await AdMob.requestTrackingAuthorization();
+    }
+  }catch(err){ console.warn("ATT request failed", err); }
+}
 async function initAds(){
   const AdMob = nativeAdMob();
   if(!AdMob){
@@ -1213,18 +1228,26 @@ async function initAds(){
     if(watchContinueBtn) watchContinueBtn.title = "Ads need the Android app build";
     return;
   }
-  try{
-    await AdMob.initialize({ initializeForTesting: true, testingDevices: [] });
+  if(admobReady) return;
+  if(adsInitInFlight) return adsInitInFlight;
+  adsInitInFlight = (async () => {
     try{
-      const info = await AdMob.requestConsentInfo({ debugGeography: 0, timeout: 10000 });
-      if(info && (info.isConsentFormAvailable || info.status === "REQUIRED")){
-        try{ await AdMob.showConsentForm(); }catch(ce){ console.warn("consent form", ce); }
-      }
-    }catch(ce){ console.warn("consent", ce); }
-    admobReady = true;
-    wireAdPauseListeners(AdMob);
-    preloadRewarded();
-  }catch(err){ console.warn("AdMob init failed", err); admobReady = false; }
+      // ATT must complete before Google Mobile Ads SDK starts (IDFA / tracking).
+      await ensureTrackingAuthorization(AdMob);
+      await AdMob.initialize({ initializeForTesting: true, testingDevices: [] });
+      try{
+        const info = await AdMob.requestConsentInfo({ debugGeography: 0, timeout: 10000 });
+        if(info && (info.isConsentFormAvailable || info.status === "REQUIRED")){
+          try{ await AdMob.showConsentForm(); }catch(ce){ console.warn("consent form", ce); }
+        }
+      }catch(ce){ console.warn("consent", ce); }
+      admobReady = true;
+      wireAdPauseListeners(AdMob);
+      preloadRewarded();
+    }catch(err){ console.warn("AdMob init failed", err); admobReady = false; }
+    finally{ adsInitInFlight = null; }
+  })();
+  return adsInitInFlight;
 }
 async function prepareRewarded(adId, isTesting){
   const AdMob = nativeAdMob();
@@ -2397,14 +2420,16 @@ function runBoot(){
   setBg(true);
   requestAnimationFrame(()=>boot.classList.add("go"));
   let done=false;
-  const finish=()=>{ if(done) return; done=true; showTitleScreen(); boot.classList.add("out"); setTimeout(()=>boot.remove(),520); };
+  const finish=()=>{ if(done) return; done=true; showTitleScreen(); boot.classList.add("out"); setTimeout(()=>boot.remove(),520);
+    // ATT + AdMob after splash→title so the system tracking dialog is on a live screen (iPhone + iPad).
+    setTimeout(()=>{ void initAds(); }, 400);
+  };
   setTimeout(finish, 2600);
   boot.addEventListener("pointerup", ()=>{ if(boot.classList.contains("go")) setTimeout(finish, 60); });
 }
 
 buildBoard(); grid=Array.from({length:SIZE},()=>Array(SIZE).fill(0)); tray=[];
 refreshTitleBest();
-initAds();
 runBoot();
 requestAnimationFrame(layout);
 

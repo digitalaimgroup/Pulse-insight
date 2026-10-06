@@ -7,9 +7,11 @@ import FBAudienceNetwork
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
+    private var didRequestTrackingAuthorization = false
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Meta Audience Network requires ATE before Google Mobile Ads SDK init (AdMob mediation).
+        // Do not request ATT here — UIWindow is not key yet; request on didBecomeActive.
         updateMetaAdvertiserTrackingEnabled()
         return true
     }
@@ -29,8 +31,29 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func applicationDidBecomeActive(_ application: UIApplication) {
-        // ATT may resolve while inactive; keep Meta ATE in sync.
+        // Guideline 2.1: ATT framework must actually show the system prompt on iPhone AND iPad.
+        // Request when notDetermined on first foreground; sync Meta ATE after it resolves.
+        requestTrackingAuthorizationIfNeeded()
         updateMetaAdvertiserTrackingEnabled()
+    }
+
+    /// Show ATT when status is notDetermined (fresh install / reset tracking). Safe on iPad.
+    private func requestTrackingAuthorizationIfNeeded() {
+        guard #available(iOS 14, *) else { return }
+        guard !didRequestTrackingAuthorization else { return }
+        guard ATTrackingManager.trackingAuthorizationStatus == .notDetermined else {
+            updateMetaAdvertiserTrackingEnabled()
+            return
+        }
+        didRequestTrackingAuthorization = true
+        // Slight delay so the key window / root VC is ready (required for ATT sheet on iPad).
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+            ATTrackingManager.requestTrackingAuthorization { _ in
+                DispatchQueue.main.async {
+                    self?.updateMetaAdvertiserTrackingEnabled()
+                }
+            }
+        }
     }
 
     /// Google AdMob Meta mediation: set FBAdSettings ATE from ATT status before ads load.

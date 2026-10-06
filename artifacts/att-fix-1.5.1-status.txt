@@ -1,0 +1,25 @@
+PULSE Insight — ATT fix for Guideline 2.1 (1.5.1)
+Updated: 2026-10-06 CT
+
+ROOT CAUSE
+==========
+Info.plist had NSUserTrackingUsageDescription and AppDelegate imported
+AppTrackingTransparency + synced Meta FBAdSettings ATE from status, but never
+called ATTrackingManager.requestTrackingAuthorization. www initAds() called
+AdMob.initialize() immediately on boot (during splash), so Apple reviewers on
+iPad Air 11-inch (M3) / iPadOS 27.0.1 never saw the ATT permission dialog.
+Same bug Word Rush hit — fixed there in 2428971 (1.1.4).
+
+FIX
+===
+1) ios/App/App/AppDelegate.swift — requestTrackingAuthorization when
+   notDetermined on applicationDidBecomeActive (+0.5s for key window / iPad);
+   FBAdSettings ATE sync after ATT resolves.
+2) www/index.html — ensureTrackingAuthorization() before AdMob.initialize /
+   UMP; defer initAds until after splash→title (+400ms).
+3) Info.plist — clearer NSUserTrackingUsageDescription.
+4) Version bump marketing 1.5.1; CURRENT_PROJECT_VERSION baseline 19
+   (CI BUILD_NUMBER=run_number overrides uploaded build); Android versionCode 11.
+5) sw.js cache pulse-insight-v11. iOS 15.0+ unchanged.
+
+NO physical-device ATT screen recording available on this Linux box.
