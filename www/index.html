@@ -1158,10 +1158,19 @@ function buzz(p){
 }
 
 /* ================= AdMob (Capacitor) — ATT before init (Guideline 2.1) ================= */
-const PROD_REWARDED = "ca-app-pub-3600954472890613/8958393072";
-const PROD_INTERSTITIAL = "ca-app-pub-3600954472890613/9791399496";
-const TEST_REWARDED = "ca-app-pub-3940256099942544/5224354917";
-const TEST_INTERSTITIAL = "ca-app-pub-3940256099942544/1033173712";
+const ANDROID_REWARDED = "ca-app-pub-3600954472890613/8958393072";
+const ANDROID_INTERSTITIAL = "ca-app-pub-3600954472890613/9791399496";
+const IOS_REWARDED = "ca-app-pub-3600954472890613/9220452229";
+const IOS_INTERSTITIAL = "ca-app-pub-3600954472890613/2846615560";
+function isIosPlatform(){
+  try{
+    const Cap = window.Capacitor;
+    return !!(Cap && typeof Cap.getPlatform === "function" && Cap.getPlatform() === "ios");
+  }catch(_){ return false; }
+}
+const PROD_REWARDED = isIosPlatform() ? IOS_REWARDED : ANDROID_REWARDED;
+const PROD_INTERSTITIAL = isIosPlatform() ? IOS_INTERSTITIAL : ANDROID_INTERSTITIAL;
+const ADMOB_TESTING = false; // production: real units only, no Google sample/test ads
 
 const CONTINUE_PULSE = 55;
 let admobReady = false;
@@ -1234,7 +1243,7 @@ async function initAds(){
     try{
       // ATT must complete before Google Mobile Ads SDK starts (IDFA / tracking).
       await ensureTrackingAuthorization(AdMob);
-      await AdMob.initialize({ initializeForTesting: true, testingDevices: [] });
+      await AdMob.initialize({ initializeForTesting: ADMOB_TESTING, testingDevices: [] });
       try{
         const info = await AdMob.requestConsentInfo({ debugGeography: 0, timeout: 10000 });
         if(info && (info.isConsentFormAvailable || info.status === "REQUIRED")){
@@ -1258,11 +1267,10 @@ async function prepareRewarded(adId, isTesting){
 async function preloadRewarded(){
   if(!admobReady) return;
   rewardedReady = false;
-  try{ await prepareRewarded(PROD_REWARDED, false); }
+  try{ await prepareRewarded(PROD_REWARDED, ADMOB_TESTING); }
   catch(e1){
-    console.warn("prod rewarded preload failed", e1);
-    try{ await prepareRewarded(TEST_REWARDED, true); }
-    catch(e2){ console.warn("test rewarded preload failed", e2); rewardedReady = false; }
+    console.warn("rewarded preload failed", e1);
+    rewardedReady = false;
   }
 }
 async function showRewardedContinue(){
@@ -1286,18 +1294,16 @@ async function showRewardedContinue(){
   }
   try{
     if(!rewardedReady){
-      try{ await prepareRewarded(PROD_REWARDED, false); }
-      catch(_){ await prepareRewarded(TEST_REWARDED, true); endReason.textContent = "Using test ad (AdMob still under review)…"; }
+      await prepareRewarded(PROD_REWARDED, ADMOB_TESTING);
     }
     await showPrepared();
     placeTip.textContent = "Thanks — Pulse restored!";
     return true;
   }catch(err1){
-    console.warn("rewarded show failed, retrying test unit", err1);
+    console.warn("rewarded show failed, retrying", err1);
     rewardedReady = false;
     try{
-      await prepareRewarded(TEST_REWARDED, true);
-      endReason.textContent = "Using test ad…";
+      await prepareRewarded(PROD_REWARDED, ADMOB_TESTING);
       await showPrepared();
       placeTip.textContent = "Thanks — Pulse restored!";
       return true;
@@ -1322,8 +1328,7 @@ async function maybeShowInterstitial(){
   levelsSinceInterstitial = 0;
   pauseForAd();
   try{
-    try{ await AdMob.prepareInterstitial({ adId: PROD_INTERSTITIAL, isTesting: false }); }
-    catch(_){ await AdMob.prepareInterstitial({ adId: TEST_INTERSTITIAL, isTesting: true }); }
+    await AdMob.prepareInterstitial({ adId: PROD_INTERSTITIAL, isTesting: ADMOB_TESTING });
     await AdMob.showInterstitial();
   }catch(err){ console.warn("Interstitial failed", err); }
   finally{ resumeAfterAd(); }
