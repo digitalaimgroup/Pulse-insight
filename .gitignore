@@ -18,3 +18,7 @@ secrets/
 vendor/bundle
 
 android/local.properties
+
+# Signing secrets (never commit)
+android/keystore.properties
+keystore.properties
