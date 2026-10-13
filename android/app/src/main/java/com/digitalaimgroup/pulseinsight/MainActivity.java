@@ -6,6 +6,11 @@ import android.os.Bundle;
 import android.view.View;
 import android.webkit.WebView;
 
+import androidx.activity.EdgeToEdge;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+
 import com.getcapacitor.BridgeActivity;
 
 import java.util.ArrayList;
@@ -22,6 +27,7 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         registerPlugin(PulseNativePlugin.class);
+        EdgeToEdge.enable(this);
         super.onCreate(savedInstanceState);
     }
 
@@ -52,12 +58,37 @@ public class MainActivity extends BridgeActivity {
 
         if (!gestureHooksAttached) {
             gestureHooksAttached = true;
+            ViewCompat.setOnApplyWindowInsetsListener(webView, (v, insets) -> {
+                Insets bars = insets.getInsets(
+                    WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.displayCutout());
+                lastInsets = bars;
+                pushSafeAreaToWeb(webView);
+                return insets;
+            });
+            ViewCompat.requestApplyInsets(webView);
             webView.addOnLayoutChangeListener(
                 (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) ->
                     applySystemGestureExclusions(webView)
             );
         }
         webView.post(() -> applySystemGestureExclusions(webView));
+        pushSafeAreaToWeb(webView);
+    }
+
+    private Insets lastInsets = Insets.NONE;
+
+    /** Edge-to-edge: expose system bar / cutout insets to CSS as --sat/--sab/--sal/--sar (CSS px). */
+    private void pushSafeAreaToWeb(WebView webView) {
+        if (webView == null) return;
+        float d = getResources().getDisplayMetrics().density;
+        Insets i = lastInsets;
+        String js = "(function(){var s=document.documentElement.style;"
+            + "s.setProperty('--sat','" + Math.round(i.top / d) + "px');"
+            + "s.setProperty('--sab','" + Math.round(i.bottom / d) + "px');"
+            + "s.setProperty('--sal','" + Math.round(i.left / d) + "px');"
+            + "s.setProperty('--sar','" + Math.round(i.right / d) + "px');"
+            + "try{window.dispatchEvent(new Event('resize'))}catch(e){}})();";
+        webView.post(() -> webView.evaluateJavascript(js, null));
     }
 
     private void applySystemGestureExclusions(WebView webView) {

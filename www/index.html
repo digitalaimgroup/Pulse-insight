@@ -600,6 +600,7 @@ html.device-ipad{--col:min(94vw,700px)}
 html.device-ipad #app > .topbar,html.device-ipad #app > .pulse-wrap,html.device-ipad #app > .pulse-cap,html.device-ipad #app > .powers,html.device-ipad #app > .tip{width:calc(var(--col)/1.4)}
 .device-ipad .card{zoom:1.2}
 @media (min-width:700px) and (min-height:800px){:root{--col:min(92vw,620px)}}
+@media (orientation:landscape) and (max-height:600px){#app{padding-top:calc(var(--sat) + 4px);padding-bottom:calc(var(--sab) + 4px)}.pulse-cap,.tip{display:none}}
 @media (max-height:640px){.tip{display:none}.pulse-cap{display:none}#scoreEl{font-size:2.1rem}.powers{margin-bottom:6px}}
 
 </style>
@@ -932,10 +933,10 @@ function applyPulseDevice(form){
 }
 (function initPulseDevice(){ applyPulseDevice(detectPulseDevice().form); })();
 
-/* Native status bar: light text on our dark-blue theme */
+/* Native status bar: light text on our dark-blue theme (edge-to-edge: no bar colors) */
 try{
   const SB = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.StatusBar;
-  if(SB){ SB.setStyle && SB.setStyle({style:"DARK"}).catch(()=>{}); SB.setBackgroundColor && SB.setBackgroundColor({color:"#1b1a5c"}).catch(()=>{}); }
+  if(SB){ SB.setStyle && SB.setStyle({style:"DARK"}).catch(()=>{}); }
 }catch(_){}
 
 /* ================= Game rules (unchanged tuning) ================= */
