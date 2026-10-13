@@ -1,17 +1,17 @@
 {
   "name": "pulse-insight",
-  "version": "1.5.2",
+  "version": "1.5.3",
   "private": true,
-  "description": "PULSE Insight \u2014 Capacitor Android + iOS",
+  "description": "PULSE Insight — Capacitor Android + iOS",
   "dependencies": {
-    "@capacitor-community/admob": "^6.2.0",
-    "@capacitor/android": "^6.1.2",
-    "@capacitor/app": "^6.0.1",
-    "@capacitor/cli": "^6.1.2",
-    "@capacitor/core": "^6.1.2",
-    "@capacitor/haptics": "^6.0.1",
-    "@capacitor/ios": "^6.2.2",
-    "@capacitor/status-bar": "^6.0.1"
+    "@capacitor-community/admob": "^7.2.0",
+    "@capacitor/android": "^7.6.9",
+    "@capacitor/app": "^7.1.2",
+    "@capacitor/cli": "^7.6.9",
+    "@capacitor/core": "^7.6.9",
+    "@capacitor/haptics": "^7.0.5",
+    "@capacitor/ios": "^7.6.9",
+    "@capacitor/status-bar": "^7.0.6"
   },
   "scripts": {
     "sync": "npx cap sync",

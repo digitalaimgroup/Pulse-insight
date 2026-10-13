@@ -3,7 +3,12 @@
   "appName": "PULSE Insight",
   "webDir": "www",
   "android": {
-    "allowMixedContent": true
+    "allowMixedContent": true,
+    "includePlugins": [
+      "@capacitor-community/admob",
+      "@capacitor/app",
+      "@capacitor/haptics"
+    ]
   },
   "server": {
     "androidScheme": "https",

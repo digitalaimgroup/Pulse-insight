@@ -13,6 +13,11 @@ if (!fs.existsSync(podspec)) {
   process.exit(0);
 }
 let t = fs.readFileSync(podspec, 'utf8');
+// AdMob 7+ ships UMP 3 natively; pinning UMP < 3 would conflict.
+if (/s\.dependency ['"]GoogleUserMessagingPlatform['"]/.test(t)) {
+  console.log('patch-admob-ump: podspec already declares UMP, skip');
+  process.exit(0);
+}
 if (t.includes("GoogleUserMessagingPlatform', '>= 2.7.0', '< 3.0.0'")) {
   console.log('patch-admob-ump: already pinned');
   process.exit(0);
