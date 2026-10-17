@@ -7,7 +7,9 @@
     "includePlugins": [
       "@capacitor-community/admob",
       "@capacitor/app",
-      "@capacitor/haptics"
+      "@capacitor/haptics",
+      "@capacitor-community/in-app-review",
+      "@capacitor/share"
     ]
   },
   "server": {

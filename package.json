@@ -5,12 +5,14 @@
   "description": "PULSE Insight — Capacitor Android + iOS",
   "dependencies": {
     "@capacitor-community/admob": "^7.2.0",
+    "@capacitor-community/in-app-review": "^7.1.0",
     "@capacitor/android": "^7.6.9",
     "@capacitor/app": "^7.1.2",
     "@capacitor/cli": "^7.6.9",
     "@capacitor/core": "^7.6.9",
     "@capacitor/haptics": "^7.0.5",
     "@capacitor/ios": "^7.6.9",
+    "@capacitor/share": "^7.0.4",
     "@capacitor/status-bar": "^7.0.6"
   },
   "scripts": {

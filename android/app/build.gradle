@@ -23,8 +23,8 @@ android {
         applicationId "com.digitalaimgroup.pulseinsight"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 14
-        versionName "1.5.3"
+        versionCode 15
+        versionName "1.5.4"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         androidResources {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -37,8 +37,11 @@ android {
             if (keystorePropertiesFile.exists()) {
                 signingConfig signingConfigs.release
             }
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            // R8: shrink + obfuscate code and drop unused resources. mapping.txt is written to
+            // app/build/outputs/mapping/release/ (upload it to Play for deobfuscated crash traces).
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
 }

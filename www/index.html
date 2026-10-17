@@ -557,6 +557,8 @@ button.set-row .go{font:400 1.4rem var(--display);color:var(--gold)}
 .fb-mail span{color:#fff;-webkit-user-select:text;user-select:text}
 .go-row.three{grid-template-columns:1fr 1fr 58px}
 .go-row .share-btn{padding:0;display:grid;place-items:center;font-size:24px}
+.go-row .share-btn.hot{animation:wob 1.2s ease-in-out infinite}
+body.rm .go-row .share-btn.hot{animation:none}
 :focus-visible{outline:3px solid #ffd23f;outline-offset:2px}
 /* Accessibility: colorblind symbols */
 body.cb .blk::before{content:"";position:absolute;inset:27%;z-index:1;background:center/contain no-repeat;pointer-events:none}
@@ -825,19 +827,6 @@ html.device-ipad #app > .topbar,html.device-ipad #app > .pulse-wrap,html.device-
     <div class="go-row">
       <button type="button" class="candy-btn sm" id="dPlay"><span class="row"><svg class="i"><use href="#i-play"/></svg>PLAY</span></button>
       <button type="button" class="candy-btn sm purple" id="dShare"><span class="row"><svg class="i"><use href="#i-share"/></svg>SHARE</span></button>
-    </div>
-  </div>
-</div>
-
-<!-- ===== Rate prompt ===== -->
-<div id="ratePrompt" class="modal hide" role="dialog" aria-label="Rate PULSE Insight">
-  <div class="card">
-    <div class="big-stars"><svg class="i"><use href="#i-star"/></svg><svg class="i"><use href="#i-star"/></svg><svg class="i"><use href="#i-star"/></svg><svg class="i"><use href="#i-star"/></svg><svg class="i"><use href="#i-star"/></svg></div>
-    <h2>Having fun?</h2>
-    <p class="body">A quick rating helps other players find PULSE Insight. It only takes a few seconds.</p>
-    <div class="btn-col">
-      <button type="button" class="candy-btn sm gold" id="rateYes">RATE THE GAME</button>
-      <button type="button" class="textbtn" id="rateLater">Not now</button>
     </div>
   </div>
 </div>
@@ -1478,6 +1467,7 @@ function setPulse(v, opts){
 }
 function levelUp(){
   level+=1;
+  noteHappyMoment("levelup");
   dailyEvent("level",level,"max");
   levelEl.textContent=level;
   const badge=$("levelBadge"); badge.classList.remove("pop"); void badge.offsetWidth; badge.classList.add("pop");
@@ -1857,6 +1847,7 @@ function endGame(reason, kind){
   $("finalCombo").textContent=bestCombo;
   overlayBest.textContent=bestEl.textContent;
   newBestEl.textContent=isNew?"★ NEW BEST! ★":"";
+  $("goShare").classList.toggle("hot", !!isNew);
   if(watchContinueBtn){
     if(continueUsedThisRun) setContinueLabel("Continue used", true);
     else { setContinueLabel("Watch ad · continue", false); preloadRewarded(); }
@@ -1866,6 +1857,7 @@ function endGame(reason, kind){
     gameOverEl.classList.add("show");
     countUp(finalScoreEl, score, 900);
     if(isNew){ setTimeout(()=>{ confetti(120); sfx.best(); hap("success"); }, 900); }
+    if(isNew){ noteHappyMoment("best"); setTimeout(()=>{ if(gameOver && inGame && gameOverEl.classList.contains("show")) maybeAskRate(); }, 2600); }
   }, 950);
 }
 function countUp(el,to,dur){
@@ -1888,6 +1880,7 @@ function startGame(){
   buildBoard(); layout(); fillTray(); paintBoard(); renderTray();
   renderPulse();
   placeTip.textContent="Drag blocks onto the board. Fill a row or column to clear it!";
+  runHappy=false;
   runId++; lsSet("pulseGames",(parseInt(lsGet("pulseGames","0"),10)||0)+1); dailyEvent("games",1);
   const boosted=consumeBoost();
   updatePowers();
@@ -2117,7 +2110,7 @@ document.addEventListener("visibilitychange",()=>{
 });
 
 /* ================= v1.4: app info, links ================= */
-const APP_VERSION="1.5.0";
+const APP_VERSION="1.5.4";
 const SUPPORT_EMAIL="digitalaimgroup@gmail.com";
 const LINKS={
   ios:"https://apps.apple.com/app/id6811510320",
@@ -2254,7 +2247,7 @@ function recordRunScore(){
   const bests=lsJSON("pulseDayBests",{}); bests[day]=Math.max(bests[day]||0,score);
   const keys=Object.keys(bests).sort(); while(keys.length>21){ delete bests[keys.shift()]; }
   lsSetJSON("pulseDayBests",bests);
-  if(level>(parseInt(lsGet("pulseBestLevel","1"),10)||1)){ lsSet("pulseBestLevel",level); lsSet("pulseRateTrigger","1"); }
+  if(level>(parseInt(lsGet("pulseBestLevel","1"),10)||1)){ lsSet("pulseBestLevel",level); }
 }
 function timeToReset(){
   const n=new Date(), m=new Date(n); m.setHours(24,0,0,0);
@@ -2304,44 +2297,72 @@ $("dShare").addEventListener("click",()=>{
 });
 
 /* ================= Sharing ================= */
-function storeLine(){ return "\niPhone: "+LINKS.ios+"\nAndroid: "+LINKS.play; }
+function storeLink(){ const p=platform(); if(p==="android") return LINKS.play; if(p==="ios") return LINKS.ios; return /iPhone|iPad|iPod|Macintosh/i.test(navigator.userAgent)?LINKS.ios:LINKS.play; }
+function storeLine(){ return "\n"+storeLink(); }
+function sharePlugin(){ try{ const C=window.Capacitor; if(!isNative()||!C||!C.Plugins) return null; return C.Plugins.Share||null; }catch(_){ return null; } }
 async function shareText(msg){
   const text=msg+storeLine();
-  const P=nativePlugin();
-  if(P && P.share){ try{ await P.share({title:"PULSE Insight", text}); return; }catch(_){} }
-  if(navigator.share){ try{ await navigator.share({title:"PULSE Insight", text}); return; }catch(e){ if(e && e.name==="AbortError") return; } }
-  try{ await navigator.clipboard.writeText(text); toast("Copied to clipboard","Paste it in a message or post",{info:true,icon:"i-share"}); }
-  catch(_){ toast("Sharing isn't available here","Try again from the app",{info:true,icon:"i-share"}); }
+  try{
+    const S=sharePlugin();
+    if(S && S.share){ try{ await S.share({title:"PULSE Insight", text, dialogTitle:"Share PULSE Insight"}); return "native"; }catch(e){ if(/cancel/i.test(String(e&&(e.message||e)))) return "cancel"; } }
+    const P=nativePlugin();
+    if(P && P.share){ try{ await P.share({title:"PULSE Insight", text}); return "native"; }catch(_){} }
+    if(navigator.share){ try{ await navigator.share({title:"PULSE Insight", text}); return "web"; }catch(e){ if(e && e.name==="AbortError") return "cancel"; } }
+    try{ await navigator.clipboard.writeText(text); toast("Copied to clipboard","Paste it in a message or post",{info:true,icon:"i-share"}); return "clipboard"; }
+    catch(_){ toast("Sharing isn't available here","Try again from the app",{info:true,icon:"i-share"}); return "none"; }
+  }catch(_){ return "none"; }
 }
-$("goShare").addEventListener("click",()=>{ sfx.click(); shareText("I scored "+fmtN(score)+" and reached Level "+level+" in PULSE Insight! Can you beat it?"); });
+function shareScore(){ return shareText("I scored "+fmtN(score)+" in PULSE Insight! Can you beat me?"); }
+$("goShare").addEventListener("click",()=>{ sfx.click(); shareScore(); });
 $("shareAppBtn").addEventListener("click",()=>{ sfx.click(); shareText("I'm hooked on PULSE Insight, a block puzzle where you keep a heartbeat alive by clearing lines. Try it:"); });
 
 /* ================= Rating ================= */
+/* Native in-app review (Google Play In-App Review / SKStoreReviewController) via @capacitor-community/in-app-review.
+   Only after a happy moment (level-up or new best), never during gameplay or ads, at most once per 7 days,
+   not before the 3rd session or the 2nd level-up. No pre-prompt, no star wording, nothing gated on rating. Silent on web. */
+const REVIEW_MIN_GAP_MS=7*86400000, REVIEW_MIN_SESSIONS=3, REVIEW_MIN_LEVELUPS=2;
+let runHappy=false, reviewInFlight=false;
+function lsInt(k){ return parseInt(lsGet(k,"0"),10)||0; }
+function noteHappyMoment(kind){
+  runHappy=true;
+  if(kind==="levelup") lsSet("pulseLevelUps", lsInt("pulseLevelUps")+1);
+}
+function countSession(){ lsSet("pulseSessions", lsInt("pulseSessions")+1); }
+function reviewPlugin(){ try{ const C=window.Capacitor; if(!isNative()||!C||!C.Plugins) return null; return C.Plugins.InAppReview||null; }catch(_){ return null; } }
+function reviewEligible(){
+  if(!isNative()) return false;
+  if(lsInt("pulseSessions")<REVIEW_MIN_SESSIONS) return false;
+  if(lsInt("pulseLevelUps")<REVIEW_MIN_LEVELUPS) return false;
+  if(Date.now()-lsInt("pulseReviewLast") < REVIEW_MIN_GAP_MS) return false;
+  return true;
+}
+function safeMomentForReview(){
+  if(pausedForAd || adsInitInFlight || document.hidden) return false;   // never over/around an ad or the ATT/consent flow
+  if(inGame && !gameOver) return false;                                  // never during gameplay
+  return true;
+}
+async function maybeAskRate(){
+  try{
+    if(reviewInFlight || !runHappy || !reviewEligible() || !safeMomentForReview()) return false;
+    const R=reviewPlugin(); if(!R || typeof R.requestReview!=="function") return false;
+    reviewInFlight=true; runHappy=false; lsSet("pulseReviewLast", Date.now());
+    try{ await R.requestReview(); return true; }catch(_){ return false; }
+  }catch(_){ return false; }
+  finally{ reviewInFlight=false; }
+}
 function storeReviewUrl(){ const p=platform(); return p==="android" ? LINKS.playMarket : p==="ios" ? LINKS.iosReview : (/Android/i.test(navigator.userAgent)?LINKS.play:LINKS.iosReviewWeb); }
-async function inAppReview(){
-  const P=nativePlugin();
-  if(P && P.requestReview){ try{ await P.requestReview(); return true; }catch(_){} }
-  return false;
-}
-function markRated(){ lsSet("pulseRated","1"); }
-$("rateBtn").addEventListener("click",()=>{ sfx.click(); markRated(); openExternal(storeReviewUrl()); });
-function maybeAskRate(){
-  if(lsGet("pulseRated","0")==="1") return;
-  const asks=parseInt(lsGet("pulseRateAsks","0"),10)||0; if(asks>=3) return;
-  const last=parseInt(lsGet("pulseRateLast","0"),10)||0; if(Date.now()-last < 4*86400000) return;
-  const games=parseInt(lsGet("pulseGames","0"),10)||0;
-  const trigger = lsGet("pulseRateTrigger","0")==="1" && (parseInt(lsGet("pulseBestLevel","1"),10)||1)>=4;
-  if(!(trigger || games>=5)) return;
-  if(!$("titleScreen") || $("titleScreen").classList.contains("hide")) return;
-  lsSet("pulseRateAsks",asks+1); lsSet("pulseRateLast",Date.now()); lsSet("pulseRateTrigger","0");
-  $("ratePrompt").classList.remove("hide"); sfx.ready();
-}
-$("rateYes").addEventListener("click",async ()=>{
-  sfx.click(); $("ratePrompt").classList.add("hide"); markRated();
-  const shown = platform()==="android" ? await inAppReview() : false;
-  if(!shown) openExternal(storeReviewUrl());
-});
-$("rateLater").addEventListener("click",()=>{ sfx.click(); $("ratePrompt").classList.add("hide"); });
+/* Settings > Rate PULSE Insight: user-initiated, opens the store page. */
+$("rateBtn").addEventListener("click",()=>{ sfx.click(); openExternal(storeReviewUrl()); });
+countSession();
+try{
+  const AppP=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.App;
+  let bgAt=0;
+  if(AppP && typeof AppP.addListener==="function") AppP.addListener("appStateChange",st=>{
+    if(!st||!st.isActive){ bgAt=Date.now(); return; }
+    if(bgAt && Date.now()-bgAt>30*60000) countSession();
+    bgAt=0;
+  });
+}catch(_){}
 
 /* ================= Feedback ================= */
 let fbType="Bug";
@@ -2378,7 +2399,7 @@ function showTitleScreen(){
   gameOver=true;
   holds.clear();
   if(gameOverEl) gameOverEl.classList.remove("show");
-  ["levelUp","ready","tutorial","sheet","daily","feedback","ratePrompt"].forEach(id=>$(id).classList.add("hide"));
+  ["levelUp","ready","tutorial","sheet","daily","feedback"].forEach(id=>$(id).classList.add("hide"));
   document.body.classList.add("title-locked"); document.body.classList.remove("danger");
   if(titleScreen) titleScreen.classList.remove("hide");
   refreshTitleBest(); setBg(true); refreshDailyUi();
@@ -2408,7 +2429,6 @@ try{
   const AppPlugin = Cap && Cap.Plugins && Cap.Plugins.App;
   if(AppPlugin && typeof AppPlugin.addListener === "function"){
     AppPlugin.addListener("backButton", ()=>{
-      if(!$("ratePrompt").classList.contains("hide")){ $("ratePrompt").classList.add("hide"); return; }
       if(!$("feedback").classList.contains("hide")){ $("feedback").classList.add("hide"); return; }
       if(!$("daily").classList.contains("hide")){ closeDaily(); return; }
       if(!$("tutorial").classList.contains("hide")){ closeTutorial(); return; }
@@ -2444,7 +2464,7 @@ if(/[?&]debug/.test(location.search)){
     get grid(){return grid}, get tray(){return tray}, get pulse(){return pulse}, get level(){return level}, get score(){return score},
     get gameOver(){return gameOver}, get M(){return M},
     setGrid(g){grid=g;paintBoard()}, setTray(names){tray=names.map((n,i)=>n?{name:n,shape:cloneShape(n),color:(i*3)%8+1}:null);renderTray()},
-    tryPlace, setPulse, endGame, levelUp, dailyEvent, cellRect(r,c){const b=cells[r][c].getBoundingClientRect();return{x:b.left+b.width/2,y:b.top+b.height/2}}
+    tryPlace, setPulse, endGame, levelUp, dailyEvent, maybeAskRate, shareScore, shareText, reviewEligible, cellRect(r,c){const b=cells[r][c].getBoundingClientRect();return{x:b.left+b.width/2,y:b.top+b.height/2}}
   };
 }
 if("serviceWorker" in navigator)navigator.serviceWorker.register("./sw.js").catch(()=>{});
