@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.view.View;
 import android.webkit.WebView;
 
-import androidx.activity.EdgeToEdge;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -27,7 +26,13 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         registerPlugin(PulseNativePlugin.class);
-        EdgeToEdge.enable(this);
+        // 1.5.5: no androidx.activity EdgeToEdge.enable(). Its backport code calls
+        // Window.setStatusBarColor / setNavigationBarColor and sets
+        // LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES, which Play flags as deprecated
+        // edge-to-edge APIs on Android 15. With targetSdk 36 the OS itself draws the
+        // app edge-to-edge on Android 15+ (no opt-out); on Android 14 and older the
+        // app uses standard (opaque) system bars, so content is laid out between them.
+        // On 15+ the inset listener below feeds the bar/cutout insets to the CSS.
         super.onCreate(savedInstanceState);
     }
 

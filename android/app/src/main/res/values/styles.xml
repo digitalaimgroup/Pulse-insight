@@ -13,6 +13,9 @@
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <item name="android:background">@null</item>
+        <!-- Android 14 and older (no forced edge-to-edge): tint the classic status bar to
+             PULSE's default theme colour instead of AppCompat's grey/black default. -->
+        <item name="colorPrimaryDark">#1B1A5C</item>
     </style>
 
 
