@@ -1828,7 +1828,8 @@ function endGame(reason, kind){
   gameOver=true; stopDrain();
   const isNew=saveBest();
   recordRunScore();
-  if(level>(parseInt(lsGet("pulseBestLevel","1"),10)||1)) lsSet("pulseBestLevel",level);
+  const isNewLevel=level>(parseInt(lsGet("pulseBestLevel","1"),10)||1);
+  if(isNewLevel) lsSet("pulseBestLevel",level);
   hideGhost(); clearPreview(); blastMode=false; insightActive=false; surgeArmed=false;
   selectedIdx=null; renderTray(); updatePowers();
   document.body.classList.remove("danger");
@@ -1857,7 +1858,7 @@ function endGame(reason, kind){
     gameOverEl.classList.add("show");
     countUp(finalScoreEl, score, 900);
     if(isNew){ setTimeout(()=>{ confetti(120); sfx.best(); hap("success"); }, 900); }
-    if(isNew){ noteHappyMoment("best"); setTimeout(()=>{ if(gameOver && inGame && gameOverEl.classList.contains("show")) maybeAskRate(); }, 2600); }
+    if(isNew || isNewLevel){ noteHappyMoment("best"); setTimeout(()=>{ if(gameOver && inGame && gameOverEl.classList.contains("show")) maybeAskRate(); }, REVIEW_DELAY_MS); }
   }, 950);
 }
 function countUp(el,to,dur){
@@ -2318,22 +2319,34 @@ $("shareAppBtn").addEventListener("click",()=>{ sfx.click(); shareText("I'm hook
 
 /* ================= Rating ================= */
 /* Native in-app review (Google Play In-App Review / SKStoreReviewController) via @capacitor-community/in-app-review.
-   Only after a happy moment (level-up or new best), never during gameplay or ads, at most once per 7 days,
-   not before the 3rd session or the 2nd level-up. No pre-prompt, no star wording, nothing gated on rating. Silent on web. */
-const REVIEW_MIN_GAP_MS=7*86400000, REVIEW_MIN_SESSIONS=3, REVIEW_MIN_LEVELUPS=2;
+   Asked 1s after the results card shows a personal best (new best score or new best level), never during gameplay or ads.
+   Engaged players only: 3+ sessions, 5+ games, 2+ level-ups. At most once per 30 days and 3 times per 365 days,
+   counting only requests actually made. No pre-prompt, no star wording, nothing gated on rating. Silent on web. */
+const DAY_MS=86400000, REVIEW_MIN_GAP_MS=30*DAY_MS, REVIEW_WINDOW_MS=365*DAY_MS, REVIEW_MAX_PER_YEAR=3;
+const REVIEW_MIN_SESSIONS=3, REVIEW_MIN_GAMES=5, REVIEW_MIN_LEVELUPS=2, REVIEW_DELAY_MS=1000;
 let runHappy=false, reviewInFlight=false;
 function lsInt(k){ return parseInt(lsGet(k,"0"),10)||0; }
 function noteHappyMoment(kind){
-  runHappy=true;
   if(kind==="levelup") lsSet("pulseLevelUps", lsInt("pulseLevelUps")+1);
+  else runHappy=true;
 }
 function countSession(){ lsSet("pulseSessions", lsInt("pulseSessions")+1); }
 function reviewPlugin(){ try{ const C=window.Capacitor; if(!isNative()||!C||!C.Plugins) return null; return C.Plugins.InAppReview||null; }catch(_){ return null; } }
+/* Timestamps of native review requests made in the last 365 days (older 1.5.x builds stored one in pulseReviewLast). */
+function reviewLog(now){
+  const v=lsJSON("pulseReviewLog",null), last=lsInt("pulseReviewLast");
+  const a=Array.isArray(v) ? v : last>0 ? [last] : [];
+  return a.filter(t=>typeof t==="number" && t>0 && now-t<REVIEW_WINDOW_MS);
+}
+function noteReviewRequested(){ const now=Date.now(); lsSetJSON("pulseReviewLog", reviewLog(now).concat(now)); }
 function reviewEligible(){
   if(!isNative()) return false;
   if(lsInt("pulseSessions")<REVIEW_MIN_SESSIONS) return false;
+  if(lsInt("pulseGames")<REVIEW_MIN_GAMES) return false;
   if(lsInt("pulseLevelUps")<REVIEW_MIN_LEVELUPS) return false;
-  if(Date.now()-lsInt("pulseReviewLast") < REVIEW_MIN_GAP_MS) return false;
+  const now=Date.now(), log=reviewLog(now);
+  if(log.length>=REVIEW_MAX_PER_YEAR) return false;
+  if(log.length && now-Math.max.apply(null,log) < REVIEW_MIN_GAP_MS) return false;
   return true;
 }
 function safeMomentForReview(){
@@ -2345,8 +2358,8 @@ async function maybeAskRate(){
   try{
     if(reviewInFlight || !runHappy || !reviewEligible() || !safeMomentForReview()) return false;
     const R=reviewPlugin(); if(!R || typeof R.requestReview!=="function") return false;
-    reviewInFlight=true; runHappy=false; lsSet("pulseReviewLast", Date.now());
-    try{ await R.requestReview(); return true; }catch(_){ return false; }
+    reviewInFlight=true; runHappy=false;
+    try{ await R.requestReview(); noteReviewRequested(); return true; }catch(_){ return false; }
   }catch(_){ return false; }
   finally{ reviewInFlight=false; }
 }
@@ -2393,7 +2406,6 @@ function refreshTitleBest(){
   $("titleStats").textContent = g ? (g+" game"+(g===1?"":"s")+" played · best level "+bl) : "";
 }
 function showTitleScreen(){
-  const fromGame=inGame;
   inGame=false;
   stopDrain();
   gameOver=true;
@@ -2403,7 +2415,6 @@ function showTitleScreen(){
   document.body.classList.add("title-locked"); document.body.classList.remove("danger");
   if(titleScreen) titleScreen.classList.remove("hide");
   refreshTitleBest(); setBg(true); refreshDailyUi();
-  if(fromGame) setTimeout(maybeAskRate, 700);
 }
 function beginFromTitle(){
   document.body.classList.remove("title-locked");
