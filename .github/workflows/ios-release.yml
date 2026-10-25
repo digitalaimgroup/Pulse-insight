@@ -1,19 +1,25 @@
-name: iOS TestFlight
+name: iOS App Store release
 
+# Manual only: build, upload to App Store Connect, set What's New, submit for App Review
+# (automatic release after approval). No TestFlight distribution. Pushes do not trigger builds.
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - "www/**"
-      - "ios/**"
-      - "fastlane/**"
-      - "package.json"
-      - "capacitor.config.json"
-      - ".github/workflows/ios-testflight.yml"
+    inputs:
+      submit_for_review:
+        description: "Submit to App Review (automatic release after approval)"
+        type: boolean
+        default: true
+      release_notes:
+        description: "What's New (en-US)"
+        type: string
+        default: "Bug fixes and improvements."
+
+concurrency:
+  group: ios-release
+  cancel-in-progress: false
 
 jobs:
-  testflight:
+  release:
     runs-on: macos-26
     timeout-minutes: 90
     steps:
@@ -86,7 +92,7 @@ jobs:
       - name: Install Fastlane
         run: gem install fastlane --no-document
 
-      - name: Build & upload TestFlight
+      - name: Build, upload & submit (App Store)
         env:
           APPLE_KEY_ID: ${{ secrets.APPLE_KEY_ID }}
           APPLE_ISSUER_ID: ${{ secrets.APPLE_ISSUER_ID }}
@@ -95,4 +101,6 @@ jobs:
           MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
           MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
           BUILD_NUMBER: ${{ github.run_number }}
-        run: fastlane ios beta
+          SUBMIT_FOR_REVIEW: ${{ inputs.submit_for_review }}
+          RELEASE_NOTES: ${{ inputs.release_notes }}
+        run: fastlane ios release

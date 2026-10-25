@@ -15,7 +15,7 @@ through the plugin; the `com.google.gms.google-services` Gradle plugin is applie
 
 Both are in `.gitignore`. Make the secret value with `base64 -w0 <file>` (Linux) or `base64 -i <file>` (macOS).
 
-- `ios-testflight.yml` writes the plist from `GOOGLE_SERVICE_INFO_PLIST_BASE64` and **fails** if the secret is
+- `ios-release.yml` writes the plist from `GOOGLE_SERVICE_INFO_PLIST_BASE64` and **fails** if the secret is
   missing (Firebase calls `FirebaseApp.configure()` at launch, so a build without the plist would crash).
   The plist is already referenced in the Xcode project (App target, Copy Bundle Resources).
 - Android release tasks (`bundleRelease`/`assembleRelease`) fail if `google-services.json` is missing, so a
