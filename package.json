@@ -1,6 +1,6 @@
 {
   "name": "pulse-insight",
-  "version": "1.5.6",
+  "version": "1.5.7",
   "private": true,
   "description": "PULSE Insight — Capacitor Android + iOS",
   "dependencies": {
