@@ -1248,7 +1248,7 @@ async function initAds(){
     try{
       // ATT must complete before Google Mobile Ads SDK starts (IDFA / tracking).
       await ensureTrackingAuthorization(AdMob);
-      await AdMob.initialize({ initializeForTesting: ADMOB_TESTING, testingDevices: [] });
+      await AdMob.initialize({ initializeForTesting: ADMOB_TESTING, testingDevices: [], maxAdContentRating: "General" });
       try{
         const info = await AdMob.requestConsentInfo({ debugGeography: 0, timeout: 10000 });
         if(info && (info.isConsentFormAvailable || info.status === "REQUIRED")){
@@ -1363,8 +1363,48 @@ function continueFromFlatline(){
 bestEl.textContent = lsGet("pulseGridBest","0");
 function cloneShape(n){return SHAPES[n].map(([r,c])=>[r,c])}
 function shapeBounds(sh){let mr=0,mc=0;for(const[r,c]of sh){mr=Math.max(mr,r);mc=Math.max(mc,c)}return{rows:mr+1,cols:mc+1}}
-function poolForLevel(){ return POOLS[Math.min(6,Math.max(1,level))]; }
-function drainPerSecond(){
+/* ================= Helping hand (gentle dynamic difficulty) =================
+   After 2 struggling runs in a row (ended at level 1-2 with under 50% of your best), the next runs
+   are easier than normal: Pulse drains 15% slower, starts at 80 instead of 70, and pieces come from
+   one level lower. After 2 good runs (level 3+, or 75%+ of your best) play returns to normal.
+   It never makes the game harder than normal. Stored on-device only. */
+const ASSIST_KEY="pulseAssistV1";
+const ASSIST_AFTER_STRUGGLES=2, ASSIST_OFF_AFTER_GOOD=2;
+const ASSIST_DRAIN_MULT=0.85, ASSIST_START_PULSE=80, NEAR_BEST_RATIO=0.8;
+let assistOn=false, assistSnap=null;
+function loadAssist(){
+  try{
+    const p=JSON.parse(lsGet(ASSIST_KEY,"null"));
+    if(p && typeof p==="object"){
+      const n=v=>{ v=Math.floor(Number(v)); return Number.isFinite(v)&&v>0?Math.min(v,99):0; };
+      return {struggles:n(p.struggles), goods:n(p.goods), assist:p.assist===true};
+    }
+  }catch(_){}
+  return {struggles:0, goods:0, assist:false};
+}
+function saveAssist(st){ try{ localStorage.setItem(ASSIST_KEY, JSON.stringify(st)); }catch(_){} return st; }
+function assistAfterRun(st, lvl, sc, bestBefore){
+  const struggle = lvl<=2 && sc < 0.5*bestBefore;
+  const good = lvl>=3 || (bestBefore>0 && sc >= 0.75*bestBefore);
+  if(struggle){
+    const struggles=Math.min(99, st.struggles+1);
+    return {struggles, goods:0, assist: st.assist || struggles>=ASSIST_AFTER_STRUGGLES};
+  }
+  if(good){
+    const goods=Math.min(99, st.goods+1);
+    if(st.assist && goods>=ASSIST_OFF_AFTER_GOOD) return {struggles:0, goods:0, assist:false};
+    return {struggles:0, goods, assist:st.assist};
+  }
+  return {...st};
+}
+/* A continue can end the same run twice; the last ending of a run is the one that counts. */
+function noteRunEndForAssist(bestBefore){
+  if(!assistSnap || assistSnap.run!==runId) assistSnap={run:runId, state:loadAssist()};
+  saveAssist(assistAfterRun(assistSnap.state, level, score, bestBefore));
+}
+function poolForLevel(){ return POOLS[Math.min(6,Math.max(1,level-(assistOn?1:0)))]; }
+function drainPerSecond(){ return baseDrainPerSecond()*(assistOn?ASSIST_DRAIN_MULT:1); }
+function baseDrainPerSecond(){
   if(level<=1) return 1.35;
   if(level===2) return 1.55;
   if(level===3) return 1.8;
@@ -1841,7 +1881,9 @@ function checkGameOver(){
 function endGame(reason, kind){
   if(gameOver)return;
   gameOver=true; stopDrain();
+  const bestBefore=getBest();
   const isNew=saveBest();
+  noteRunEndForAssist(bestBefore);
   recordRunScore();
   const isNewLevel=level>(parseInt(lsGet("pulseBestLevel","1"),10)||1);
   if(isNewLevel) lsSet("pulseBestLevel",level);
@@ -1857,6 +1899,9 @@ function endGame(reason, kind){
   icon.innerHTML = '<svg class="i"><use href="#'+(flat?"i-heart":"i-grid")+'"/></svg>';
   $("goEcg").style.display = flat ? "block" : "none";
   endReason.textContent=reason||"Game over";
+  if(!isNew && bestBefore>0 && score<bestBefore && score>=NEAR_BEST_RATIO*bestBefore){
+    endReason.textContent += " So close: you were "+(bestBefore-score)+" points from your best!";
+  }
   finalScoreEl.textContent="0";
   finalLevelEl.textContent=level;
   $("finalLines").textContent=linesCleared;
@@ -1885,7 +1930,8 @@ function startGame(){
   stopDrain();
   holds.clear();
   grid=Array.from({length:SIZE},()=>Array(SIZE).fill(0));
-  score=0; pulse=START_PULSE; level=1; clearStreak=0; linesCleared=0; bestCombo=0;
+  assistOn=loadAssist().assist;
+  score=0; pulse=assistOn?ASSIST_START_PULSE:START_PULSE; level=1; clearStreak=0; linesCleared=0; bestCombo=0;
   insightActive=false; surgeArmed=false; blastMode=false;
   continueUsedThisRun=false; levelsSinceInterstitial=0;
   selectedIdx=null; clearing=false; gameOver=false; hoverRC=null; dragIdx=null;
@@ -1896,7 +1942,9 @@ function startGame(){
   buildBoard(); layout(); fillTray(); paintBoard(); renderTray();
   logAnalyticsEvent("game_start");
   renderPulse();
-  placeTip.textContent="Drag blocks onto the board. Fill a row or column to clear it!";
+  placeTip.textContent = assistOn
+    ? "Helping hand: your Pulse drains a little slower this game."
+    : "Drag blocks onto the board. Fill a row or column to clear it!";
   runHappy=false;
   runId++; lsSet("pulseGames",(parseInt(lsGet("pulseGames","0"),10)||0)+1); dailyEvent("games",1);
   const boosted=consumeBoost();
@@ -2127,7 +2175,7 @@ document.addEventListener("visibilitychange",()=>{
 });
 
 /* ================= v1.4: app info, links ================= */
-const APP_VERSION="1.5.7";
+const APP_VERSION="1.5.8";
 const SUPPORT_EMAIL="digitalaimgroup@gmail.com";
 const LINKS={
   ios:"https://apps.apple.com/app/id6811510320",
@@ -2253,7 +2301,7 @@ function getStreak(){
 function consumeBoost(){
   if(!useBoosts || getBoosts()<=0) return false;
   addBoosts(-1);
-  pulse=Math.min(100,START_PULSE+15); surgeArmed=true; renderPulse();
+  pulse=Math.min(100,(assistOn?ASSIST_START_PULSE:START_PULSE)+15); surgeArmed=true; renderPulse();
   return true;
 }
 let runId=0;

@@ -79,6 +79,14 @@ jobs:
             exit 1
           fi
 
+      - name: Build number (project CURRENT_PROJECT_VERSION + run - 1)
+        run: |
+          set -euo pipefail
+          BASE=$(grep -m1 -oE 'CURRENT_PROJECT_VERSION = [0-9]+' ios/App/App.xcodeproj/project.pbxproj | grep -oE '[0-9]+$')
+          BN=$(( BASE + GITHUB_RUN_NUMBER - 1 ))
+          echo "BUILD_NUMBER=$BN" >> "$GITHUB_ENV"
+          echo "Build number: $BN"
+
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
@@ -100,7 +108,6 @@ jobs:
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
           MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
           MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
-          BUILD_NUMBER: ${{ github.run_number }}
           SUBMIT_FOR_REVIEW: ${{ inputs.submit_for_review }}
           RELEASE_NOTES: ${{ inputs.release_notes }}
         run: fastlane ios release
