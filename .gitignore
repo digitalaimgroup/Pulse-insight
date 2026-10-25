@@ -22,3 +22,9 @@ android/local.properties
 # Signing secrets (never commit)
 android/keystore.properties
 keystore.properties
+
+# Firebase config (never commit; CI/local writes from secret)
+android/app/google-services.json
+ios/App/App/GoogleService-Info.plist
+google-services.json
+GoogleService-Info.plist

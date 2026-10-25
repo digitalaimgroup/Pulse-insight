@@ -1147,6 +1147,21 @@ function buzz(p){
   hap(k);
 }
 
+/* ================= Firebase Analytics (Capacitor) =================
+   first_open / session_start are logged automatically by the native SDK; this only adds custom events.
+   iOS uses the WithoutAdIdSupport pod, so Firebase never reads IDFA (ATT-before-ads flow unchanged).
+   Fails silently on web or if Firebase config is missing. */
+function logAnalyticsEvent(name, params){
+  try{
+    const Cap = window.Capacitor;
+    if(!Cap || typeof Cap.isNativePlatform !== "function" || !Cap.isNativePlatform()) return;
+    const FA = Cap.Plugins && Cap.Plugins.FirebaseAnalytics;
+    if(!FA || typeof FA.logEvent !== "function") return;
+    const p = FA.logEvent({ name: name, params: params || {} });
+    if(p && typeof p.catch === "function") p.catch(()=>{});
+  }catch(_){}
+}
+
 /* ================= AdMob (Capacitor) — ATT before init (Guideline 2.1) ================= */
 const ANDROID_REWARDED = "ca-app-pub-3600954472890613/8958393072";
 const ANDROID_INTERSTITIAL = "ca-app-pub-3600954472890613/9791399496";
@@ -1879,6 +1894,7 @@ function startGame(){
   gameOverEl.classList.remove("show"); hideGhost(); newBestEl.textContent="";
   $("levelUp").classList.add("hide"); $("sheet").classList.add("hide");
   buildBoard(); layout(); fillTray(); paintBoard(); renderTray();
+  logAnalyticsEvent("game_start");
   renderPulse();
   placeTip.textContent="Drag blocks onto the board. Fill a row or column to clear it!";
   runHappy=false;

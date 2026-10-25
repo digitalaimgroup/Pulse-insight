@@ -9,7 +9,8 @@
       "@capacitor/app",
       "@capacitor/haptics",
       "@capacitor-community/in-app-review",
-      "@capacitor/share"
+      "@capacitor/share",
+      "@capacitor-firebase/analytics"
     ]
   },
   "server": {

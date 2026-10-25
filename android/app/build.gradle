@@ -78,3 +78,12 @@ try {
 } catch(Exception e) {
     logger.info("google-services.json not found, google-services plugin not applied. Push Notifications won't work")
 }
+
+// Firebase Analytics (first_open for Google Ads): release builds must include google-services.json
+// (gitignored; written from secret GOOGLE_SERVICES_JSON_BASE64 in CI). Override: -PallowNoFirebase
+gradle.taskGraph.whenReady { graph ->
+    def wantsRelease = graph.allTasks.any { it.project == project && it.name.toLowerCase().contains('release') }
+    if (wantsRelease && !file('google-services.json').exists() && !project.hasProperty('allowNoFirebase')) {
+        throw new GradleException("android/app/google-services.json is missing: release build would ship without Firebase Analytics.")
+    }
+}
